@@ -81,11 +81,14 @@
         .header h1 {
             font-size: 20px;
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .hospital-info {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
+            margin-top: 5px;
         }
         
         .timer {
@@ -125,14 +128,22 @@
             color: #60a5fa;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 700;
         }
         
-        /* Grid 3 colunas como no cards.js */
-        .form-grid {
+        /* Layout de 3 colunas */
+        .form-row-3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+        }
+        
+        /* Layout de 1 coluna */
+        .form-row-1 {
+            display: grid;
+            grid-template-columns: 1fr;
+            margin-bottom: 20px;
         }
         
         .form-group {
@@ -186,6 +197,7 @@
             font-weight: 700;
             text-transform: uppercase;
             margin-bottom: 15px;
+            letter-spacing: 0.5px;
         }
         
         .checkbox-grid {
@@ -249,32 +261,32 @@
             transition: all 0.3s;
         }
         
-        .btn-save {
+        .btn-primary {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
         }
         
-        .btn-save:hover {
+        .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
         }
         
-        .btn-alta {
+        .btn-danger {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
         }
         
-        .btn-alta:hover {
+        .btn-danger:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
         }
         
-        .btn-cancel {
+        .btn-secondary {
             background: #374151;
             color: white;
         }
         
-        .btn-cancel:hover {
+        .btn-secondary:hover {
             background: #4b5563;
         }
         
@@ -320,8 +332,20 @@
                 text-align: center;
             }
             
-            .form-grid {
-                grid-template-columns: 1fr;
+            /* Manter 3 colunas no mobile como no cards.js */
+            .form-row-3 {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            
+            .form-group label {
+                font-size: 10px;
+            }
+            
+            .form-group input,
+            .form-group select {
+                padding: 8px;
+                font-size: 12px;
             }
             
             .checkbox-grid {
@@ -335,6 +359,22 @@
             
             .btn {
                 width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .form-row-3 {
+                gap: 5px;
+            }
+            
+            .form-group label {
+                font-size: 9px;
+            }
+            
+            .form-group input,
+            .form-group select {
+                padding: 6px;
+                font-size: 11px;
             }
         }
         
@@ -372,7 +412,7 @@
     
     <!-- Container de Erro -->
     <div id="errorContainer" class="error-container" style="display: none;">
-        <h2>❌ Erro</h2>
+        <h2>Erro</h2>
         <p id="errorMessage">Parâmetros inválidos ou leito não encontrado.</p>
         <button class="btn" onclick="window.location.href='/'">Voltar ao Início</button>
     </div>
