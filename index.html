@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archipelago - Acesso Médico QR</title>
+    
+    <style>
+        /* =================== RESET E BASE =================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            padding: 20px;
+        }
+        
+        /* =================== LOADING =================== */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading.hidden {
+            display: none;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #334155;
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            margin-top: 20px;
+            color: #60a5fa;
+            font-size: 16px;
+        }
+        
+        /* =================== CONTAINER PRINCIPAL =================== */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #1a1f2e;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        
+        /* =================== HEADER =================== */
+        .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .hospital-info {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .timer {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .timer.warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+        
+        .timer.danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* =================== FORM BODY =================== */
+        .form-body {
+            padding: 25px;
+        }
+        
+        .form-title {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 18px;
+            color: #60a5fa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Grid 3 colunas como no cards.js */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            background: #0f172a;
+            color: #ffffff;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+        }
+        
+        .form-group input[readonly] {
+            background: #1f2937;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        /* =================== SEÇÕES CHECKBOX =================== */
+        .form-section {
+            margin: 30px 0;
+        }
+        
+        .section-title {
+            background: #60a5fa;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border: 1px solid #334155;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .checkbox-item:hover {
+            background: rgba(96, 165, 250, 0.1);
+        }
+        
+        .checkbox-item input {
+            margin-right: 10px;
+            width: 16px;
+            height: 16px;
+            accent-color: #60a5fa;
+            cursor: pointer;
+        }
+        
+        .checkbox-item span {
+            color: #e2e8f0;
+            font-size: 13px;
+            user-select: none;
+        }
+        
+        /* =================== ACTIONS =================== */
+        .actions {
+            padding: 25px;
+            background: #111827;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+        }
+        
+        .btn-save {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-alta {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        
+        .btn-alta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-cancel {
+            background: #374151;
+            color: white;
+        }
+        
+        .btn-cancel:hover {
+            background: #4b5563;
+        }
+        
+        /* =================== MENSAGEM DE ERRO =================== */
+        .error-container {
+            background: #1a1f2e;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            margin: 50px auto;
+        }
+        
+        .error-container h2 {
+            color: #ef4444;
+            margin-bottom: 20px;
+        }
+        
+        .error-container p {
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+        
+        .error-container .btn {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        /* =================== MOBILE RESPONSIVO =================== */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+            
+            .container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+                max-height: 200px;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        /* =================== SCROLLBAR CUSTOM =================== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Carregando dados...</div>
+    </div>
+    
+    <!-- Container Principal -->
+    <div id="mainContainer" class="container" style="display: none;">
+        <!-- Conteúdo será inserido via JavaScript -->
+    </div>
+    
+    <!-- Container de Erro -->
+    <div id="errorContainer" class="error-container" style="display: none;">
+        <h2>❌ Erro</h2>
+        <p id="errorMessage">Parâmetros inválidos ou leito não encontrado.</p>
+        <button class="btn" onclick="window.location.href='/'">Voltar ao Início</button>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
