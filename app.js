@@ -1,4 +1,10 @@
-// =================== ARCHIPELAGO QR - SISTEMA MÉDICO DEDICADO ===================
+async function loadHospitalData(hospitalId) {
+    try {
+        console.log('📡 Carregando dados da API...');
+        
+        // Usar a mesma chamada que o sistema principal usa
+        const response = await fetch(`${API_URL}?action=list`);
+        if// =================== ARCHIPELAGO QR - SISTEMA MÉDICO DEDICADO ===================
 // Versão 1.0 - Dezembro 2024
 
 // =================== CONFIGURAÇÃO DA API ===================
@@ -98,17 +104,20 @@ async function loadHospitalData(hospitalId) {
     try {
         console.log('📡 Carregando dados da API...');
         
-        const response = await fetch(`${API_URL}?action=getLeitos&hospital=${hospitalId}`);
+        // Usar action=all para buscar todos os dados
+        const response = await fetch(`${API_URL}?action=all`);
         if (!response.ok) throw new Error('Erro ao carregar dados');
         
         const data = await response.json();
         if (!data.ok) throw new Error(data.error || 'Erro desconhecido');
         
-        // Processar dados
-        hospitalData[hospitalId] = {
-            nome: HOSPITAIS[hospitalId],
-            leitos: processarLeitos(data.data)
-        };
+        // Os dados vêm agrupados por hospital
+        if (!data.data || !data.data[hospitalId]) {
+            throw new Error(`Hospital ${hospitalId} não encontrado nos dados`);
+        }
+        
+        // Armazenar dados do hospital
+        hospitalData[hospitalId] = data.data[hospitalId];
         
         console.log('✅ Dados carregados:', hospitalData[hospitalId]);
         
@@ -137,35 +146,35 @@ async function loadHospitalData(hospitalId) {
     }
 }
 
-// =================== PROCESSAR DADOS DOS LEITOS ===================
-function processarLeitos(dadosBrutos) {
-    return dadosBrutos.map(leito => {
-        // Se vem como array da planilha
-        if (Array.isArray(leito)) {
-            return {
-                hospital: leito[0],
-                leito: leito[1],
-                tipo: leito[2] || 'Enfermaria',
-                status: leito[3] || 'Vago',
-                nome: leito[4] || null,
-                matricula: leito[5] || null,
-                idade: leito[6] || null,
-                admAt: leito[7] || null,
-                pps: leito[8] || null,
-                spict: leito[9] || 'nao_elegivel',
-                complexidade: leito[10] || 'I',
-                prevAlta: leito[11] || null,
-                linhas: leito[12] ? leito[12].split('|').filter(l => l) : [],
-                concessoes: leito[13] ? leito[13].split('|').filter(c => c) : []
-            };
-        }
-        
-        // Se já vem como objeto
-        return leito;
-    });
-}
-
-// =================== RENDERIZAR FORMULÁRIO ===================
+// =================== INICIALIZAÇÃO ===================
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('🚀 Archipelago QR - Inicializando...');
+    
+    // Obter parâmetros da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const hospitalId = urlParams.get('h');
+    const leitoNumero = urlParams.get('l');
+    
+    // Validar parâmetros
+    if (!hospitalId || !leitoNumero) {
+        showError('Acesso inválido. Use o QR Code do leito.');
+        return;
+    }
+    
+    // Validar hospital
+    if (!HOSPITAIS[hospitalId]) {
+        showError('Hospital não reconhecido.');
+        return;
+    }
+    
+    currentHospital = hospitalId;
+    currentLeito = leitoNumero;
+    
+    console.log(`📍 Hospital: ${HOSPITAIS[hospitalId]}, Leito: ${leitoNumero}`);
+    
+    // Carregar dados do hospital
+    await loadHospitalData(hospitalId);
+});
 function renderForm(leito) {
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
@@ -334,9 +343,9 @@ async function saveData() {
         );
         const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
         
-        // Preparar payload
+        // Preparar payload - API usa 'admitir' e 'atualizar'
         const payload = {
-            action: isVago ? 'admit' : 'update',
+            action: isVago ? 'admitir' : 'atualizar',
             hospital: currentHospital,
             leito: currentLeito,
             ...dados
@@ -348,7 +357,7 @@ async function saveData() {
         const params = new URLSearchParams();
         for (const [key, value] of Object.entries(payload)) {
             if (Array.isArray(value)) {
-                params.append(key, value.join('|'));
+                params.append(key, value.join(','));
             } else if (value !== null && value !== undefined) {
                 params.append(key, String(value));
             }
@@ -375,7 +384,7 @@ async function darAlta() {
     
     try {
         const params = new URLSearchParams({
-            action: 'alta',
+            action: 'daralta',  // API usa 'daralta' não 'alta'
             hospital: currentHospital,
             leito: currentLeito
         });
