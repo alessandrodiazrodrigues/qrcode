@@ -1,10 +1,4 @@
-async function loadHospitalData(hospitalId) {
-    try {
-        console.log('📡 Carregando dados da API...');
-        
-        // Usar a mesma chamada que o sistema principal usa
-        const response = await fetch(`${API_URL}?action=list`);
-        if// =================== ARCHIPELAGO QR - SISTEMA MÉDICO DEDICADO ===================
+// =================== ARCHIPELAGO QR - SISTEMA MÉDICO DEDICADO ===================
 // Versão 1.0 - Dezembro 2024
 
 // =================== CONFIGURAÇÃO DA API ===================
@@ -146,35 +140,7 @@ async function loadHospitalData(hospitalId) {
     }
 }
 
-// =================== INICIALIZAÇÃO ===================
-document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 Archipelago QR - Inicializando...');
-    
-    // Obter parâmetros da URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const hospitalId = urlParams.get('h');
-    const leitoNumero = urlParams.get('l');
-    
-    // Validar parâmetros
-    if (!hospitalId || !leitoNumero) {
-        showError('Acesso inválido. Use o QR Code do leito.');
-        return;
-    }
-    
-    // Validar hospital
-    if (!HOSPITAIS[hospitalId]) {
-        showError('Hospital não reconhecido.');
-        return;
-    }
-    
-    currentHospital = hospitalId;
-    currentLeito = leitoNumero;
-    
-    console.log(`📍 Hospital: ${HOSPITAIS[hospitalId]}, Leito: ${leitoNumero}`);
-    
-    // Carregar dados do hospital
-    await loadHospitalData(hospitalId);
-});
+// =================== RENDERIZAR FORMULÁRIO ===================
 function renderForm(leito) {
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
