@@ -98,7 +98,7 @@ async function loadHospitalData(hospitalId) {
     try {
         console.log('📡 Carregando dados da API...');
         
-        const response = await fetch(`${API_URL}?action=state&hospital=${hospitalId}`);
+        const response = await fetch(`${API_URL}?action=getLeitos&hospital=${hospitalId}`);
         if (!response.ok) throw new Error('Erro ao carregar dados');
         
         const data = await response.json();
