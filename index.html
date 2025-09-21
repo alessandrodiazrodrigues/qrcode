@@ -611,11 +611,11 @@ function renderForm(leito) {
             <h2 class="form-title">${isVago ? 'ADMISSÃO DE PACIENTE' : 'ATUALIZAÇÃO DE DADOS'}</h2>
             
             ${isVago ? `
-                <!-- Formulário de Admissão - Layout 3 colunas -->
+                <!-- Formulário de Admissão - Layout 3 colunas alinhado -->
                 <div class="form-row-3">
                     <div class="form-group">
-                        <label>NOME COMPLETO *</label>
-                        <input type="text" id="nome" required>
+                        <label>INICIAIS *</label>
+                        <input type="text" id="iniciais" placeholder="Ex: J S" maxlength="10" required>
                     </div>
                     <div class="form-group">
                         <label>MATRÍCULA *</label>
@@ -627,11 +627,11 @@ function renderForm(leito) {
                     </div>
                 </div>
             ` : `
-                <!-- Formulário de Atualização - Layout 3 colunas -->
+                <!-- Formulário de Atualização - Layout 3 colunas alinhado -->
                 <div class="form-row-3">
                     <div class="form-group">
-                        <label>PACIENTE</label>
-                        <input type="text" value="${leito.nome || ''}" readonly>
+                        <label>INICIAIS</label>
+                        <input type="text" value="${leito.iniciais || leito.nome?.split(' ').map(n => n[0]).join(' ') || ''}" readonly>
                     </div>
                     <div class="form-group">
                         <label>MATRÍCULA</label>
@@ -699,6 +699,22 @@ function renderForm(leito) {
                     `).join('')}
                 </div>
             </div>
+            
+            <!-- Informações de Internação (apenas para pacientes internados) -->
+            ${!isVago && leito.admissao ? `
+            <div class="form-section" style="background: rgba(96, 165, 250, 0.05); border-radius: 8px; padding: 15px; margin-top: 20px; border-left: 4px solid #60a5fa;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; font-weight: 600;">Data de Admissão</div>
+                        <div style="color: #60a5fa; font-weight: 600; font-size: 14px;">${formatarData(leito.admissao)}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; font-weight: 600;">Internado há</div>
+                        <div style="color: #fbbf24; font-weight: 700; font-size: 16px;">${calcularDiasInternacao(leito.admissao)}</div>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
         </div>
         
         <!-- Actions -->
@@ -765,6 +781,12 @@ async function saveData() {
             leito: currentLeito,
             ...dados
         };
+        
+        // Se for admissão, converter iniciais em nome completo simulado
+        if (isVago && dados.iniciais) {
+            payload.nome = dados.iniciais; // API receberá as iniciais como nome
+            delete payload.iniciais;
+        }
         
         // Enviar para API
         console.log('📤 Enviando dados:', payload);
