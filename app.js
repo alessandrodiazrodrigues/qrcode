@@ -151,51 +151,51 @@ function renderForm(leito) {
         <div class="header">
             <div>
                 <h1>Archipelago Medical</h1>
-                <div class="hospital-info">🏥 ${hospitalNome} - Leito ${currentLeito}</div>
+                <div class="hospital-info">${hospitalNome} - Leito ${currentLeito}</div>
             </div>
             <div class="timer" id="timer">2:00</div>
         </div>
         
         <!-- Form Body -->
         <div class="form-body">
-            <h2 class="form-title">${isVago ? '📝 ADMISSÃO DE PACIENTE' : '🔄 ATUALIZAÇÃO DE DADOS'}</h2>
+            <h2 class="form-title">${isVago ? 'ADMISSÃO DE PACIENTE' : 'ATUALIZAÇÃO DE DADOS'}</h2>
             
             ${isVago ? `
-                <!-- Formulário de Admissão -->
-                <div class="form-grid">
+                <!-- Formulário de Admissão - Layout 3 colunas -->
+                <div class="form-row-3">
                     <div class="form-group">
-                        <label>Nome Completo *</label>
+                        <label>NOME COMPLETO *</label>
                         <input type="text" id="nome" required>
                     </div>
                     <div class="form-group">
-                        <label>Matrícula *</label>
+                        <label>MATRÍCULA *</label>
                         <input type="text" id="matricula" required>
                     </div>
                     <div class="form-group">
-                        <label>Idade *</label>
+                        <label>IDADE *</label>
                         <input type="number" id="idade" min="0" max="120" required>
                     </div>
                 </div>
             ` : `
-                <!-- Formulário de Atualização -->
-                <div class="form-grid">
+                <!-- Formulário de Atualização - Layout 3 colunas -->
+                <div class="form-row-3">
                     <div class="form-group">
-                        <label>Paciente</label>
+                        <label>PACIENTE</label>
                         <input type="text" value="${leito.nome || ''}" readonly>
                     </div>
                     <div class="form-group">
-                        <label>Matrícula</label>
+                        <label>MATRÍCULA</label>
                         <input type="text" value="${leito.matricula || ''}" readonly>
                     </div>
                     <div class="form-group">
-                        <label>Idade *</label>
+                        <label>IDADE *</label>
                         <input type="number" id="idade" value="${leito.idade || ''}" min="0" max="120" required>
                     </div>
                 </div>
             `}
             
-            <!-- Campos Comuns -->
-            <div class="form-grid">
+            <!-- Segunda linha - 3 colunas -->
+            <div class="form-row-3">
                 <div class="form-group">
                     <label>PPS % *</label>
                     <select id="pps" required>
@@ -213,7 +213,19 @@ function renderForm(leito) {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Previsão Alta *</label>
+                    <label>COMPLEXIDADE</label>
+                    <select id="complexidade">
+                        <option value="I" ${leito.complexidade === 'I' ? 'selected' : ''}>Nível I</option>
+                        <option value="II" ${leito.complexidade === 'II' ? 'selected' : ''}>Nível II</option>
+                        <option value="III" ${leito.complexidade === 'III' ? 'selected' : ''}>Nível III</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Terceira linha - Previsão de Alta -->
+            <div class="form-row-1">
+                <div class="form-group">
+                    <label>PREVISÃO DE ALTA *</label>
                     <select id="prevAlta" required>
                         ${PREVISAO_ALTA.map(p => 
                             `<option value="${p}" ${leito.prevAlta === p ? 'selected' : ''}>${p}</option>`
@@ -227,25 +239,25 @@ function renderForm(leito) {
                 <div class="section-title">CONCESSÕES PREVISTAS NA ALTA</div>
                 <div class="checkbox-grid">
                     ${CONCESSOES.map((c, i) => `
-                        <div class="checkbox-item">
+                        <label class="checkbox-item">
                             <input type="checkbox" id="conc${i}" value="${c}" 
                                 ${leito.concessoes && leito.concessoes.includes(c) ? 'checked' : ''}>
                             <span>${c}</span>
-                        </div>
+                        </label>
                     `).join('')}
                 </div>
             </div>
             
             <!-- Linhas de Cuidado -->
             <div class="form-section">
-                <div class="section-title">LINHAS DE CUIDADO PREVISTAS</div>
+                <div class="section-title">LINHAS DE CUIDADO PREVISTAS NA ALTA</div>
                 <div class="checkbox-grid">
                     ${LINHAS_CUIDADO.map((l, i) => `
-                        <div class="checkbox-item">
+                        <label class="checkbox-item">
                             <input type="checkbox" id="linha${i}" value="${l}"
                                 ${leito.linhas && leito.linhas.includes(l) ? 'checked' : ''}>
                             <span>${l}</span>
-                        </div>
+                        </label>
                     `).join('')}
                 </div>
             </div>
@@ -253,11 +265,11 @@ function renderForm(leito) {
         
         <!-- Actions -->
         <div class="actions">
-            <button class="btn btn-save" onclick="saveData()">
-                ${isVago ? '✅ ADMITIR PACIENTE' : '💾 SALVAR ALTERAÇÕES'}
+            <button class="btn btn-primary" onclick="saveData()">
+                ${isVago ? 'ADMITIR PACIENTE' : 'SALVAR ALTERAÇÕES'}
             </button>
-            ${!isVago ? '<button class="btn btn-alta" onclick="darAlta()">🏠 DAR ALTA</button>' : ''}
-            <button class="btn btn-cancel" onclick="cancelar()">❌ CANCELAR</button>
+            ${!isVago ? '<button class="btn btn-danger" onclick="darAlta()">DAR ALTA</button>' : ''}
+            <button class="btn btn-secondary" onclick="cancelar()">CANCELAR</button>
         </div>
     `;
     
@@ -288,7 +300,7 @@ function startTimer() {
         
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            alert('⏰ Tempo expirado! Escaneie o QR Code novamente.');
+            alert('Tempo expirado! Escaneie o QR Code novamente.');
             window.location.href = '/';
         }
     }, 1000);
@@ -335,7 +347,7 @@ async function saveData() {
         if (!result.ok) throw new Error(result.error || 'Erro ao salvar');
         
         // Sucesso
-        alert(`✅ ${isVago ? 'Paciente admitido' : 'Dados atualizados'} com sucesso!\n\nPara nova operação, escaneie o QR Code.`);
+        alert(`${isVago ? 'Paciente admitido' : 'Dados atualizados'} com sucesso!\n\nPara nova operação, escaneie o QR Code.`);
         window.location.href = '/';
         
     } catch (error) {
@@ -346,7 +358,7 @@ async function saveData() {
 
 // =================== DAR ALTA ===================
 async function darAlta() {
-    if (!confirm('⚠️ Confirma a ALTA deste paciente?')) return;
+    if (!confirm('Confirma a ALTA deste paciente?')) return;
     
     try {
         const params = new URLSearchParams({
@@ -360,7 +372,7 @@ async function darAlta() {
         
         if (!result.ok) throw new Error(result.error || 'Erro ao dar alta');
         
-        alert('✅ Alta processada com sucesso!\n\nPara nova operação, escaneie o QR Code.');
+        alert('Alta processada com sucesso!\n\nPara nova operação, escaneie o QR Code.');
         window.location.href = '/';
         
     } catch (error) {
@@ -426,7 +438,7 @@ function validarDados(dados) {
     if (!dados.prevAlta) erros.push('Previsão de Alta é obrigatória');
     
     if (erros.length > 0) {
-        alert('❌ Campos obrigatórios:\n\n• ' + erros.join('\n• '));
+        alert('Campos obrigatórios:\n\n• ' + erros.join('\n• '));
         return false;
     }
     
