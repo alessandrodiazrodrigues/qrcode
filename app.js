@@ -1,5 +1,5 @@
 // =================== ARCHIPELAGO QR - SISTEMA MÉDICO DEDICADO ===================
-// Versão 1.0 - Dezembro 2024
+// Sistema corrigido com campos atualizados para V3.1
 
 // =================== CONFIGURAÇÃO DA API ===================
 const API_URL = 'https://script.google.com/macros/s/AKfycbxAEyQKas6IEFPV5iQK8HSjm-xIRfcczzB9poXEKpJhvYkmJZ6vaBN_x74IiBe-8wHC/exec';
@@ -11,13 +11,19 @@ let currentLeito = null;
 let timerInterval = null;
 let timeLeft = 120; // 2 minutos em segundos
 
-// =================== CONSTANTES ===================
+// =================== CONSTANTES ATUALIZADAS V3.1 ===================
 const HOSPITAIS = {
-    H1: 'Neomater',
-    H2: 'Cruz Azul',
-    H3: 'Santa Marcelina',
-    H4: 'Santa Clara'
+    H1: { nome: 'Neomater', leitos: 10 },
+    H2: { nome: 'Cruz Azul', leitos: 36 },
+    H3: { nome: 'Santa Marcelina', leitos: 13 },
+    H4: { nome: 'Santa Clara', leitos: 7 }
 };
+
+const ISOLAMENTO_OPTIONS = [
+    "NÃO ISOLAMENTO",
+    "ISOLAMENTO DE CONTATO", 
+    "ISOLAMENTO RESPIRATÓRIO"
+];
 
 const CONCESSOES = [
     "Transição Domiciliar",
@@ -74,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Validar parâmetros
     if (!hospitalId || !leitoNumero) {
-        showError('Acesso inválido. Use o QR Code do leito.');
+        showError('Para acessar, admitir, alterar ou dar alta em um leito, leia o QR Code novamente.');
         return;
     }
     
@@ -84,10 +90,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
     
+    // NOVA VALIDAÇÃO: Verificar se leito existe no hospital
+    const leitoNum = parseInt(leitoNumero);
+    if (leitoNum < 1 || leitoNum > HOSPITAIS[hospitalId].leitos) {
+        showError(`Leito ${leitoNumero} inválido para ${HOSPITAIS[hospitalId].nome}. Este hospital possui ${HOSPITAIS[hospitalId].leitos} leitos.`);
+        return;
+    }
+    
     currentHospital = hospitalId;
     currentLeito = leitoNumero;
     
-    console.log(`📍 Hospital: ${HOSPITAIS[hospitalId]}, Leito: ${leitoNumero}`);
+    console.log(`📍 Hospital: ${HOSPITAIS[hospitalId].nome}, Leito: ${leitoNumero}`);
     
     // Carregar dados do hospital
     await loadHospitalData(hospitalId);
@@ -121,7 +134,7 @@ async function loadHospitalData(hospitalId) {
         );
         
         if (!leito) {
-            showError(`Leito ${currentLeito} não encontrado no ${HOSPITAIS[hospitalId]}.`);
+            showError(`Leito ${currentLeito} não encontrado no ${HOSPITAIS[hospitalId].nome}.`);
             return;
         }
         
@@ -140,11 +153,16 @@ async function loadHospitalData(hospitalId) {
     }
 }
 
-// =================== RENDERIZAR FORMULÁRIO ===================
+// =================== RENDERIZAR FORMULÁRIO CORRIGIDO ===================
 function renderForm(leito) {
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
-    const hospitalNome = HOSPITAIS[currentHospital];
+    const hospitalNome = HOSPITAIS[currentHospital].nome;
+    
+    // Gerar opções de idade para dropdown mobile (14-115 anos)
+    const idadeOptions = Array.from({length: 102}, (_, i) => i + 14).map(idade => 
+        `<option value="${idade}" ${leito.idade == idade ? 'selected' : ''}>${idade} anos</option>`
+    ).join('');
     
     container.innerHTML = `
         <!-- Header -->
@@ -161,11 +179,11 @@ function renderForm(leito) {
             <h2 class="form-title">${isVago ? 'ADMISSÃO DE PACIENTE' : 'ATUALIZAÇÃO DE DADOS'}</h2>
             
             ${isVago ? `
-                <!-- Formulário de Admissão - Layout 3 colunas -->
+                <!-- Formulário de Admissão - CORRIGIDO COM INICIAIS -->
                 <div class="form-row-3">
                     <div class="form-group">
-                        <label>NOME COMPLETO *</label>
-                        <input type="text" id="nome" required>
+                        <label>INICIAIS *</label>
+                        <input type="text" id="iniciais" placeholder="Ex: J S M" maxlength="10" required>
                     </div>
                     <div class="form-group">
                         <label>MATRÍCULA *</label>
@@ -173,15 +191,21 @@ function renderForm(leito) {
                     </div>
                     <div class="form-group">
                         <label>IDADE *</label>
-                        <input type="number" id="idade" min="0" max="120" required>
+                        <!-- Mobile: Dropdown 14-115 anos -->
+                        <select id="idadeMobile" class="mobile-dropdown" required>
+                            <option value="">Selecionar...</option>
+                            ${idadeOptions}
+                        </select>
+                        <!-- Desktop: Input number -->
+                        <input type="number" id="idadeDesktop" class="desktop-input" min="14" max="115" required>
                     </div>
                 </div>
             ` : `
-                <!-- Formulário de Atualização - Layout 3 colunas -->
+                <!-- Formulário de Atualização - CORRIGIDO COM INICIAIS -->
                 <div class="form-row-3">
                     <div class="form-group">
-                        <label>PACIENTE</label>
-                        <input type="text" value="${leito.nome || ''}" readonly>
+                        <label>INICIAIS</label>
+                        <input type="text" value="${leito.iniciais || leito.nome?.split(' ').map(n => n[0]).join(' ') || ''}" readonly>
                     </div>
                     <div class="form-group">
                         <label>MATRÍCULA</label>
@@ -189,12 +213,18 @@ function renderForm(leito) {
                     </div>
                     <div class="form-group">
                         <label>IDADE *</label>
-                        <input type="number" id="idade" value="${leito.idade || ''}" min="0" max="120" required>
+                        <!-- Mobile: Dropdown 14-115 anos -->
+                        <select id="idadeMobile" class="mobile-dropdown" required>
+                            <option value="">Selecionar...</option>
+                            ${idadeOptions}
+                        </select>
+                        <!-- Desktop: Input number -->
+                        <input type="number" id="idadeDesktop" class="desktop-input" value="${leito.idade || ''}" min="14" max="115" required>
                     </div>
                 </div>
             `}
             
-            <!-- Segunda linha - 3 colunas -->
+            <!-- Segunda linha - 3 colunas: PPS, SPICT e Previsão de Alta -->
             <div class="form-row-3">
                 <div class="form-group">
                     <label>PPS % *</label>
@@ -213,24 +243,29 @@ function renderForm(leito) {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>COMPLEXIDADE</label>
-                    <select id="complexidade">
-                        <option value="I" ${leito.complexidade === 'I' ? 'selected' : ''}>Nível I</option>
-                        <option value="II" ${leito.complexidade === 'II' ? 'selected' : ''}>Nível II</option>
-                        <option value="III" ${leito.complexidade === 'III' ? 'selected' : ''}>Nível III</option>
-                    </select>
-                </div>
-            </div>
-            
-            <!-- Terceira linha - Previsão de Alta -->
-            <div class="form-row-1">
-                <div class="form-group">
                     <label>PREVISÃO DE ALTA *</label>
                     <select id="prevAlta" required>
                         ${PREVISAO_ALTA.map(p => 
                             `<option value="${p}" ${leito.prevAlta === p ? 'selected' : ''}>${p}</option>`
                         ).join('')}
                     </select>
+                </div>
+            </div>
+            
+            <!-- NOVOS CAMPOS OBRIGATÓRIOS V3.1 -->
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label>ISOLAMENTO *</label>
+                    <select id="isolamento" required>
+                        ${ISOLAMENTO_OPTIONS.map(opt => 
+                            `<option value="${opt}" ${leito.isolamento === opt ? 'selected' : ''}>${opt}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>IDENTIFICAÇÃO DO LEITO *</label>
+                    <input type="text" id="identificacaoLeito" value="${leito.identificacaoLeito || ''}" 
+                           placeholder="Ex: NEO1, UTI-5" maxlength="6" pattern="[A-Za-z0-9]{1,6}" required>
                 </div>
             </div>
             
@@ -300,13 +335,13 @@ function startTimer() {
         
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            alert('Tempo expirado! Escaneie o QR Code novamente.');
+            alert('Sessão expirada! Escaneie novamente o QR Code do leito.');
             window.location.href = '/';
         }
     }, 1000);
 }
 
-// =================== SALVAR DADOS ===================
+// =================== SALVAR DADOS CORRIGIDO ===================
 async function saveData() {
     try {
         // Coletar dados
@@ -328,6 +363,12 @@ async function saveData() {
             leito: currentLeito,
             ...dados
         };
+        
+        // Se for admissão, converter iniciais em nome para API
+        if (isVago && dados.iniciais) {
+            payload.nome = dados.iniciais; // API recebe iniciais como nome
+            delete payload.iniciais;
+        }
         
         // Enviar para API
         console.log('📤 Enviando dados:', payload);
@@ -381,24 +422,33 @@ async function darAlta() {
     }
 }
 
-// =================== COLETAR DADOS DO FORMULÁRIO ===================
+// =================== COLETAR DADOS CORRIGIDO ===================
 function coletarDados() {
     const dados = {};
     
-    // Campos básicos
-    const nome = document.getElementById('nome');
-    if (nome) dados.nome = nome.value.trim();
+    // CORRIGIDO: Iniciais em vez de nome
+    const iniciais = document.getElementById('iniciais');
+    if (iniciais) dados.iniciais = iniciais.value.trim();
     
     const matricula = document.getElementById('matricula');
     if (matricula) dados.matricula = matricula.value.trim();
     
-    const idade = document.getElementById('idade');
-    if (idade) dados.idade = parseInt(idade.value);
+    // CORRIGIDO: Idade mobile ou desktop
+    const idadeMobile = document.getElementById('idadeMobile');
+    const idadeDesktop = document.getElementById('idadeDesktop');
+    if (idadeMobile && idadeMobile.value) {
+        dados.idade = parseInt(idadeMobile.value);
+    } else if (idadeDesktop && idadeDesktop.value) {
+        dados.idade = parseInt(idadeDesktop.value);
+    }
     
     dados.pps = document.getElementById('pps').value;
     dados.spict = document.getElementById('spict').value;
     dados.prevAlta = document.getElementById('prevAlta').value;
-    dados.complexidade = 'I'; // Padrão
+    
+    // NOVOS CAMPOS V3.1
+    dados.isolamento = document.getElementById('isolamento').value;
+    dados.identificacaoLeito = document.getElementById('identificacaoLeito').value.trim().toUpperCase();
     
     // Concessões
     dados.concessoes = [];
@@ -417,25 +467,36 @@ function coletarDados() {
     return dados;
 }
 
-// =================== VALIDAR DADOS ===================
+// =================== VALIDAR DADOS CORRIGIDO ===================
 function validarDados(dados) {
     const erros = [];
     
-    if (dados.nome !== undefined && !dados.nome) {
-        erros.push('Nome é obrigatório');
+    // CORRIGIDO: Validação para iniciais
+    if (dados.iniciais !== undefined && !dados.iniciais) {
+        erros.push('Iniciais são obrigatórias');
     }
     
     if (dados.matricula !== undefined && !dados.matricula) {
         erros.push('Matrícula é obrigatória');
     }
     
-    if (!dados.idade || dados.idade < 0 || dados.idade > 120) {
-        erros.push('Idade inválida');
+    // CORRIGIDO: Faixa etária 14-115 anos
+    if (!dados.idade || dados.idade < 14 || dados.idade > 115) {
+        erros.push('Idade deve estar entre 14 e 115 anos');
     }
     
     if (!dados.pps) erros.push('PPS é obrigatório');
     if (!dados.spict) erros.push('SPICT-BR é obrigatório');
     if (!dados.prevAlta) erros.push('Previsão de Alta é obrigatória');
+    
+    // NOVOS CAMPOS OBRIGATÓRIOS V3.1
+    if (!dados.isolamento) erros.push('Isolamento é obrigatório');
+    if (!dados.identificacaoLeito) erros.push('Identificação do Leito é obrigatória');
+    
+    // Validar formato da identificação do leito
+    if (dados.identificacaoLeito && !/^[A-Za-z0-9]{1,6}$/.test(dados.identificacaoLeito)) {
+        erros.push('Identificação do Leito deve ter até 6 caracteres alfanuméricos');
+    }
     
     if (erros.length > 0) {
         alert('Campos obrigatórios:\n\n• ' + erros.join('\n• '));
@@ -465,7 +526,11 @@ function showError(message) {
     document.getElementById('errorContainer').style.display = 'block';
 }
 
-// =================== LOG ===================
-console.log('✅ Archipelago QR System v1.0');
+// =================== LOG ATUALIZADO ===================
+console.log('✅ Archipelago QR System - V3.1 Corrigido');
 console.log('📱 Sistema dedicado para acesso médico via QR Code');
 console.log('⏰ Timer de 2 minutos ativo');
+console.log('🔧 Campos atualizados: INICIAIS, ISOLAMENTO, IDENTIFICAÇÃO_LEITO');
+console.log('📊 Idade: dropdown mobile (14-115), input desktop');
+console.log('🏥 Hospitais V3.1: H1:10, H2:36, H3:13, H4:7 leitos');
+console.log('✅ Validação de leitos por hospital implementada');
