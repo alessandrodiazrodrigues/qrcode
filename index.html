@@ -67,11 +67,12 @@
             border-radius: 20px;
             box-shadow: 0 25px 50px rgba(0,0,0,0.5);
             overflow: hidden;
+            position: relative;
         }
         
         /* =================== HEADER =================== */
         .header {
-            background: #1e40af; /* Cor sólida azul escura */
+            background: #1e40af;
             padding: 20px 25px;
             display: flex;
             justify-content: space-between;
@@ -135,6 +136,14 @@
         .form-row-3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        /* Layout de 2 colunas */
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -336,6 +345,20 @@
             text-decoration: none;
         }
         
+        /* =================== RODAPÉ COM VERSÃO =================== */
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.3);
+            padding: 8px 15px;
+            text-align: center;
+            font-size: 10px;
+            color: #6b7280;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
         /* =================== MOBILE RESPONSIVO =================== */
         @media (max-width: 768px) {
             body {
@@ -353,10 +376,19 @@
                 text-align: center;
             }
             
-            /* MANTER 3 colunas no mobile */
+            /* MANTER 3 colunas no mobile para desktop */
             .form-row-3 {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 8px;
+            }
+            
+            /* Idade como dropdown em mobile */
+            .mobile-dropdown {
+                display: block;
+            }
+            
+            .desktop-input {
+                display: none;
             }
             
             .form-group label {
@@ -383,8 +415,18 @@
             }
         }
         
+        @media (min-width: 769px) {
+            /* Desktop: idade como input number */
+            .mobile-dropdown {
+                display: none;
+            }
+            
+            .desktop-input {
+                display: block;
+            }
+        }
+        
         @media (max-width: 480px) {
-            /* AINDA mantém 3 colunas */
             .form-row-3 {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 5px;
@@ -431,6 +473,9 @@
     <!-- Container Principal -->
     <div id="mainContainer" class="container" style="display: none;">
         <!-- Conteúdo será inserido via JavaScript -->
+        <div class="footer">
+            Archipelago Dashboard V3.1 - Sistema Médico QR
+        </div>
     </div>
     
     <!-- Container de Erro -->
@@ -438,6 +483,9 @@
         <h2>Atenção</h2>
         <p id="errorMessage">Parâmetros inválidos ou leito não encontrado.</p>
         <button class="btn btn-qrcode" onclick="openQRScanner()">Ler QR Code</button>
+        <div class="footer">
+            Archipelago Dashboard V3.1 - Sistema Médico QR
+        </div>
     </div>
     
     <!-- Container de Sucesso -->
@@ -446,12 +494,15 @@
         <p id="successMessage">Operação realizada com sucesso.</p>
         <p>Para acessar, admitir, alterar ou dar alta em um leito, leia o QR Code novamente.</p>
         <button class="btn btn-qrcode" onclick="openQRScanner()">Ler QR Code</button>
+        <div class="footer">
+            Archipelago Dashboard V3.1 - Sistema Médico QR
+        </div>
     </div>
     
     <!-- JavaScript -->
     <script>
 // =================== ARCHIPELAGO QR - SISTEMA MÉDICO DEDICADO ===================
-// Versão 1.0 - Dezembro 2024
+// Sistema corrigido com campos atualizados
 
 // =================== CONFIGURAÇÃO DA API ===================
 const API_URL = 'https://script.google.com/macros/s/AKfycbxAEyQKas6IEFPV5iQK8HSjm-xIRfcczzB9poXEKpJhvYkmJZ6vaBN_x74IiBe-8wHC/exec';
@@ -463,13 +514,19 @@ let currentLeito = null;
 let timerInterval = null;
 let timeLeft = 120; // 2 minutos em segundos
 
-// =================== CONSTANTES ===================
+// =================== CONSTANTES ATUALIZADAS =================== 
 const HOSPITAIS = {
-    H1: 'Neomater',
-    H2: 'Cruz Azul',
-    H3: 'Santa Marcelina',
-    H4: 'Santa Clara'
+    H1: { nome: 'Neomater', leitos: 10 },
+    H2: { nome: 'Cruz Azul', leitos: 36 },
+    H3: { nome: 'Santa Marcelina', leitos: 13 },
+    H4: { nome: 'Santa Clara', leitos: 7 }
 };
+
+const ISOLAMENTO_OPTIONS = [
+    "NÃO ISOLAMENTO",
+    "ISOLAMENTO DE CONTATO", 
+    "ISOLAMENTO RESPIRATÓRIO"
+];
 
 const CONCESSOES = [
     "Transição Domiciliar",
@@ -536,10 +593,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
     
+    // Validar se leito existe no hospital
+    const leitoNum = parseInt(leitoNumero);
+    if (leitoNum < 1 || leitoNum > HOSPITAIS[hospitalId].leitos) {
+        showError(`Leito ${leitoNumero} inválido para ${HOSPITAIS[hospitalId].nome}. Este hospital possui ${HOSPITAIS[hospitalId].leitos} leitos.`);
+        return;
+    }
+    
     currentHospital = hospitalId;
     currentLeito = leitoNumero;
     
-    console.log(`📍 Hospital: ${HOSPITAIS[hospitalId]}, Leito: ${leitoNumero}`);
+    console.log(`📍 Hospital: ${HOSPITAIS[hospitalId].nome}, Leito: ${leitoNumero}`);
     
     // Carregar dados do hospital
     await loadHospitalData(hospitalId);
@@ -550,19 +614,16 @@ async function loadHospitalData(hospitalId) {
     try {
         console.log('📡 Carregando dados da API...');
         
-        // Usar action=all para buscar todos os dados
         const response = await fetch(`${API_URL}?action=all`);
         if (!response.ok) throw new Error('Erro ao carregar dados');
         
         const data = await response.json();
         if (!data.ok) throw new Error(data.error || 'Erro desconhecido');
         
-        // Os dados vêm agrupados por hospital
         if (!data.data || !data.data[hospitalId]) {
             throw new Error(`Hospital ${hospitalId} não encontrado nos dados`);
         }
         
-        // Armazenar dados do hospital
         hospitalData[hospitalId] = data.data[hospitalId];
         
         console.log('✅ Dados carregados:', hospitalData[hospitalId]);
@@ -573,7 +634,7 @@ async function loadHospitalData(hospitalId) {
         );
         
         if (!leito) {
-            showError(`Leito ${currentLeito} não encontrado no ${HOSPITAIS[hospitalId]}.`);
+            showError(`Leito ${currentLeito} não encontrado no ${HOSPITAIS[hospitalId].nome}.`);
             return;
         }
         
@@ -596,7 +657,12 @@ async function loadHospitalData(hospitalId) {
 function renderForm(leito) {
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
-    const hospitalNome = HOSPITAIS[currentHospital];
+    const hospitalNome = HOSPITAIS[currentHospital].nome;
+    
+    // Gerar opções de idade para dropdown mobile
+    const idadeOptions = Array.from({length: 102}, (_, i) => i + 14).map(idade => 
+        `<option value="${idade}" ${leito.idade == idade ? 'selected' : ''}>${idade} anos</option>`
+    ).join('');
     
     container.innerHTML = `
         <!-- Header -->
@@ -613,11 +679,11 @@ function renderForm(leito) {
             <h2 class="form-title">${isVago ? 'ADMISSÃO DE PACIENTE' : 'ATUALIZAÇÃO DE DADOS'}</h2>
             
             ${isVago ? `
-                <!-- Formulário de Admissão - Layout 3 colunas alinhado -->
+                <!-- Formulário de Admissão - CORRIGIDO -->
                 <div class="form-row-3">
                     <div class="form-group">
                         <label>INICIAIS *</label>
-                        <input type="text" id="iniciais" placeholder="Ex: J S" maxlength="10" required>
+                        <input type="text" id="iniciais" placeholder="Ex: J S M" maxlength="10" required>
                     </div>
                     <div class="form-group">
                         <label>MATRÍCULA *</label>
@@ -625,11 +691,17 @@ function renderForm(leito) {
                     </div>
                     <div class="form-group">
                         <label>IDADE *</label>
-                        <input type="number" id="idade" min="0" max="120" required>
+                        <!-- Mobile: Dropdown -->
+                        <select id="idadeMobile" class="mobile-dropdown" required>
+                            <option value="">Selecionar...</option>
+                            ${idadeOptions}
+                        </select>
+                        <!-- Desktop: Input number -->
+                        <input type="number" id="idadeDesktop" class="desktop-input" min="14" max="115" required>
                     </div>
                 </div>
             ` : `
-                <!-- Formulário de Atualização - Layout 3 colunas alinhado -->
+                <!-- Formulário de Atualização - CORRIGIDO -->
                 <div class="form-row-3">
                     <div class="form-group">
                         <label>INICIAIS</label>
@@ -641,7 +713,13 @@ function renderForm(leito) {
                     </div>
                     <div class="form-group">
                         <label>IDADE *</label>
-                        <input type="number" id="idade" value="${leito.idade || ''}" min="0" max="120" required>
+                        <!-- Mobile: Dropdown -->
+                        <select id="idadeMobile" class="mobile-dropdown" required>
+                            <option value="">Selecionar...</option>
+                            ${idadeOptions}
+                        </select>
+                        <!-- Desktop: Input number -->
+                        <input type="number" id="idadeDesktop" class="desktop-input" value="${leito.idade || ''}" min="14" max="115" required>
                     </div>
                 </div>
             `}
@@ -671,6 +749,23 @@ function renderForm(leito) {
                             `<option value="${p}" ${leito.prevAlta === p ? 'selected' : ''}>${p}</option>`
                         ).join('')}
                     </select>
+                </div>
+            </div>
+            
+            <!-- Terceira linha - NOVOS CAMPOS OBRIGATÓRIOS -->
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label>ISOLAMENTO *</label>
+                    <select id="isolamento" required>
+                        ${ISOLAMENTO_OPTIONS.map(opt => 
+                            `<option value="${opt}" ${leito.isolamento === opt ? 'selected' : ''}>${opt}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>IDENTIFICAÇÃO DO LEITO *</label>
+                    <input type="text" id="identificacaoLeito" value="${leito.identificacaoLeito || ''}" 
+                           placeholder="Ex: NEO1, UTI-5" maxlength="6" pattern="[A-Za-z0-9]{1,6}" required>
                 </div>
             </div>
             
@@ -727,6 +822,11 @@ function renderForm(leito) {
             ${!isVago ? '<button class="btn btn-danger" onclick="darAlta()">DAR ALTA</button>' : ''}
             <button class="btn btn-secondary" onclick="cancelar()">CANCELAR</button>
         </div>
+        
+        <!-- Rodapé com versão -->
+        <div class="footer">
+            Archipelago Dashboard V3.1 - Sistema Médico QR
+        </div>
     `;
     
     container.style.display = 'block';
@@ -746,7 +846,6 @@ function startTimer() {
         if (timerEl) {
             timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
             
-            // Mudar cor conforme tempo
             if (timeLeft <= 30) {
                 timerEl.className = 'timer danger';
             } else if (timeLeft <= 60) {
@@ -756,7 +855,7 @@ function startTimer() {
         
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            showSuccess('Tempo expirado! Para acessar, admitir, alterar ou dar alta em um leito, leia o QR Code novamente.');
+            showSuccess('Sessão expirada. Escaneie novamente o QR Code do leito.');
         }
     }, 1000);
 }
@@ -764,19 +863,15 @@ function startTimer() {
 // =================== SALVAR DADOS ===================
 async function saveData() {
     try {
-        // Coletar dados
         const dados = coletarDados();
         
-        // Validar
         if (!validarDados(dados)) return;
         
-        // Determinar ação
         const leito = hospitalData[currentHospital].leitos.find(l => 
             String(l.leito || l.numero) === String(currentLeito)
         );
         const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
         
-        // Preparar payload - API usa 'admitir' e 'atualizar'
         const payload = {
             action: isVago ? 'admitir' : 'atualizar',
             hospital: currentHospital,
@@ -784,13 +879,11 @@ async function saveData() {
             ...dados
         };
         
-        // Se for admissão, converter iniciais em nome completo simulado
         if (isVago && dados.iniciais) {
-            payload.nome = dados.iniciais; // API receberá as iniciais como nome
+            payload.nome = dados.iniciais;
             delete payload.iniciais;
         }
         
-        // Enviar para API
         console.log('📤 Enviando dados:', payload);
         
         const params = new URLSearchParams();
@@ -807,7 +900,6 @@ async function saveData() {
         
         if (!result.ok) throw new Error(result.error || 'Erro ao salvar');
         
-        // Sucesso
         const message = isVago ? 'Paciente admitido com sucesso!' : 'Dados atualizados com sucesso!';
         showSuccess(message);
         
@@ -823,7 +915,7 @@ async function darAlta() {
     
     try {
         const params = new URLSearchParams({
-            action: 'daralta',  // API usa 'daralta' não 'alta'
+            action: 'daralta',
             hospital: currentHospital,
             leito: currentLeito
         });
@@ -845,19 +937,29 @@ async function darAlta() {
 function coletarDados() {
     const dados = {};
     
-    // Campos básicos
-    const nome = document.getElementById('nome');
-    if (nome) dados.nome = nome.value.trim();
+    // Iniciais para admissão
+    const iniciais = document.getElementById('iniciais');
+    if (iniciais) dados.iniciais = iniciais.value.trim();
     
     const matricula = document.getElementById('matricula');
     if (matricula) dados.matricula = matricula.value.trim();
     
-    const idade = document.getElementById('idade');
-    if (idade) dados.idade = parseInt(idade.value);
+    // Idade: mobile ou desktop
+    const idadeMobile = document.getElementById('idadeMobile');
+    const idadeDesktop = document.getElementById('idadeDesktop');
+    if (idadeMobile && idadeMobile.value) {
+        dados.idade = parseInt(idadeMobile.value);
+    } else if (idadeDesktop && idadeDesktop.value) {
+        dados.idade = parseInt(idadeDesktop.value);
+    }
     
     dados.pps = document.getElementById('pps').value;
     dados.spict = document.getElementById('spict').value;
     dados.prevAlta = document.getElementById('prevAlta').value;
+    
+    // NOVOS CAMPOS OBRIGATÓRIOS
+    dados.isolamento = document.getElementById('isolamento').value;
+    dados.identificacaoLeito = document.getElementById('identificacaoLeito').value.trim().toUpperCase();
     
     // Concessões
     dados.concessoes = [];
@@ -880,21 +982,28 @@ function coletarDados() {
 function validarDados(dados) {
     const erros = [];
     
-    if (dados.nome !== undefined && !dados.nome) {
-        erros.push('Nome é obrigatório');
+    if (dados.iniciais !== undefined && !dados.iniciais) {
+        erros.push('Iniciais são obrigatórias');
     }
     
     if (dados.matricula !== undefined && !dados.matricula) {
         erros.push('Matrícula é obrigatória');
     }
     
-    if (!dados.idade || dados.idade < 0 || dados.idade > 120) {
-        erros.push('Idade inválida');
+    if (!dados.idade || dados.idade < 14 || dados.idade > 115) {
+        erros.push('Idade deve estar entre 14 e 115 anos');
     }
     
     if (!dados.pps) erros.push('PPS é obrigatório');
     if (!dados.spict) erros.push('SPICT-BR é obrigatório');
     if (!dados.prevAlta) erros.push('Previsão de Alta é obrigatória');
+    if (!dados.isolamento) erros.push('Isolamento é obrigatório');
+    if (!dados.identificacaoLeito) erros.push('Identificação do Leito é obrigatória');
+    
+    // Validar formato da identificação do leito
+    if (dados.identificacaoLeito && !/^[A-Za-z0-9]{1,6}$/.test(dados.identificacaoLeito)) {
+        erros.push('Identificação do Leito deve ter até 6 caracteres alfanuméricos');
+    }
     
     if (erros.length > 0) {
         alert('Campos obrigatórios:\n\n• ' + erros.join('\n• '));
@@ -913,12 +1022,7 @@ function cancelar() {
 
 // =================== ABRIR SCANNER DE QR CODE ===================
 function openQRScanner() {
-    // Simular abertura de câmera para leitura de QR Code
-    // Em produção, aqui integraria com biblioteca de QR scanner
     alert('Abrindo câmera para leitura de QR Code...\n\n(Funcionalidade requer integração com biblioteca de QR scanner)');
-    
-    // Para teste, pode redirecionar para URL com parâmetros
-    // window.location.href = '/?h=H1&l=1';
 }
 
 // =================== UTILS ===================
@@ -930,18 +1034,15 @@ function hideLoading() {
 function showError(message) {
     hideLoading();
     
-    // Esconder outros containers
     const mainContainer = document.getElementById('mainContainer');
     if (mainContainer) mainContainer.style.display = 'none';
     
     const successContainer = document.getElementById('successContainer');
     if (successContainer) successContainer.style.display = 'none';
     
-    // Mostrar container de erro
     document.getElementById('errorMessage').textContent = message;
     document.getElementById('errorContainer').style.display = 'block';
     
-    // Limpar timer se existir
     if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
@@ -951,31 +1052,44 @@ function showError(message) {
 function showSuccess(message) {
     hideLoading();
     
-    // Esconder outros containers
     const mainContainer = document.getElementById('mainContainer');
     if (mainContainer) mainContainer.style.display = 'none';
     
     const errorContainer = document.getElementById('errorContainer');
     if (errorContainer) errorContainer.style.display = 'none';
     
-    // Mostrar container de sucesso
     const successMessage = document.getElementById('successMessage');
     if (successMessage) successMessage.textContent = message;
     document.getElementById('successContainer').style.display = 'block';
     
-    // Limpar timer se existir
     if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
     }
 }
 
+function formatarData(dataString) {
+    if (!dataString) return 'N/A';
+    const data = new Date(dataString);
+    return data.toLocaleDateString('pt-BR');
+}
+
+function calcularDiasInternacao(dataAdmissao) {
+    if (!dataAdmissao) return 'N/A';
+    const admissao = new Date(dataAdmissao);
+    const hoje = new Date();
+    const diffTime = hoje - admissao;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return `${diffDays} dia${diffDays !== 1 ? 's' : ''}`;
+}
+
 // =================== LOG ===================
-console.log('✅ Archipelago QR System v1.0');
+console.log('✅ Archipelago QR System - Corrigido');
 console.log('📱 Sistema dedicado para acesso médico via QR Code');
 console.log('⏰ Timer de 2 minutos ativo');
-console.log('🎨 Header com cor sólida #1e40af');
-console.log('📊 Layout 3 colunas mantido em todas as telas');
+console.log('🔧 Campos atualizados: INICIAIS, ISOLAMENTO, IDENTIFICAÇÃO_LEITO');
+console.log('📊 Idade: dropdown mobile (14-115), input desktop');
+console.log('🏥 Hospitais V3.1: H1:10, H2:36, H3:13, H4:7 leitos');
     </script>
 </body>
 </html>
