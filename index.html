@@ -132,18 +132,10 @@
             font-weight: 700;
         }
         
-        /* Layout de 3 colunas SEMPRE */
+        /* Layout de 3 colunas */
         .form-row-3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        /* Layout de 2 colunas */
-        .form-row-2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -376,7 +368,6 @@
                 text-align: center;
             }
             
-            /* MANTER 3 colunas no mobile para desktop */
             .form-row-3 {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 8px;
@@ -502,7 +493,7 @@
     <!-- JavaScript -->
     <script>
 // =================== ARCHIPELAGO QR - SISTEMA MÉDICO DEDICADO ===================
-// Sistema corrigido com campos atualizados
+// Sistema corrigido com layout reorganizado
 
 // =================== CONFIGURAÇÃO DA API ===================
 const API_URL = 'https://script.google.com/macros/s/AKfycbxAEyQKas6IEFPV5iQK8HSjm-xIRfcczzB9poXEKpJhvYkmJZ6vaBN_x74IiBe-8wHC/exec';
@@ -514,7 +505,7 @@ let currentLeito = null;
 let timerInterval = null;
 let timeLeft = 120; // 2 minutos em segundos
 
-// =================== CONSTANTES ATUALIZADAS =================== 
+// =================== CONSTANTES ATUALIZADAS V3.1 ===================
 const HOSPITAIS = {
     H1: { nome: 'Neomater', leitos: 10 },
     H2: { nome: 'Cruz Azul', leitos: 36 },
@@ -653,23 +644,29 @@ async function loadHospitalData(hospitalId) {
     }
 }
 
-// =================== RENDERIZAR FORMULÁRIO ===================
+// =================== RENDERIZAR FORMULÁRIO CORRIGIDO ===================
 function renderForm(leito) {
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
     const hospitalNome = HOSPITAIS[currentHospital].nome;
+    const idSequencial = String(currentLeito).padStart(2, '0');
     
-    // Gerar opções de idade para dropdown mobile
+    // Identificação personalizada do leito ou padrão
+    const leitoPersonalizado = (leito.identificacaoLeito && leito.identificacaoLeito.trim()) 
+        ? leito.identificacaoLeito.trim().toUpperCase()
+        : `LEITO${currentLeito}`;
+    
+    // Gerar opções de idade para dropdown mobile (14-115 anos)
     const idadeOptions = Array.from({length: 102}, (_, i) => i + 14).map(idade => 
         `<option value="${idade}" ${leito.idade == idade ? 'selected' : ''}>${idade} anos</option>`
     ).join('');
     
     container.innerHTML = `
-        <!-- Header -->
+        <!-- Header CORRIGIDO -->
         <div class="header">
             <div>
                 <h1>Archipelago Medical</h1>
-                <div class="hospital-info">${hospitalNome} - Leito ${currentLeito}</div>
+                <div class="hospital-info">${hospitalNome} - ID ${idSequencial} - Leito ${leitoPersonalizado}</div>
             </div>
             <div class="timer" id="timer">2:00</div>
         </div>
@@ -678,8 +675,17 @@ function renderForm(leito) {
         <div class="form-body">
             <h2 class="form-title">${isVago ? 'ADMISSÃO DE PACIENTE' : 'ATUALIZAÇÃO DE DADOS'}</h2>
             
+            <!-- IDENTIFICAÇÃO DO LEITO - LINHA ÚNICA (igual aos cards) -->
+            <div class="form-row-1">
+                <div class="form-group">
+                    <label>IDENTIFICAÇÃO DO LEITO *</label>
+                    <input type="text" id="identificacaoLeito" value="${leito.identificacaoLeito || ''}" 
+                           placeholder="Ex: NEO1, UTI-5" maxlength="6" pattern="[A-Za-z0-9]{1,6}" required>
+                </div>
+            </div>
+            
             ${isVago ? `
-                <!-- Formulário de Admissão - CORRIGIDO -->
+                <!-- Formulário de Admissão -->
                 <div class="form-row-3">
                     <div class="form-group">
                         <label>INICIAIS *</label>
@@ -691,7 +697,7 @@ function renderForm(leito) {
                     </div>
                     <div class="form-group">
                         <label>IDADE *</label>
-                        <!-- Mobile: Dropdown -->
+                        <!-- Mobile: Dropdown 14-115 anos -->
                         <select id="idadeMobile" class="mobile-dropdown" required>
                             <option value="">Selecionar...</option>
                             ${idadeOptions}
@@ -701,7 +707,7 @@ function renderForm(leito) {
                     </div>
                 </div>
             ` : `
-                <!-- Formulário de Atualização - CORRIGIDO -->
+                <!-- Formulário de Atualização -->
                 <div class="form-row-3">
                     <div class="form-group">
                         <label>INICIAIS</label>
@@ -713,7 +719,7 @@ function renderForm(leito) {
                     </div>
                     <div class="form-group">
                         <label>IDADE *</label>
-                        <!-- Mobile: Dropdown -->
+                        <!-- Mobile: Dropdown 14-115 anos -->
                         <select id="idadeMobile" class="mobile-dropdown" required>
                             <option value="">Selecionar...</option>
                             ${idadeOptions}
@@ -752,23 +758,6 @@ function renderForm(leito) {
                 </div>
             </div>
             
-            <!-- Terceira linha - NOVOS CAMPOS OBRIGATÓRIOS -->
-            <div class="form-row-2">
-                <div class="form-group">
-                    <label>ISOLAMENTO *</label>
-                    <select id="isolamento" required>
-                        ${ISOLAMENTO_OPTIONS.map(opt => 
-                            `<option value="${opt}" ${leito.isolamento === opt ? 'selected' : ''}>${opt}</option>`
-                        ).join('')}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>IDENTIFICAÇÃO DO LEITO *</label>
-                    <input type="text" id="identificacaoLeito" value="${leito.identificacaoLeito || ''}" 
-                           placeholder="Ex: NEO1, UTI-5" maxlength="6" pattern="[A-Za-z0-9]{1,6}" required>
-                </div>
-            </div>
-            
             <!-- Concessões -->
             <div class="form-section">
                 <div class="section-title">CONCESSÕES PREVISTAS NA ALTA</div>
@@ -797,21 +786,17 @@ function renderForm(leito) {
                 </div>
             </div>
             
-            <!-- Informações de Internação (apenas para pacientes internados) -->
-            ${!isVago && leito.admissao ? `
-            <div class="form-section" style="background: rgba(96, 165, 250, 0.05); border-radius: 8px; padding: 15px; margin-top: 20px; border-left: 4px solid #60a5fa;">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-                    <div>
-                        <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; font-weight: 600;">Data de Admissão</div>
-                        <div style="color: #60a5fa; font-weight: 600; font-size: 14px;">${formatarData(leito.admissao)}</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; font-weight: 600;">Internado há</div>
-                        <div style="color: #fbbf24; font-weight: 700; font-size: 16px;">${calcularDiasInternacao(leito.admissao)}</div>
-                    </div>
+            <!-- ISOLAMENTO - ÚLTIMA OPÇÃO -->
+            <div class="form-row-1">
+                <div class="form-group">
+                    <label>ISOLAMENTO *</label>
+                    <select id="isolamento" required>
+                        ${ISOLAMENTO_OPTIONS.map(opt => 
+                            `<option value="${opt}" ${leito.isolamento === opt ? 'selected' : ''}>${opt}</option>`
+                        ).join('')}
+                    </select>
                 </div>
             </div>
-            ` : ''}
         </div>
         
         <!-- Actions -->
@@ -933,11 +918,10 @@ async function darAlta() {
     }
 }
 
-// =================== COLETAR DADOS DO FORMULÁRIO ===================
+// =================== COLETAR DADOS ===================
 function coletarDados() {
     const dados = {};
     
-    // Iniciais para admissão
     const iniciais = document.getElementById('iniciais');
     if (iniciais) dados.iniciais = iniciais.value.trim();
     
@@ -956,8 +940,6 @@ function coletarDados() {
     dados.pps = document.getElementById('pps').value;
     dados.spict = document.getElementById('spict').value;
     dados.prevAlta = document.getElementById('prevAlta').value;
-    
-    // NOVOS CAMPOS OBRIGATÓRIOS
     dados.isolamento = document.getElementById('isolamento').value;
     dados.identificacaoLeito = document.getElementById('identificacaoLeito').value.trim().toUpperCase();
     
@@ -1068,27 +1050,11 @@ function showSuccess(message) {
     }
 }
 
-function formatarData(dataString) {
-    if (!dataString) return 'N/A';
-    const data = new Date(dataString);
-    return data.toLocaleDateString('pt-BR');
-}
-
-function calcularDiasInternacao(dataAdmissao) {
-    if (!dataAdmissao) return 'N/A';
-    const admissao = new Date(dataAdmissao);
-    const hoje = new Date();
-    const diffTime = hoje - admissao;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return `${diffDays} dia${diffDays !== 1 ? 's' : ''}`;
-}
-
 // =================== LOG ===================
-console.log('✅ Archipelago QR System - Corrigido');
-console.log('📱 Sistema dedicado para acesso médico via QR Code');
-console.log('⏰ Timer de 2 minutos ativo');
-console.log('🔧 Campos atualizados: INICIAIS, ISOLAMENTO, IDENTIFICAÇÃO_LEITO');
-console.log('📊 Idade: dropdown mobile (14-115), input desktop');
+console.log('✅ Archipelago QR System - Layout Reorganizado');
+console.log('📱 Header: Nome - ID XX - Leito XXXX');
+console.log('📝 Identificação do Leito: linha única (igual cards)');
+console.log('🔚 Isolamento: última opção do formulário');
 console.log('🏥 Hospitais V3.1: H1:10, H2:36, H3:13, H4:7 leitos');
     </script>
 </body>
