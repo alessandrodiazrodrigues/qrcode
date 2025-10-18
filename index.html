@@ -736,40 +736,6 @@ function renderForm(leito) {
     console.log('📋 Dados do leito recebidos:', leito);
     console.log('📄 JSON COMPLETO:', JSON.stringify(leito, null, 2));
     
-    // ⭐ CORREÇÃO TEMPORÁRIA: Adicionar campos faltantes com valores padrão
-    if (!leito.genero && !leito.sexo) {
-        console.warn('⚠️ Campo gênero não veio da API - usando padrão');
-        leito.genero = ''; // Vazio para forçar seleção
-    }
-    
-    if (!leito.regiao) {
-        console.warn('⚠️ Campo região não veio da API - usando padrão');
-        leito.regiao = ''; // Vazio para forçar seleção
-    }
-    
-    if (!leito.categoriaEscolhida && leito.tipo) {
-        console.warn('⚠️ Campo categoriaEscolhida não veio - convertendo tipo');
-        // Se tipo é "Híbrido" e está ocupado, precisa ter uma categoria
-        if (leito.tipo === 'Híbrido' && leito.status === 'Em uso') {
-            // Não podemos assumir, deixar vazio
-            leito.categoriaEscolhida = '';
-        } else if (leito.tipo === 'Apartamento' || leito.tipo === 'APTO') {
-            leito.categoriaEscolhida = 'Apartamento';
-        } else if (leito.tipo === 'Enfermaria' || leito.tipo === 'ENFERMARIA') {
-            leito.categoriaEscolhida = 'Enfermaria';
-        }
-    }
-    
-    if (!leito.diretivas) {
-        console.warn('⚠️ Campo diretivas não veio da API - usando padrão');
-        leito.diretivas = 'Não se aplica';
-    }
-    
-    if (!leito.isolamento) {
-        console.warn('⚠️ Campo isolamento vazio - usando padrão');
-        leito.isolamento = 'Não Isolamento';
-    }
-    
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
     const hospitalNome = HOSPITAIS[currentHospital].nome;
@@ -894,8 +860,8 @@ function renderForm(leito) {
                         }
                         
                         // Outros hospitais: editável (será ajustado depois para Santa Clara)
-                        // ⭐ CORREÇÃO: Tentar múltiplos campos para tipo/categoria
-                        const tipoAtual = leito.categoriaEscolhida || leito.categoria || leito.categoria_escolhida || leito.tipo || '';
+                        // ⭐ CORREÇÃO: usar categoria_escolhida com underscore
+                        const tipoAtual = leito.categoria_escolhida || leito.categoriaEscolhida || leito.categoria || leito.tipo || '';
                         return `<select id="tipoQuarto" required>
                             <option value="">Selecionar...</option>
                             <option value="Apartamento" ${tipoAtual === 'Apartamento' ? 'selected' : ''}>Apartamento</option>
@@ -1366,12 +1332,12 @@ function coletarDados() {
         // Cruz Azul com valor fixo (hidden input)
         dados.tipoQuarto = tipoQuartoValue.value;
         dados.categoria = tipoQuartoValue.value; // Para compatibilidade
-        dados.categoriaEscolhida = tipoQuartoValue.value; // Para planilha BU
+        dados.categoria_escolhida = tipoQuartoValue.value; // Para planilha BU com underscore
     } else if (tipoQuartoField && tipoQuartoField.value) {
         // Outros hospitais com select editável
         dados.tipoQuarto = tipoQuartoField.value;
         dados.categoria = tipoQuartoField.value; // Para compatibilidade
-        dados.categoriaEscolhida = tipoQuartoField.value; // Para planilha BU
+        dados.categoria_escolhida = tipoQuartoField.value; // Para planilha BU com underscore
     }
     
     dados.concessoes = [];
