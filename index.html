@@ -719,14 +719,6 @@ async function loadHospitalData(hospitalId) {
     } catch (error) {
         console.error('❌ Erro:', error);
         showError('Erro ao carregar dados. Tente novamente.');
-        
-        renderForm(leito);
-        startTimer();
-        hideLoading();
-        
-    } catch (error) {
-        console.error('❌ Erro:', error);
-        showError('Erro ao carregar dados. Tente novamente.');
     }
 }
 
