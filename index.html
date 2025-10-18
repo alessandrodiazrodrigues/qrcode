@@ -725,6 +725,22 @@ async function loadHospitalData(hospitalId) {
 function renderForm(leito) {
     // ⭐ DEBUG: Ver estrutura do leito
     console.log('📋 Dados do leito recebidos:', leito);
+    console.log('🔍 Debug detalhado dos campos:');
+    console.log('- genero:', leito.genero);
+    console.log('- sexo:', leito.sexo);
+    console.log('- regiao:', leito.regiao);
+    console.log('- categoria:', leito.categoria);
+    console.log('- categoriaEscolhida:', leito.categoriaEscolhida);
+    console.log('- tipo:', leito.tipo);
+    console.log('- isolamento:', leito.isolamento);
+    console.log('- pps:', leito.pps);
+    console.log('- spict:', leito.spict);
+    console.log('- diretivas:', leito.diretivas);
+    console.log('- identificacao_leito:', leito.identificacao_leito);
+    console.log('- identificacaoLeito:', leito.identificacaoLeito);
+    
+    // ⭐ LOG COMPLETO EM JSON
+    console.log('📄 JSON COMPLETO DO LEITO:', JSON.stringify(leito, null, 2));
     
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
@@ -946,9 +962,16 @@ function renderForm(leito) {
                     <label>PPS <span class="required">*</span></label>
                     <select id="pps" required>
                         <option value="">Selecionar...</option>
-                        ${PPS_OPTIONS.map(pps => 
-                            `<option value="${pps}" ${leito.pps && `${leito.pps}%` === pps ? 'selected' : ''}>${pps}</option>`
-                        ).join('')}
+                        ${PPS_OPTIONS.map(pps => {
+                            // Converter PPS para comparação
+                            let selected = false;
+                            if (leito.pps) {
+                                const ppsNumero = parseFloat(leito.pps);
+                                const ppsString = `${ppsNumero}%`.replace('.', ',');
+                                selected = ppsString === pps;
+                            }
+                            return `<option value="${pps}" ${selected ? 'selected' : ''}>${pps}</option>`;
+                        }).join('')}
                     </select>
                 </div>
                 <div class="form-group">
