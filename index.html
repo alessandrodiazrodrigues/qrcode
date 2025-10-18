@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Archipelago QR V3.3 - Acesso Médico</title>
+    <title>Archipelago QR V3.3 FINAL - Acesso Médico</title>
     
     <style>
         /* =================== RESET E BASE MOBILE =================== */
@@ -894,10 +894,61 @@ function forceClose(message) {
     showSuccess(message);
 }
 
+// =================== VALIDAR LIMITE ENFERMARIAS SANTA CLARA ===================
+async function validarLimiteSantaClara(dados) {
+    // Só valida se for Santa Clara tentando admitir Enfermaria
+    if (dados.hospital !== 'H4' || dados.tipoQuarto !== 'Enfermaria') {
+        return { valido: true };
+    }
+    
+    try {
+        // Buscar dados atuais do Santa Clara
+        const response = await fetch(API_URL);
+        const result = await response.json();
+        
+        if (!result.hospitais || !result.hospitais.H4) {
+            return { valido: true };
+        }
+        
+        // Contar enfermarias ocupadas
+        let enfermariasOcupadas = 0;
+        result.hospitais.H4.leitos.forEach(leito => {
+            const statusOcupado = leito.status === 'Em uso' || leito.status === 'Ocupado';
+            const tipoEnfermaria = leito.tipo === 'Enfermaria';
+            
+            if (statusOcupado && tipoEnfermaria) {
+                enfermariasOcupadas++;
+            }
+        });
+        
+        console.log(`Santa Clara: ${enfermariasOcupadas} enfermarias ocupadas (limite: 4)`);
+        
+        if (enfermariasOcupadas >= SANTA_CLARA_MAX_ENFERMARIAS) {
+            return {
+                valido: false,
+                mensagem: `❌ LIMITE ATINGIDO!\n\nO Santa Clara já possui ${SANTA_CLARA_MAX_ENFERMARIAS} enfermarias ocupadas (máximo permitido).\n\nAguarde uma alta ou admita como Apartamento.`
+            };
+        }
+        
+        return { valido: true };
+        
+    } catch (error) {
+        console.error('Erro ao validar limite:', error);
+        return { valido: true }; // Em caso de erro, permite continuar
+    }
+}
+
 // =================== SALVAR DADOS V3.3 ===================
 async function saveData() {
     try {
         const dados = coletarDados();
+        
+        // ⭐ V3.3: Validar limite de enfermarias Santa Clara
+        const validacao = await validarLimiteSantaClara(dados);
+        if (!validacao.valido) {
+            alert(validacao.mensagem);
+            return;
+        }
         
         if (!validarDados(dados)) return;
         
