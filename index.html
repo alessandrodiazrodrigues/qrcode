@@ -710,7 +710,12 @@ function renderForm(leito) {
         <div class="header">
             <div class="header-title">ARCHIPELAGO MEDICAL V3.3</div>
             <div class="header-info">
-                <div class="hospital-badge">${hospitalNome} • ID ${idSequencial} • ${leitoPersonalizado}</div>
+                <div class="hospital-badge">
+                    ${hospitalNome} • ID ${idSequencial} • ${leitoPersonalizado}
+                    <span style="color: ${isVago ? '#10b981' : '#f59e0b'}; font-weight: 700; margin-left: 8px;">
+                        • ${isVago ? 'VAGO' : 'OCUPADO'}
+                    </span>
+                </div>
                 <div class="timer" id="timer">2:00</div>
             </div>
         </div>
@@ -718,6 +723,38 @@ function renderForm(leito) {
         <!-- Form Body -->
         <div class="form-body">
             <h2 class="form-title">${isVago ? 'ADMISSÃO DE PACIENTE' : 'ATUALIZAÇÃO DE DADOS'}</h2>
+            
+            ${!isVago && leito.dataAdmissao ? `
+                <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #3b82f6;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                        <div style="flex: 1;">
+                            <div style="color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">
+                                Data de Admissão
+                            </div>
+                            <div style="color: #e2e8f0; font-size: 14px; font-weight: 600;">
+                                ${(() => {
+                                    const data = new Date(leito.dataAdmissao);
+                                    return data.toLocaleDateString('pt-BR');
+                                })()}
+                            </div>
+                        </div>
+                        <div style="flex: 1; text-align: right;">
+                            <div style="color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">
+                                Tempo Internado
+                            </div>
+                            <div style="color: #60a5fa; font-size: 14px; font-weight: 700;">
+                                ${(() => {
+                                    const admissao = new Date(leito.dataAdmissao);
+                                    const hoje = new Date();
+                                    const diffTime = Math.abs(hoje - admissao);
+                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                    return diffDays === 1 ? '1 dia' : `${diffDays} dias`;
+                                })()}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ` : ''}
             
             <!-- LINHA 1: IDENTIFICAÇÃO | DIRETIVAS | TIPO QUARTO (3 COLUNAS) -->
             <div class="form-row-3">
@@ -746,13 +783,44 @@ function renderForm(leito) {
                         ).join('')}
                     </select>
                 </div>
-                <div class="form-group" id="tipoQuartoGroup" style="display: none;">
+                <div class="form-group" id="tipoQuartoGroup">
                     <label>TIPO QUARTO <span class="required">*</span></label>
-                    <select id="tipoQuarto">
-                        <option value="">Selecionar...</option>
-                        <option value="Apartamento" ${leito.tipo === 'Apartamento' ? 'selected' : ''}>Apartamento</option>
-                        <option value="Enfermaria" ${leito.tipo === 'Enfermaria' ? 'selected' : ''}>Enfermaria</option>
-                    </select>
+                    ${(() => {
+                        const hospital = localStorage.getItem('hospital');
+                        const leitoNum = parseInt(localStorage.getItem('leito'));
+                        
+                        // Cruz Azul - Apartamentos (1-20): readonly
+                        if (hospital === 'H2' && leitoNum >= 1 && leitoNum <= 20) {
+                            return `<select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">
+                                <option value="Apartamento" selected>Apartamento</option>
+                            </select>
+                            <input type="hidden" id="tipoQuartoValue" value="Apartamento">
+                            <small style="color: rgba(255,255,255,0.5); font-size: 10px; margin-top: 4px; display: block;">
+                                🔒 Tipo fixo para este leito
+                            </small>`;
+                        }
+                        
+                        // Cruz Azul - Enfermarias (21-36): readonly
+                        if (hospital === 'H2' && leitoNum >= 21 && leitoNum <= 36) {
+                            return `<select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">
+                                <option value="Enfermaria" selected>Enfermaria</option>
+                            </select>
+                            <input type="hidden" id="tipoQuartoValue" value="Enfermaria">
+                            <small style="color: rgba(255,255,255,0.5); font-size: 10px; margin-top: 4px; display: block;">
+                                🔒 Tipo fixo para este leito
+                            </small>`;
+                        }
+                        
+                        // Outros hospitais: editável (será ajustado depois para Santa Clara)
+                        return `<select id="tipoQuarto" required>
+                            <option value="">Selecionar...</option>
+                            <option value="Apartamento" ${leito.tipo === 'Apartamento' ? 'selected' : ''}>Apartamento</option>
+                            <option value="Enfermaria" ${leito.tipo === 'Enfermaria' ? 'selected' : ''} id="opcaoEnfermaria">Enfermaria</option>
+                        </select>
+                        <div id="avisoLimiteEnfermaria" style="display: none; color: #f59e0b; font-size: 10px; margin-top: 4px; font-weight: 600;">
+                            ⚠️ Limite de enfermarias atingido (4/4)
+                        </div>`;
+                    })()}
                 </div>
             </div>
             
@@ -854,6 +922,26 @@ function renderForm(leito) {
                 </div>
             </div>
             
+            
+            <!-- BOTÕES DE AÇÃO -->
+            <div style="margin-top: 20px;">
+                ${isVago ? `
+                    <button onclick="saveData()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Admitir Paciente
+                    </button>
+                ` : `
+                    <button onclick="saveData()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Salvar Alterações
+                    </button>
+                    <button onclick="darAlta()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Dar Alta
+                    </button>
+                `}
+                <button onclick="location.reload()" style="width: 100%; padding: 16px; background: #334155; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase;">
+                    Cancelar
+                </button>
+            </div>
+            
             <!-- CONCESSÕES -->
             <div class="form-section">
                 <div class="section-title">CONCESSÕES PREVISTAS NA ALTA (${CONCESSOES.length})</div>
@@ -902,27 +990,48 @@ function renderForm(leito) {
     
     container.style.display = 'flex';
     
-    // ⭐ V3.3: Mostrar/ocultar TIPO DE QUARTO após renderizar
-    setTimeout(() => {
+    // ⭐ V3.3: Verificar limite Santa Clara e desabilitar Enfermaria se necessário
+    setTimeout(async () => {
         const hospital = localStorage.getItem('hospital');
-        const tipoQuartoGroup = document.getElementById('tipoQuartoGroup');
         
-        if (tipoQuartoGroup) {
-            const hospitaisComTipoQuarto = ['H1', 'H3', 'H4', 'H5'];
-            if (hospitaisComTipoQuarto.includes(hospital)) {
-                tipoQuartoGroup.style.display = 'block';
-                const tipoQuartoSelect = document.getElementById('tipoQuarto');
-                if (tipoQuartoSelect) {
-                    tipoQuartoSelect.required = true;
+        if (hospital === 'H4') {
+            try {
+                const response = await fetch(API_URL);
+                const result = await response.json();
+                
+                if (result.hospitais && result.hospitais.H4) {
+                    let enfermariasOcupadas = 0;
+                    result.hospitais.H4.leitos.forEach(l => {
+                        const ocupado = l.status === 'Em uso' || l.status === 'Ocupado';
+                        const tipoEnf = l.tipo === 'Enfermaria';
+                        if (ocupado && tipoEnf) enfermariasOcupadas++;
+                    });
+                    
+                    if (enfermariasOcupadas >= 4) {
+                        const opcaoEnf = document.getElementById('opcaoEnfermaria');
+                        const avisoLimite = document.getElementById('avisoLimiteEnfermaria');
+                        
+                        if (opcaoEnf) {
+                            opcaoEnf.disabled = true;
+                            opcaoEnf.textContent = 'Enfermaria (Limite atingido)';
+                            opcaoEnf.style.color = '#9ca3af';
+                        }
+                        
+                        if (avisoLimite) {
+                            avisoLimite.style.display = 'block';
+                        }
+                    }
                 }
-            } else {
-                tipoQuartoGroup.style.display = 'none';
-                const tipoQuartoSelect = document.getElementById('tipoQuarto');
-                if (tipoQuartoSelect) {
-                    tipoQuartoSelect.required = false;
-                }
+            } catch (error) {
+                console.error('Erro ao verificar limite Santa Clara:', error);
             }
         }
+    }, 100);
+    
+    // ⭐ V3.3: Mostrar/ocultar TIPO DE QUARTO após renderizar (NÃO PRECISA MAIS - SEMPRE MOSTRA)
+    setTimeout(() => {
+        // Campo TIPO DE QUARTO agora sempre visível
+        console.log('Tipo de Quarto: sempre visível com regras específicas por hospital');
     }, 100);
 }
 
@@ -1171,9 +1280,15 @@ function coletarDados() {
     dados.sexo = document.getElementById('sexo').value;
     dados.diretivas = document.getElementById('diretivas').value; // ⭐ NOVO V3.3
     
-    // ⭐ TIPO DE QUARTO (híbridos + Santa Clara)
+    // ⭐ TIPO DE QUARTO (todos os hospitais)
     const tipoQuartoField = document.getElementById('tipoQuarto');
-    if (tipoQuartoField && tipoQuartoField.value) {
+    const tipoQuartoValue = document.getElementById('tipoQuartoValue');
+    
+    if (tipoQuartoValue) {
+        // Cruz Azul com valor fixo (hidden input)
+        dados.tipoQuarto = tipoQuartoValue.value;
+    } else if (tipoQuartoField && tipoQuartoField.value) {
+        // Outros hospitais com select editável
         dados.tipoQuarto = tipoQuartoField.value;
     }
     
