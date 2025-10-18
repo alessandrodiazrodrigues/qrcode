@@ -7,9 +7,6 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>Archipelago QR V3.3 FINAL - Acesso Médico</title>
     
-    <!-- ⭐ CARREGAR API.JS PRIMEIRO -->
-    <script src="api.js"></script>
-    
     <style>
         /* =================== RESET E BASE MOBILE =================== */
         * {
@@ -101,207 +98,243 @@
             justify-content: space-between;
             align-items: center;
             gap: 10px;
-        }
-        
-        .hospital-name {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
         }
         
-        .leito-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
-        
-        .leito-id {
-            background: rgba(255,255,255,0.2);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: 700;
-        }
-        
-        .leito-custom {
-            background: rgba(255,255,255,0.1);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        
-        .status-badge {
+        .hospital-badge {
+            background: rgba(255,255,255,0.15);
             padding: 6px 12px;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            flex: 1;
+            text-align: center;
         }
         
-        .status-vago {
-            background: #10b981;
-            color: white;
-        }
-        
-        .status-ocupado {
-            background: #f59e0b;
-            color: white;
-        }
-        
-        /* =================== TIMER MOBILE =================== */
         .timer {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            padding: 8px 16px;
+            background: rgba(34, 197, 94, 0.25);
+            color: #22c55e;
+            padding: 6px 12px;
             border-radius: 20px;
             font-weight: 700;
             font-size: 14px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            z-index: 1000;
-            display: none;
+            min-width: 70px;
+            text-align: center;
+            border: 2px solid rgba(34, 197, 94, 0.4);
         }
         
-        /* =================== CONTENT =================== */
-        .content {
+        .timer.warning {
+            background: rgba(245, 158, 11, 0.25);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.4);
+            animation: pulse-warning 1.5s infinite;
+        }
+        
+        .timer.danger {
+            background: rgba(239, 68, 68, 0.25);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.4);
+            animation: pulse-danger 0.8s infinite;
+        }
+        
+        @keyframes pulse-warning {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes pulse-danger {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.08); opacity: 0.8; }
+        }
+        
+        /* =================== FORM BODY MOBILE =================== */
+        .form-body {
             flex: 1;
             padding: 20px 15px;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
         
-        .section-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #60a5fa;
+        .form-title {
+            text-align: center;
             margin-bottom: 20px;
+            font-size: 16px;
+            color: #60a5fa;
             text-transform: uppercase;
             letter-spacing: 1px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #334155;
+            font-weight: 700;
+            padding: 12px;
+            background: rgba(96, 165, 250, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(96, 165, 250, 0.2);
         }
         
-        /* =================== FORM GROUPS =================== */
+        /* LAYOUT 3 COLUNAS MOBILE */
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        /* LAYOUT 1 COLUNA */
+        .form-row-1 {
+            display: grid;
+            grid-template-columns: 1fr;
+            margin-bottom: 15px;
+        }
+        
         .form-group {
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
         }
         
         .form-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 9px;
+            font-weight: 700;
             color: #94a3b8;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
-        .required {
+        .form-group label .required {
             color: #ef4444;
+            font-size: 10px;
         }
         
-        /* =================== FORM ROWS =================== */
-        .form-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .form-row .form-group {
-            flex: 1;
-            margin-bottom: 0;
-        }
-        
-        @media (max-width: 600px) {
-            .form-row {
-                flex-direction: column;
-                gap: 20px;
-            }
-        }
-        
-        /* =================== INPUTS =================== */
-        input[type="text"],
-        input[type="number"],
-        select {
-            width: 100%;
-            padding: 14px;
+        .form-group input,
+        .form-group select {
+            padding: 10px 8px;
             background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 8px;
             color: #ffffff;
-            font-size: 16px;
-            -webkit-appearance: none;
-            transition: all 0.3s ease;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            font-size: 13px;
+            width: 100%;
+            box-sizing: border-box;
+            font-weight: 500;
+            transition: all 0.2s;
         }
         
-        input:focus,
-        select:focus {
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
             border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
             background: #1e293b;
         }
         
-        input[readonly],
-        select:disabled {
+        .form-group input[readonly] {
             background: #1f2937;
-            color: #9ca3af;
+            color: #6b7280;
+            border-color: #374151;
+        }
+        
+        /* =================== GRID 3 COLUNAS (IGUAL CARDS.JS) =================== */
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row-3 .form-group {
+            margin-bottom: 0;
+        }
+        
+        /* Grid 2 colunas para alguns campos */
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row-2 .form-group {
+            margin-bottom: 0;
             cursor: not-allowed;
         }
         
-        /* =================== CHECKBOXES =================== */
-        .checkbox-container {
-            background: #0f172a;
-            border: 1px solid #334155;
+        .form-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 14px;
+            padding-right: 32px;
+        }
+        
+        /* =================== SEÇÕES CHECKBOX MOBILE =================== */
+        .form-section {
+            margin: 20px 0;
+        }
+        
+        .section-title {
+            background: #60a5fa;
+            color: #000000;
+            padding: 10px 12px;
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+            text-align: center;
         }
         
         .checkbox-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin-top: 15px;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border: 2px solid #334155;
         }
         
         .checkbox-item {
             display: flex;
             align-items: center;
             padding: 10px;
-            background: #1e293b;
+            background: rgba(255,255,255,0.05);
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
+            min-height: 44px;
         }
         
         .checkbox-item:active {
+            background: rgba(96, 165, 250, 0.15);
             transform: scale(0.98);
         }
         
-        .checkbox-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+        .checkbox-item input {
             margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            accent-color: #60a5fa;
             cursor: pointer;
+            flex-shrink: 0;
         }
         
-        .checkbox-item label {
-            margin: 0;
-            font-size: 13px;
-            font-weight: 400;
+        .checkbox-item span {
             color: #e2e8f0;
-            cursor: pointer;
-            text-transform: none;
-            letter-spacing: normal;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 1.3;
+            user-select: none;
         }
         
-        /* =================== ACTIONS =================== */
+        /* =================== ACTIONS MOBILE =================== */
         .actions {
-            padding: 20px 15px;
-            background: #0f172a;
-            border-top: 1px solid #334155;
+            padding: 15px;
+            background: #111827;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
             position: sticky;
             bottom: 0;
         }
@@ -309,180 +342,321 @@
         .btn {
             width: 100%;
             padding: 16px;
-            font-size: 16px;
-            font-weight: 700;
-            text-transform: uppercase;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
-            margin-bottom: 10px;
-            transition: all 0.3s ease;
+            text-transform: uppercase;
             letter-spacing: 1px;
+            transition: all 0.2s;
+            min-height: 54px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
         .btn:active {
-            transform: scale(0.98);
+            transform: scale(0.97);
         }
         
         .btn-primary {
-            background: #3b82f6;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #2563eb;
         }
         
         .btn-danger {
-            background: #ef4444;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #dc2626;
         }
         
         .btn-secondary {
-            background: #475569;
+            background: #374151;
             color: white;
         }
         
-        .btn-secondary:hover {
-            background: #334155;
+        .btn-qrcode {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
         }
         
-        /* =================== ERROR CONTAINER =================== */
-        .error-container {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* =================== MENSAGENS =================== */
+        .message-container {
+            width: 100%;
             min-height: 100vh;
-            padding: 20px;
+            padding: 40px 20px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         
-        .error-icon {
-            width: 80px;
-            height: 80px;
-            background: #ef4444;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
+        .message-icon {
+            font-size: 60px;
             margin-bottom: 20px;
         }
         
-        .error-title {
-            font-size: 24px;
+        .message-container h2 {
+            color: #60a5fa;
+            margin-bottom: 15px;
+            font-size: 22px;
             font-weight: 700;
-            margin-bottom: 10px;
         }
         
-        .error-message {
-            font-size: 16px;
-            color: #94a3b8;
-            margin-bottom: 30px;
+        .message-container.error h2 {
+            color: #ef4444;
         }
         
-        /* =================== SUCCESS CONTAINER =================== */
-        .success-container {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-            text-align: center;
+        .message-container.success h2 {
+            color: #22c55e;
         }
         
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background: #10b981;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            margin-bottom: 20px;
-            animation: successPulse 0.6s ease;
+        .message-container p {
+            color: #cbd5e1;
+            margin-bottom: 25px;
+            font-size: 15px;
+            line-height: 1.6;
+            max-width: 400px;
         }
         
-        @keyframes successPulse {
-            0% { transform: scale(0); opacity: 0; }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        
-        /* =================== FOOTER =================== */
+        /* =================== RODAPÉ =================== */
         .footer {
-            padding: 15px;
+            background: rgba(0,0,0,0.4);
+            padding: 10px 15px;
             text-align: center;
-            font-size: 11px;
-            color: #64748b;
-            background: #0f172a;
-            border-top: 1px solid #334155;
+            font-size: 10px;
+            color: #6b7280;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* =================== SCROLLBAR MOBILE =================== */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+        
+        /* =================== ANIMAÇÕES =================== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .container {
+            animation: fadeIn 0.3s ease;
+        }
+        
+        /* =================== ORIENTAÇÃO LANDSCAPE =================== */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .header {
+                padding: 10px 15px;
+            }
+            
+            .form-body {
+                padding: 15px;
+            }
+            
+            .checkbox-grid {
+                max-height: 150px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Loading -->
-    <div class="loading" id="loading">
+    <!-- Loading Screen -->
+    <div id="loading" class="loading">
         <div class="spinner"></div>
         <div class="loading-text">Carregando dados...</div>
     </div>
     
-    <!-- Timer -->
-    <div class="timer" id="timer">2:00</div>
+    <!-- Container Principal -->
+    <div id="mainContainer" class="container" style="display: none;"></div>
     
-    <!-- Main Container -->
-    <div id="mainContainer"></div>
-    
-    <!-- Error Container -->
-    <div class="error-container" id="errorContainer">
-        <div class="error-icon">❌</div>
-        <h1 class="error-title">Erro ao Carregar</h1>
-        <p class="error-message" id="errorMessage">Ocorreu um erro ao carregar os dados.</p>
-        <button class="btn btn-primary" onclick="location.reload()">TENTAR NOVAMENTE</button>
+    <!-- Container de Erro -->
+    <div id="errorContainer" class="message-container error" style="display: none;">
+        <div class="message-icon">⚠️</div>
+        <h2>Atenção</h2>
+        <p id="errorMessage">Parâmetros inválidos.</p>
+        <button class="btn btn-qrcode" onclick="openQRScanner()">LER QR CODE</button>
     </div>
     
-    <!-- Success Container -->
-    <div class="success-container" id="successContainer">
-        <div class="success-icon">✓</div>
-        <h1 class="error-title">Sucesso!</h1>
-        <p class="error-message" id="successMessage">Operação realizada com sucesso.</p>
+    <!-- Container de Sucesso -->
+    <div id="successContainer" class="message-container success" style="display: none;">
+        <div class="message-icon">✅</div>
+        <h2>Sucesso!</h2>
+        <p id="successMessage">Operação realizada.</p>
+        <p style="margin-top: 15px; font-size: 13px; color: #94a3b8;">Para acessar outro leito, leia o QR Code novamente.</p>
+        <button class="btn btn-qrcode" onclick="openQRScanner()">LER QR CODE</button>
     </div>
     
     <script>
-// =================== ESPERAR API.JS CARREGAR ===================
-window.addEventListener('load', function() {
-    console.log('🚀 Verificando api.js...');
-    
-    // Verificar se api.js foi carregado
-    if (typeof window.lerDadosLeito !== 'function') {
-        console.error('❌ lerDadosLeito não encontrada! api.js não carregou corretamente');
-        alert('Erro: api.js não foi carregado. Verifique se o arquivo está na mesma pasta.');
-        return;
-    }
-    
-    console.log('✅ api.js carregado com sucesso!');
-    initializeApp();
-});
+// =================== ARCHIPELAGO QR V3.3 MOBILE FINAL ===================
+// =================== CONFIGURAÇÃO ===================
+const API_URL = 'https://script.google.com/macros/s/AKfycbxC9Gdvu3_mzXko0VjIYOFgtiH_Z_d8E9VXniUpBxyfaHRC1BHilyEuKhAtLnzmnusT/exec';
 
-// =================== VARIÁVEIS GLOBAIS ===================
+// =================== DADOS GLOBAIS ===================
 let hospitalData = {};
 let currentHospital = null;
 let currentLeito = null;
 let timerInterval = null;
-let timeLeft = 120; // 2 minutos
+let timeLeft = 120;
+
+// =================== CONSTANTES V3.3 ===================
+const HOSPITAIS = {
+    H1: { nome: 'Neomater', leitos: 10 },
+    H2: { nome: 'Cruz Azul', leitos: 36 },
+    H3: { nome: 'Santa Marcelina', leitos: 7 },
+    H4: { nome: 'Santa Clara', leitos: 13 },
+    H5: { nome: 'Adventista', leitos: 13 }
+};
+
+const ISOLAMENTO_OPTIONS = [
+    "Não Isolamento",
+    "Isolamento de Contato", 
+    "Isolamento Respiratório"
+];
+
+const REGIAO_OPTIONS = [
+    'Zona Central',
+    'Zona Sul',
+    'Zona Norte',
+    'Zona Leste',
+    'Zona Oeste',
+    'ABC',
+    'Guarulhos',
+    'Osasco',
+    'Outra'
+];
+
+const SEXO_OPTIONS = [
+    'Masculino',
+    'Feminino'
+];
+
+// ⭐ NOVO V3.3: HOSPITAIS HÍBRIDOS (H1, H3, H5)
+const HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5'];
+
+// ⭐ NOVO V3.3: SANTA CLARA - TODOS OS LEITOS SÃO HÍBRIDOS
+const SANTA_CLARA_MAX_ENFERMARIAS = 4;
+
+// ⭐ NOVO V3.3: CRUZ AZUL - MAPEAMENTO LEITOS IRMÃOS
+const CRUZ_AZUL_LEITOS_IRMAOS = {
+    '21': '22', '22': '21',  // 711.1 ↔ 711.2
+    '23': '24', '24': '23',  // 713.1 ↔ 713.2
+    '25': '26', '26': '25',  // 715.1 ↔ 715.2
+    '27': '28', '28': '27',  // 717.1 ↔ 717.2
+    '29': '30', '30': '29',  // 719.1 ↔ 719.2
+    '31': '32', '32': '31',  // 721.1 ↔ 721.2
+    '33': '34', '34': '33',  // 723.1 ↔ 723.2
+    '35': '36', '36': '35'   // 725.1 ↔ 725.2
+};
+
+// ⭐ NOVO V3.3: CRUZ AZUL - NUMERAÇÃO FIXA ENFERMARIAS
+const NUMERACAO_FIXA_CRUZ_AZUL = {
+    '21': '711.1', '22': '711.2',
+    '23': '713.1', '24': '713.2',
+    '25': '715.1', '26': '715.2',
+    '27': '717.1', '28': '717.2',
+    '29': '719.1', '30': '719.2',
+    '31': '721.1', '32': '721.2',
+    '33': '723.1', '34': '723.2',
+    '35': '725.1', '36': '725.2'
+};
+
+// ⭐ NOVO V3.3: DIRETIVAS ANTECIPADAS (BV/73)
+const DIRETIVAS_OPTIONS = [
+    'Não se aplica',
+    'Sim',
+    'Não'
+];
+
+const CONCESSOES = [
+    "Transição Domiciliar",
+    "Aplicação domiciliar de medicamentos",
+    "Aspiração",
+    "Banho",
+    "Curativo",
+    "Curativo PICC",
+    "Fisioterapia Domiciliar",
+    "Fonoaudiologia Domiciliar",
+    "Oxigenoterapia",
+    "Remoção",
+    "Solicitação domiciliar de exames"
+];
+
+const LINHAS_CUIDADO = [
+    "Assiste",
+    "APS SP",
+    "Cuidados Paliativos",
+    "ICO (Insuficiência Coronariana)",
+    "Nexus SP Cardiologia",
+    "Nexus SP Gastroentereologia",
+    "Nexus SP Geriatria",
+    "Nexus SP Pneumologia",
+    "Nexus SP Psiquiatria",
+    "Nexus SP Reumatologia",
+    "Nexus SP Saúde do Fígado",
+    "Generalista",
+    "Bucomaxilofacial",
+    "Cardiologia",
+    "Cirurgia Cardíaca",
+    "Cirurgia de Cabeça e Pescoço",
+    "Cirurgia do Aparelho Digestivo",
+    "Cirurgia Geral",
+    "Cirurgia Oncológica",
+    "Cirurgia Plástica",
+    "Cirurgia Torácica",
+    "Cirurgia Vascular",
+    "Clínica Médica",
+    "Coloproctologia",
+    "Dermatologia",
+    "Endocrinologia",
+    "Fisiatria",
+    "Gastroenterologia",
+    "Geriatria",
+    "Ginecologia e Obstetrícia",
+    "Hematologia",
+    "Infectologia",
+    "Mastologia",
+    "Nefrologia",
+    "Neurocirurgia",
+    "Neurologia",
+    "Oftalmologia",
+    "Oncologia Clínica",
+    "Ortopedia",
+    "Otorrinolaringologia",
+    "Pediatria",
+    "Pneumologia",
+    "Psiquiatria",
+    "Reumatologia",
+    "Urologia"
+];
+
+const PREVISAO_ALTA = [
+    'Hoje Ouro', 'Hoje 2R', 'Hoje 3R',
+    '24h Ouro', '24h 2R', '24h 3R',
+    '48h', '72h', '96h', 'SP'
+];
+
+const PPS_OPTIONS = ['10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'];
+const IDADE_OPTIONS = Array.from({length: 102}, (_, i) => i + 14);
 
 // =================== INICIALIZAÇÃO ===================
-function initializeApp() {
-    console.log('🚀 Archipelago QR V3.3 iniciando com api.js...');
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('🚀 Archipelago QR V3.3 Mobile - Iniciando...');
     
-    // Parâmetros da URL
     const urlParams = new URLSearchParams(window.location.search);
     const hospitalId = urlParams.get('h');
     const leitoNumero = urlParams.get('l');
@@ -492,68 +666,45 @@ function initializeApp() {
         return;
     }
     
-    if (!window.HOSPITAIS[hospitalId]) {
+    if (!HOSPITAIS[hospitalId]) {
         showError('Hospital não reconhecido.');
         return;
     }
     
     const leitoNum = parseInt(leitoNumero);
-    if (leitoNum < 1 || leitoNum > window.HOSPITAIS[hospitalId].leitos) {
-        showError(`Leito ${leitoNumero} inválido para ${window.HOSPITAIS[hospitalId].nome}.`);
+    if (leitoNum < 1 || leitoNum > HOSPITAIS[hospitalId].leitos) {
+        showError(`Leito ${leitoNumero} inválido para ${HOSPITAIS[hospitalId].nome}.`);
         return;
     }
     
     currentHospital = hospitalId;
     currentLeito = leitoNumero;
     
-    console.log(`📍 ${window.HOSPITAIS[hospitalId].nome} - Leito ${leitoNumero}`);
+    console.log(`📍 ${HOSPITAIS[hospitalId].nome} - Leito ${leitoNumero}`);
     
-    loadHospitalData(hospitalId);
-}
+    await loadHospitalData(hospitalId);
+});
 
 // =================== CARREGAR DADOS ===================
 async function loadHospitalData(hospitalId) {
     try {
-        console.log('📡 Carregando dados...');
+        console.log('📡 Carregando dados V3.3...');
         
-        // Usar fetch direto (como o api.js faz internamente)
-        const response = await fetch(`${window.API_URL}?action=all`);
+        const response = await fetch(`${API_URL}?action=all`);
         if (!response.ok) throw new Error('Erro na API');
         
-        const result = await response.json();
-        console.log('📥 Resposta da API:', result);
+        const data = await response.json();
+        if (!data.ok) throw new Error(data.error || 'Erro desconhecido');
         
-        if (!result.ok) throw new Error(result.error || 'Erro desconhecido');
-        
-        // ⭐ IMPORTANTE: Processar os dados com lerDadosLeito
-        const dadosBrutos = result.data;
-        hospitalData = {};
-        
-        // Processar cada hospital
-        for (const [hospId, hospital] of Object.entries(dadosBrutos)) {
-            hospitalData[hospId] = {
-                ...hospital,
-                leitos: hospital.leitos.map(leitoBruto => {
-                    // Se for array (dados brutos), processar com lerDadosLeito
-                    if (Array.isArray(leitoBruto)) {
-                        return window.lerDadosLeito(leitoBruto);
-                    }
-                    // Se já for objeto mas sem os campos novos, tentar reprocessar
-                    else if (!leitoBruto.genero && !leitoBruto.regiao) {
-                        // Pode ser que precise converter de volta para array
-                        // Por enquanto, retornar como está
-                        return leitoBruto;
-                    }
-                    return leitoBruto;
-                })
-            };
+        if (!data.data || !data.data[hospitalId]) {
+            throw new Error(`Hospital ${hospitalId} não encontrado`);
         }
         
-        console.log('📊 Dados processados:', hospitalData);
+        // ⭐ CORREÇÃO: Armazenar TODOS os dados como no cards.js
+        hospitalData = data.data;
         
-        // Encontrar o leito específico
         const leito = hospitalData[hospitalId].leitos.find(l => 
-            String(l.leito) === String(currentLeito)
+            String(l.leito || l.numero) === String(currentLeito)
         );
         
         if (!leito) {
@@ -561,7 +712,13 @@ async function loadHospitalData(hospitalId) {
             return;
         }
         
-        console.log('📋 Dados do leito processados por lerDadosLeito:', leito);
+        renderForm(leito);
+        startTimer();
+        hideLoading();
+        
+    } catch (error) {
+        console.error('❌ Erro:', error);
+        showError('Erro ao carregar dados. Tente novamente.');
         
         renderForm(leito);
         startTimer();
@@ -573,310 +730,551 @@ async function loadHospitalData(hospitalId) {
     }
 }
 
-// =================== RENDERIZAR FORMULÁRIO ===================
+// =================== RENDERIZAR FORMULÁRIO V3.3 ===================
 function renderForm(leito) {
+    // ⭐ DEBUG: Ver estrutura completa do leito
+    console.log('📋 Dados do leito recebidos:', leito);
+    console.log('📄 JSON COMPLETO:', JSON.stringify(leito, null, 2));
+    
+    // ⭐ CORREÇÃO TEMPORÁRIA: Adicionar campos faltantes com valores padrão
+    if (!leito.genero && !leito.sexo) {
+        console.warn('⚠️ Campo gênero não veio da API - usando padrão');
+        leito.genero = ''; // Vazio para forçar seleção
+    }
+    
+    if (!leito.regiao) {
+        console.warn('⚠️ Campo região não veio da API - usando padrão');
+        leito.regiao = ''; // Vazio para forçar seleção
+    }
+    
+    if (!leito.categoriaEscolhida && leito.tipo) {
+        console.warn('⚠️ Campo categoriaEscolhida não veio - convertendo tipo');
+        // Se tipo é "Híbrido" e está ocupado, precisa ter uma categoria
+        if (leito.tipo === 'Híbrido' && leito.status === 'Em uso') {
+            // Não podemos assumir, deixar vazio
+            leito.categoriaEscolhida = '';
+        } else if (leito.tipo === 'Apartamento' || leito.tipo === 'APTO') {
+            leito.categoriaEscolhida = 'Apartamento';
+        } else if (leito.tipo === 'Enfermaria' || leito.tipo === 'ENFERMARIA') {
+            leito.categoriaEscolhida = 'Enfermaria';
+        }
+    }
+    
+    if (!leito.diretivas) {
+        console.warn('⚠️ Campo diretivas não veio da API - usando padrão');
+        leito.diretivas = 'Não se aplica';
+    }
+    
+    if (!leito.isolamento) {
+        console.warn('⚠️ Campo isolamento vazio - usando padrão');
+        leito.isolamento = 'Não Isolamento';
+    }
+    
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
-    const hospitalNome = window.HOSPITAIS[currentHospital].nome;
+    const hospitalNome = HOSPITAIS[currentHospital].nome;
     const idSequencial = String(currentLeito).padStart(2, '0');
     
-    // Identificação do leito
-    const leitoPersonalizado = (leito.identificacaoLeito && leito.identificacaoLeito.trim()) 
-        ? leito.identificacaoLeito.trim().toUpperCase()
+    // ⭐ CORREÇÃO: Tentar múltiplos campos para identificação
+    const identificacao = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
+    const leitoPersonalizado = (identificacao && identificacao.trim()) 
+        ? identificacao.trim().toUpperCase()
         : `LEITO ${currentLeito}`;
     
-    // Idade options
-    const idadeOptions = window.IDADE_OPTIONS.map(idade => 
+    const idadeOptions = IDADE_OPTIONS.map(idade => 
         `<option value="${idade}" ${leito.idade == idade ? 'selected' : ''}>${idade} anos</option>`
     ).join('');
     
-    // ⭐ IMPORTANTE: Adicionar CRUZ_AZUL_NUMERACAO se não existir
-    if (!window.CRUZ_AZUL_NUMERACAO) {
-        window.CRUZ_AZUL_NUMERACAO = {
-            '21': '711.1', '22': '711.2',
-            '23': '713.1', '24': '713.2',
-            '25': '715.1', '26': '715.2',
-            '27': '717.1', '28': '717.2',
-            '29': '719.1', '30': '719.2',
-            '31': '721.1', '32': '721.2',
-            '33': '723.1', '34': '723.2',
-            '35': '725.1', '36': '725.2'
-        };
-    }
-    
     container.innerHTML = `
-        <div class="container">
-            <!-- Header -->
-            <div class="header">
-                <div class="header-title">ARCHIPELAGO MEDICAL V3.3</div>
-                <div class="header-info">
-                    <div class="hospital-name">${hospitalNome}</div>
-                    <div class="leito-info">
-                        <span class="leito-id">ID ${idSequencial}</span>
-                        <span class="leito-custom">${leitoPersonalizado}</span>
-                    </div>
-                    <span class="status-badge ${isVago ? 'status-vago' : 'status-ocupado'}">
-                        ${isVago ? 'VAGO' : 'OCUPADO'}
+        <!-- Header Mobile -->
+        <div class="header">
+            <div class="header-title">ARCHIPELAGO MEDICAL V3.3</div>
+            <div class="header-info">
+                <div class="hospital-badge">
+                    ${hospitalNome} • ID ${idSequencial} • ${leitoPersonalizado}
+                    <span style="color: ${isVago ? '#10b981' : '#f59e0b'}; font-weight: 700; margin-left: 8px;">
+                        • ${isVago ? 'VAGO' : 'OCUPADO'}
                     </span>
                 </div>
+                <div class="timer" id="timer">2:00</div>
             </div>
+        </div>
+        
+        <!-- Form Body -->
+        <div class="form-body">
+            <h2 class="form-title">${isVago ? 'ADMISSÃO DE PACIENTE' : 'ATUALIZAÇÃO DE DADOS'}</h2>
             
-            <!-- Content -->
-            <div class="content">
-                <h2 class="section-title">
-                    ${isVago ? 'ADMISSÃO DE PACIENTE' : 'ATUALIZAÇÃO DE DADOS'}
-                </h2>
-                
-                <!-- ID Leito, Diretivas, Tipo Quarto -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>ID LEITO <span class="required">*</span></label>
-                        ${(() => {
-                            const leitoNum = parseInt(currentLeito);
-                            if (currentHospital === 'H2' && leitoNum >= 21 && leitoNum <= 36 && window.CRUZ_AZUL_NUMERACAO[leitoNum]) {
-                                const numFixo = window.CRUZ_AZUL_NUMERACAO[String(leitoNum)];
-                                return `<input type="text" id="identificacaoLeito" value="${numFixo}" readonly>`;
-                            } else {
-                                return `<input type="text" id="identificacaoLeito" value="${leito.identificacaoLeito || ''}" 
-                                         placeholder="Ex: NEO1" maxlength="6" required>`;
-                            }
-                        })()}
-                    </div>
-                    <div class="form-group">
-                        <label>DIRETIVAS <span class="required">*</span></label>
-                        <select id="diretivas" required>
-                            ${window.DIRETIVAS_OPTIONS.map((opcao, index) => 
-                                `<option value="${opcao}" ${(leito.diretivas === opcao || (index === 0 && !leito.diretivas)) ? 'selected' : ''}>${opcao}</option>`
-                            ).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group" id="tipoQuartoGroup">
-                        <label>TIPO QUARTO <span class="required">*</span></label>
-                        ${(() => {
-                            const hospital = currentHospital;
-                            const leitoNum = parseInt(currentLeito);
-                            
-                            // Cruz Azul - Apartamentos (1-20): readonly
-                            if (hospital === 'H2' && leitoNum >= 1 && leitoNum <= 20) {
-                                return `<select id="tipoQuarto" disabled>
-                                    <option value="Apartamento" selected>Apartamento</option>
-                                </select>
-                                <input type="hidden" id="tipoQuartoValue" value="Apartamento">`;
-                            }
-                            
-                            // Cruz Azul - Enfermarias (21-36): readonly
-                            if (hospital === 'H2' && leitoNum >= 21 && leitoNum <= 36) {
-                                return `<select id="tipoQuarto" disabled>
-                                    <option value="Enfermaria" selected>Enfermaria</option>
-                                </select>
-                                <input type="hidden" id="tipoQuartoValue" value="Enfermaria">`;
-                            }
-                            
-                            // Hospitais Híbridos e Santa Clara: editável
-                            if (window.HOSPITAIS_HIBRIDOS.includes(hospital) || hospital === 'H4') {
-                                return `<select id="tipoQuarto" required>
-                                    <option value="">Selecionar...</option>
-                                    <option value="Apartamento" ${leito.categoriaEscolhida === 'Apartamento' ? 'selected' : ''}>Apartamento</option>
-                                    <option value="Enfermaria" ${leito.categoriaEscolhida === 'Enfermaria' ? 'selected' : ''} id="opcaoEnfermaria">Enfermaria</option>
-                                </select>
-                                <div id="avisoLimiteEnfermaria" style="display: none; color: #f59e0b; font-size: 12px; margin-top: 8px;">
-                                    ⚠️ Limite de enfermarias atingido (4/4)
-                                </div>`;
-                            }
-                            
-                            // Outros casos
-                            return `<select id="tipoQuarto" disabled>
-                                <option value="">Não aplicável</option>
-                            </select>`;
-                        })()}
-                    </div>
-                </div>
-                
-                <!-- Isolamento, Região, Gênero -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>ISOLAMENTO <span class="required">*</span></label>
-                        <select id="isolamento" required>
-                            ${window.ISOLAMENTO_OPTIONS.map((opt, index) => 
-                                `<option value="${opt}" ${(leito.isolamento === opt || (index === 0 && !leito.isolamento)) ? 'selected' : ''}>${opt}</option>`
-                            ).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>REGIÃO <span class="required">*</span></label>
-                        <select id="regiao" required>
-                            <option value="">Selecionar...</option>
-                            ${window.REGIAO_OPTIONS.map(regiao => 
-                                `<option value="${regiao}" ${leito.regiao === regiao ? 'selected' : ''}>${regiao}</option>`
-                            ).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>GÊNERO <span class="required">*</span></label>
-                        <select id="genero" required>
-                            <option value="">Selecionar...</option>
-                            ${window.SEXO_OPTIONS.map(sexo => 
-                                `<option value="${sexo}" ${leito.genero === sexo ? 'selected' : ''}>${sexo}</option>`
-                            ).join('')}
-                        </select>
-                    </div>
-                </div>
-                
-                ${isVago ? `
-                    <!-- Dados do Paciente (ADMISSÃO) -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>INICIAIS <span class="required">*</span></label>
-                            <input type="text" id="iniciais" placeholder="Ex: J S M" maxlength="10" required>
-                        </div>
-                        <div class="form-group">
-                            <label>MATRÍCULA <span class="required">*</span></label>
-                            <input type="text" id="matricula" placeholder="00000-0" maxlength="8" required>
-                        </div>
-                        <div class="form-group">
-                            <label>IDADE <span class="required">*</span></label>
-                            <select id="idade" required>
-                                <option value="">Selecionar...</option>
-                                ${idadeOptions}
-                            </select>
-                        </div>
-                    </div>
-                ` : `
-                    <!-- Dados do Paciente (ATUALIZAÇÃO) -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>INICIAIS</label>
-                            <input type="text" value="${leito.nome || ''}" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>MATRÍCULA</label>
-                            <input type="text" value="${leito.matricula || ''}" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>IDADE</label>
-                            <select id="idade" required>
-                                ${idadeOptions}
-                            </select>
-                        </div>
-                    </div>
-                `}
-                
-                <!-- PPS, SPICT, Previsão Alta -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>PPS <span class="required">*</span></label>
-                        <select id="pps" required>
-                            <option value="">Selecionar...</option>
-                            ${window.PPS_OPTIONS.map(pps => 
-                                `<option value="${pps}" ${leito.pps && `${leito.pps}%` === pps ? 'selected' : ''}>${pps}</option>`
-                            ).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>SPICT-BR <span class="required">*</span></label>
-                        <select id="spict" required>
-                            ${window.SPICT_OPTIONS.map(sp => 
-                                `<option value="${sp}" ${leito.spict === sp ? 'selected' : ''}>
-                                    ${sp === 'elegivel' ? 'Elegível' : 'Não elegível'}
-                                </option>`
-                            ).join('')}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>PREVISÃO ALTA <span class="required">*</span></label>
-                        <select id="prevAlta" required>
-                            ${window.PREV_ALTA_OPTIONS.map(p => 
-                                `<option value="${p}" ${leito.prevAlta === p || (!leito.prevAlta && p === 'SP') ? 'selected' : ''}>${p}</option>`
-                            ).join('')}
-                        </select>
-                    </div>
-                </div>
-                
-                <!-- Concessões -->
-                <div class="checkbox-container">
-                    <h3 class="section-title">CONCESSÕES PREVISTAS NA ALTA (${window.CONCESSOES.length})</h3>
-                    <div class="checkbox-grid">
-                        ${window.CONCESSOES.map((c, i) => `
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="conc${i}" value="${c}" 
-                                    ${leito.concessoes && leito.concessoes.includes(c) ? 'checked' : ''}>
-                                <label for="conc${i}">${c}</label>
+            ${!isVago && leito.dataAdmissao ? `
+                <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #3b82f6;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                        <div style="flex: 1;">
+                            <div style="color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">
+                                Data de Admissão
                             </div>
-                        `).join('')}
-                    </div>
-                </div>
-                
-                <!-- Linhas de Cuidado -->
-                <div class="checkbox-container">
-                    <h3 class="section-title">LINHAS DE CUIDADO PREVISTAS NA ALTA (${window.LINHAS_CUIDADO.length})</h3>
-                    <div class="checkbox-grid">
-                        ${window.LINHAS_CUIDADO.map((l, i) => `
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="linha${i}" value="${l}"
-                                    ${leito.linhas && leito.linhas.includes(l) ? 'checked' : ''}>
-                                <label for="linha${i}">${l}</label>
+                            <div style="color: #e2e8f0; font-size: 14px; font-weight: 600;">
+                                ${(() => {
+                                    const data = new Date(leito.dataAdmissao);
+                                    return data.toLocaleDateString('pt-BR');
+                                })()}
                             </div>
-                        `).join('')}
+                        </div>
+                        <div style="flex: 1; text-align: right;">
+                            <div style="color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">
+                                Tempo Internado
+                            </div>
+                            <div style="color: #60a5fa; font-size: 14px; font-weight: 700;">
+                                ${(() => {
+                                    const admissao = new Date(leito.dataAdmissao);
+                                    const hoje = new Date();
+                                    const diffTime = Math.abs(hoje - admissao);
+                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                    return diffDays === 1 ? '1 dia' : `${diffDays} dias`;
+                                })()}
+                            </div>
+                        </div>
                     </div>
+                </div>
+            ` : ''}
+            
+            <!-- LINHA 1: IDENTIFICAÇÃO | DIRETIVAS | TIPO QUARTO (3 COLUNAS) -->
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label>ID LEITO <span class="required">*</span></label>
+                    ${(() => {
+                        const hospital = localStorage.getItem('hospital');
+                        const leitoNum = parseInt(localStorage.getItem('leito'));
+                        const isCruzAzulEnfermaria = (hospital === 'H2' && leitoNum >= 21 && leitoNum <= 36);
+                        
+                        if (isCruzAzulEnfermaria) {
+                            const numFixo = NUMERACAO_FIXA_CRUZ_AZUL[String(leitoNum)];
+                            return `<input type="text" id="identificacaoLeito" value="${numFixo}" readonly 
+                                     style="background: #1f2937; color: #9ca3af; cursor: not-allowed;" required>`;
+                        } else {
+                            // ⭐ CORREÇÃO: Tentar múltiplos campos
+                            const identificacaoValue = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
+                            return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}" 
+                                     placeholder="Ex: NEO1" maxlength="6" required>`;
+                        }
+                    })()}
+                </div>
+                <div class="form-group">
+                    <label>DIRETIVAS <span class="required">*</span></label>
+                    <select id="diretivas" required>
+                        ${DIRETIVAS_OPTIONS.map((opcao, index) => 
+                            `<option value="${opcao}" ${(leito.diretivas === opcao || (index === 0 && !leito.diretivas)) ? 'selected' : ''}>${opcao}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div class="form-group" id="tipoQuartoGroup">
+                    <label>TIPO QUARTO <span class="required">*</span></label>
+                    ${(() => {
+                        const hospital = localStorage.getItem('hospital');
+                        const leitoNum = parseInt(localStorage.getItem('leito'));
+                        
+                        // Cruz Azul - Apartamentos (1-20): readonly
+                        if (hospital === 'H2' && leitoNum >= 1 && leitoNum <= 20) {
+                            return `<select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">
+                                <option value="Apartamento" selected>Apartamento</option>
+                            </select>
+                            <input type="hidden" id="tipoQuartoValue" value="Apartamento">
+                            <small style="color: rgba(255,255,255,0.5); font-size: 10px; margin-top: 4px; display: block;">
+                                🔒 Tipo fixo para este leito
+                            </small>`;
+                        }
+                        
+                        // Cruz Azul - Enfermarias (21-36): readonly
+                        if (hospital === 'H2' && leitoNum >= 21 && leitoNum <= 36) {
+                            return `<select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">
+                                <option value="Enfermaria" selected>Enfermaria</option>
+                            </select>
+                            <input type="hidden" id="tipoQuartoValue" value="Enfermaria">
+                            <small style="color: rgba(255,255,255,0.5); font-size: 10px; margin-top: 4px; display: block;">
+                                🔒 Tipo fixo para este leito
+                            </small>`;
+                        }
+                        
+                        // Outros hospitais: editável (será ajustado depois para Santa Clara)
+                        // ⭐ CORREÇÃO: Tentar múltiplos campos para tipo/categoria
+                        const tipoAtual = leito.categoriaEscolhida || leito.categoria || leito.categoria_escolhida || leito.tipo || '';
+                        return `<select id="tipoQuarto" required>
+                            <option value="">Selecionar...</option>
+                            <option value="Apartamento" ${tipoAtual === 'Apartamento' ? 'selected' : ''}>Apartamento</option>
+                            <option value="Enfermaria" ${tipoAtual === 'Enfermaria' ? 'selected' : ''} id="opcaoEnfermaria">Enfermaria</option>
+                        </select>
+                        <div id="avisoLimiteEnfermaria" style="display: none; color: #f59e0b; font-size: 10px; margin-top: 4px; font-weight: 600;">
+                            ⚠️ Limite de enfermarias atingido (4/4)
+                        </div>`;
+                    })()}
                 </div>
             </div>
             
-            <!-- Actions -->
-            <div class="actions">
-                <button class="btn btn-primary" onclick="saveData()">
-                    ${isVago ? 'ADMITIR PACIENTE' : 'SALVAR ALTERAÇÕES'}
-                </button>
-                ${!isVago ? '<button class="btn btn-danger" onclick="darAlta()">DAR ALTA</button>' : ''}
-                <button class="btn btn-secondary" onclick="cancelar()">CANCELAR</button>
+            <!-- LINHA 2: ISOLAMENTO | REGIÃO | GÊNERO (3 COLUNAS) -->
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label>ISOLAMENTO <span class="required">*</span></label>
+                    <select id="isolamento" required>
+                        ${ISOLAMENTO_OPTIONS.map((opt, index) => 
+                            `<option value="${opt}" ${(leito.isolamento === opt || (index === 0 && !leito.isolamento)) ? 'selected' : ''}>${opt}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>REGIÃO <span class="required">*</span></label>
+                    <select id="regiao" required>
+                        <option value="">Selecionar...</option>
+                        ${REGIAO_OPTIONS.map(regiao => 
+                            `<option value="${regiao}" ${leito.regiao === regiao ? 'selected' : ''}>${regiao}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>GÊNERO <span class="required">*</span></label>
+                    <select id="sexo" required>
+                        <option value="">Selecionar...</option>
+                        ${SEXO_OPTIONS.map(sexo => {
+                            // ⭐ CORREÇÃO: Tentar genero ou sexo
+                            const generoAtual = leito.genero || leito.sexo || '';
+                            return `<option value="${sexo}" ${generoAtual === sexo ? 'selected' : ''}>${sexo}</option>`;
+                        }).join('')}
+                    </select>
+                </div>
             </div>
             
-            <!-- Footer -->
-            <div class="footer">
-                Archipelago Dashboard V3.3 FINAL - Sistema Médico QR<br>
-                Total Rede: 79 leitos | 5 hospitais<br>
-                <strong>Criado por:</strong> Dr. Guilherme Santoro | <strong>Desenvolvido por:</strong> Alessandro Rodrigues
+            ${isVago ? `
+                <!-- ADMISSÃO: INICIAIS, MATRÍCULA, IDADE -->
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label>INICIAIS <span class="required">*</span></label>
+                        <input type="text" id="iniciais" placeholder="Ex: J S M" maxlength="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label>MATRÍCULA <span class="required">*</span></label>
+                        <input type="text" id="matricula" placeholder="00000-0" maxlength="8" required>
+                    </div>
+                    <div class="form-group">
+                        <label>IDADE <span class="required">*</span></label>
+                        <select id="idade" required>
+                            <option value="">Selecionar...</option>
+                            ${idadeOptions}
+                        </select>
+                    </div>
+                </div>
+            ` : `
+                <!-- ATUALIZAÇÃO: INICIAIS E MATRÍCULA READONLY -->
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label>INICIAIS</label>
+                        <input type="text" value="${leito.nome?.split(' ').map(n => n[0]).join(' ') || ''}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>MATRÍCULA</label>
+                        <input type="text" value="${leito.matricula || ''}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>IDADE <span class="required">*</span></label>
+                        <select id="idade" required>
+                            <option value="">Selecionar...</option>
+                            ${idadeOptions}
+                        </select>
+                    </div>
+                </div>
+            `}
+            
+            <!-- PPS, SPICT, PREVISÃO ALTA - 3 COLUNAS -->
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label>PPS <span class="required">*</span></label>
+                    <select id="pps" required>
+                        <option value="">Selecionar...</option>
+                        ${PPS_OPTIONS.map(pps => {
+                            // ⭐ CORREÇÃO: Converter PPS numérico para porcentagem
+                            let selected = false;
+                            if (leito.pps !== null && leito.pps !== undefined && leito.pps !== '') {
+                                const ppsStr = String(leito.pps).replace(',', '.');
+                                const ppsNum = parseFloat(ppsStr);
+                                if (!isNaN(ppsNum)) {
+                                    // Se é decimal menor que 1 (ex: 0.7), multiplicar por 100
+                                    const ppsValue = ppsNum < 1 ? ppsNum * 100 : ppsNum;
+                                    const ppsFormatado = `${Math.round(ppsValue / 10) * 10}%`;
+                                    selected = ppsFormatado === pps;
+                                }
+                            }
+                            return `<option value="${pps}" ${selected ? 'selected' : ''}>${pps}</option>`;
+                        }).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>SPICT-BR <span class="required">*</span></label>
+                    <select id="spict" required>
+                        <option value="nao_elegivel" ${leito.spict === 'nao_elegivel' || !leito.spict ? 'selected' : ''}>Não elegível</option>
+                        <option value="elegivel" ${leito.spict === 'elegivel' ? 'selected' : ''}>Elegível</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>PREV ALTA <span class="required">*</span></label>
+                    <select id="prevAlta" required>
+                        ${PREVISAO_ALTA.map(p => 
+                            `<option value="${p}" ${leito.prevAlta === p || (!leito.prevAlta && p === 'SP') ? 'selected' : ''}>${p}</option>`
+                        ).join('')}
+                    </select>
+                </div>
             </div>
+            
+            <!-- CONCESSÕES -->
+            <div class="form-section">
+                <div class="section-title">CONCESSÕES PREVISTAS NA ALTA (${CONCESSOES.length})</div>
+                <div class="checkbox-grid">
+                    ${CONCESSOES.map((c, i) => `
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="conc${i}" value="${c}" 
+                                ${leito.concessoes && leito.concessoes.includes(c) ? 'checked' : ''}>
+                            <span>${c}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <!-- LINHAS DE CUIDADO -->
+            <div class="form-section">
+                <div class="section-title">LINHAS DE CUIDADO PREVISTAS NA ALTA (${LINHAS_CUIDADO.length})</div>
+                <div class="checkbox-grid">
+                    ${LINHAS_CUIDADO.map((l, i) => `
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="linha${i}" value="${l}"
+                                ${leito.linhas && leito.linhas.includes(l) ? 'checked' : ''}>
+                            <span>${l}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn btn-primary" onclick="saveData()">
+                ${isVago ? 'ADMITIR PACIENTE' : 'SALVAR ALTERAÇÕES'}
+            </button>
+            ${!isVago ? '<button class="btn btn-danger" onclick="darAlta()">DAR ALTA</button>' : ''}
+            <button class="btn btn-secondary" onclick="cancelar()">CANCELAR</button>
+        </div>
+        
+        <!-- Rodapé -->
+        <div class="footer">
+            Archipelago Dashboard V3.3 FINAL - Sistema Médico QR<br>
+            Total Rede: 79 leitos | 5 hospitais<br>
+            <strong>Criado por:</strong> Dr. Guilherme Santoro | <strong>Desenvolvido por:</strong> Alessandro Rodrigues
         </div>
     `;
     
-    container.style.display = 'block';
+    container.style.display = 'flex';
+    
+    // ⭐ V3.3: Verificar limite Santa Clara e desabilitar Enfermaria se necessário
+    setTimeout(async () => {
+        const hospital = localStorage.getItem('hospital');
+        
+        if (hospital === 'H4') {
+            try {
+                const response = await fetch(API_URL);
+                const result = await response.json();
+                
+                if (result.hospitais && result.hospitais.H4) {
+                    let enfermariasOcupadas = 0;
+                    result.hospitais.H4.leitos.forEach(l => {
+                        const ocupado = l.status === 'Em uso' || l.status === 'Ocupado';
+                        const tipoEnf = l.tipo === 'Enfermaria';
+                        if (ocupado && tipoEnf) enfermariasOcupadas++;
+                    });
+                    
+                    if (enfermariasOcupadas >= 4) {
+                        const opcaoEnf = document.getElementById('opcaoEnfermaria');
+                        const avisoLimite = document.getElementById('avisoLimiteEnfermaria');
+                        
+                        if (opcaoEnf) {
+                            opcaoEnf.disabled = true;
+                            opcaoEnf.textContent = 'Enfermaria (Limite atingido)';
+                            opcaoEnf.style.color = '#9ca3af';
+                        }
+                        
+                        if (avisoLimite) {
+                            avisoLimite.style.display = 'block';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao verificar limite Santa Clara:', error);
+            }
+        }
+    }, 100);
+    
+    // ⭐ V3.3: Mostrar/ocultar TIPO DE QUARTO após renderizar (NÃO PRECISA MAIS - SEMPRE MOSTRA)
+    setTimeout(() => {
+        // Campo TIPO DE QUARTO agora sempre visível
+        console.log('Tipo de Quarto: sempre visível com regras específicas por hospital');
+    }, 100);
 }
 
-// =================== TIMER 2 MINUTOS ===================
+// =================== TIMER 2 MINUTOS COM FECHAMENTO FORÇADO ===================
 function startTimer() {
-    const timerEl = document.getElementById('timer');
-    timerEl.style.display = 'block';
+    timeLeft = 120;
     
     timerInterval = setInterval(() => {
         timeLeft--;
+        
         const minutes = Math.floor(timeLeft / 60);
         const seconds = timeLeft % 60;
-        timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        const timerEl = document.getElementById('timer');
+        
+        if (timerEl) {
+            timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 30) {
+                timerEl.className = 'timer danger';
+            } else if (timeLeft <= 60) {
+                timerEl.className = 'timer warning';
+            }
+        }
         
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            alert('⏱️ Tempo esgotado! Por segurança, a sessão foi encerrada.');
-            window.close();
-            setTimeout(() => {
-                location.href = 'about:blank';
-            }, 100);
+            forceClose('Sessão expirada! (2 minutos)');
         }
     }, 1000);
 }
 
-// =================== SALVAR DADOS ===================
+function forceClose(message) {
+    showSuccess(message);
+}
+
+// =================== VALIDAR BLOQUEIO CRUZ AZUL (LEITOS IRMÃOS) ===================
+async function validarBloqueioCruzAzul(dados) {
+    // Só valida se for Cruz Azul enfermaria (leitos 21-36)
+    if (dados.hospital !== 'H2') return { valido: true };
+    
+    const leitoNum = parseInt(dados.leito);
+    if (leitoNum < 21 || leitoNum > 36) return { valido: true };
+    
+    try {
+        // Buscar leito irmão
+        const leitoIrmao = CRUZ_AZUL_LEITOS_IRMAOS[dados.leito];
+        if (!leitoIrmao) return { valido: true };
+        
+        // Buscar dados atuais
+        const response = await fetch(API_URL);
+        const result = await response.json();
+        
+        if (!result.hospitais || !result.hospitais.H2) {
+            return { valido: true };
+        }
+        
+        // Encontrar dados do leito irmão
+        const dadosIrmao = result.hospitais.H2.leitos.find(l => 
+            String(l.leito || l.numero) === String(leitoIrmao)
+        );
+        
+        // Se irmão está vago, libera
+        if (!dadosIrmao || dadosIrmao.status === 'Vago' || dadosIrmao.status === 'vago') {
+            return { valido: true };
+        }
+        
+        const numFixoIrmao = NUMERACAO_FIXA_CRUZ_AZUL[leitoIrmao];
+        
+        // PRIORIDADE 1: ISOLAMENTO
+        if (dadosIrmao.isolamento && dadosIrmao.isolamento !== 'Não Isolamento') {
+            return {
+                valido: false,
+                mensagem: `❌ BLOQUEADO POR ISOLAMENTO!\n\nO leito irmão (${numFixoIrmao}) está em ${dadosIrmao.isolamento}.\n\nAguarde a alta para admitir neste leito.`
+            };
+        }
+        
+        // PRIORIDADE 2: GÊNERO
+        if (dados.genero && dadosIrmao.sexo && dados.genero !== dadosIrmao.sexo) {
+            return {
+                valido: false,
+                mensagem: `❌ BLOQUEADO POR GÊNERO!\n\nLeito irmão (${numFixoIrmao}) ocupado por paciente ${dadosIrmao.sexo}.\n\nEste leito só pode receber pacientes do sexo ${dadosIrmao.sexo}.`
+            };
+        }
+        
+        console.log(`Cruz Azul: Leito ${dados.leito} liberado (irmão ${leitoIrmao} compatível)`);
+        return { valido: true };
+        
+    } catch (error) {
+        console.error('Erro ao validar Cruz Azul:', error);
+        return { valido: true }; // Em caso de erro, permite continuar
+    }
+}
+
+// =================== VALIDAR LIMITE ENFERMARIAS SANTA CLARA ===================
+async function validarLimiteSantaClara(dados) {
+    // Só valida se for Santa Clara tentando admitir Enfermaria
+    if (dados.hospital !== 'H4' || dados.tipoQuarto !== 'Enfermaria') {
+        return { valido: true };
+    }
+    
+    try {
+        // Buscar dados atuais do Santa Clara
+        const response = await fetch(API_URL);
+        const result = await response.json();
+        
+        if (!result.hospitais || !result.hospitais.H4) {
+            return { valido: true };
+        }
+        
+        // Contar enfermarias ocupadas
+        let enfermariasOcupadas = 0;
+        result.hospitais.H4.leitos.forEach(leito => {
+            const statusOcupado = leito.status === 'Em uso' || leito.status === 'Ocupado';
+            const tipoEnfermaria = leito.tipo === 'Enfermaria';
+            
+            if (statusOcupado && tipoEnfermaria) {
+                enfermariasOcupadas++;
+            }
+        });
+        
+        console.log(`Santa Clara: ${enfermariasOcupadas} enfermarias ocupadas (limite: 4)`);
+        
+        if (enfermariasOcupadas >= SANTA_CLARA_MAX_ENFERMARIAS) {
+            return {
+                valido: false,
+                mensagem: `❌ LIMITE ATINGIDO!\n\nO Santa Clara já possui ${SANTA_CLARA_MAX_ENFERMARIAS} enfermarias ocupadas (máximo permitido).\n\nAguarde uma alta ou admita como Apartamento.`
+            };
+        }
+        
+        return { valido: true };
+        
+    } catch (error) {
+        console.error('Erro ao validar limite:', error);
+        return { valido: true }; // Em caso de erro, permite continuar
+    }
+}
+
+// =================== SALVAR DADOS V3.3 ===================
 async function saveData() {
     try {
         const dados = coletarDados();
         
+        // ⭐ V3.3: Validar Cruz Azul leitos irmãos
+        const validacaoCA = await validarBloqueioCruzAzul(dados);
+        if (!validacaoCA.valido) {
+            alert(validacaoCA.mensagem);
+            return;
+        }
+        
+        // ⭐ V3.3: Validar limite de enfermarias Santa Clara
+        const validacaoSC = await validarLimiteSantaClara(dados);
+        if (!validacaoSC.valido) {
+            alert(validacaoSC.mensagem);
+            return;
+        }
+        
         if (!validarDados(dados)) return;
         
         const leito = hospitalData[currentHospital].leitos.find(l => 
-            String(l.leito) === String(currentLeito)
+            String(l.leito || l.numero) === String(currentLeito)
         );
-        const isVago = !leito.status || leito.status === 'Vago';
+        const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
         
         const payload = {
+            action: isVago ? 'admitir' : 'atualizar',
             hospital: currentHospital,
             leito: currentLeito,
             ...dados
@@ -887,29 +1285,25 @@ async function saveData() {
             delete payload.iniciais;
         }
         
-        console.log('📤 Enviando dados:', payload);
+        console.log('📤 Enviando V3.3 (COM DIRETIVAS):', payload);
         
-        const action = isVago ? 'admitir' : 'atualizar';
-        const response = await fetch(`${window.API_URL}?action=${action}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        
-        const result = await response.json();
-        
-        if (!result.ok) {
-            throw new Error(result.error || 'Erro ao salvar');
+        const params = new URLSearchParams();
+        for (const [key, value] of Object.entries(payload)) {
+            if (Array.isArray(value)) {
+                params.append(key, value.join(','));
+            } else if (value !== null && value !== undefined) {
+                params.append(key, String(value));
+            }
         }
         
-        clearInterval(timerInterval);
-        const message = isVago ? 'Paciente admitido com sucesso!' : 'Dados atualizados com sucesso!';
-        showSuccess(message);
+        const response = await fetch(`${API_URL}?${params.toString()}`);
+        const result = await response.json();
         
-        setTimeout(() => {
-            window.close();
-            location.href = 'about:blank';
-        }, 3000);
+        if (!result.ok) throw new Error(result.error || 'Erro ao salvar');
+        
+        clearInterval(timerInterval);
+        const message = isVago ? 'Paciente admitido com sucesso (V3.3)!' : 'Dados atualizados com sucesso (V3.3)!';
+        showSuccess(message);
         
     } catch (error) {
         console.error('❌ Erro:', error);
@@ -919,41 +1313,30 @@ async function saveData() {
 
 // =================== DAR ALTA ===================
 async function darAlta() {
-    if (!confirm('⚠️ CONFIRMAR ALTA DO PACIENTE?\n\nEsta ação não pode ser desfeita.')) {
-        return;
-    }
+    if (!confirm('Confirma a ALTA deste paciente?')) return;
     
     try {
-        const response = await fetch(`${window.API_URL}?action=liberar`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                hospital: currentHospital,
-                leito: currentLeito
-            })
+        const params = new URLSearchParams({
+            action: 'daralta',
+            hospital: currentHospital,
+            leito: currentLeito
         });
         
+        const response = await fetch(`${API_URL}?${params.toString()}`);
         const result = await response.json();
         
-        if (!result.ok) {
-            throw new Error(result.error || 'Erro ao dar alta');
-        }
+        if (!result.ok) throw new Error(result.error || 'Erro ao dar alta');
         
         clearInterval(timerInterval);
-        showSuccess('Alta realizada com sucesso! Leito liberado.');
-        
-        setTimeout(() => {
-            window.close();
-            location.href = 'about:blank';
-        }, 3000);
+        showSuccess('Alta processada com sucesso!');
         
     } catch (error) {
         console.error('❌ Erro:', error);
-        alert('Erro ao dar alta: ' + error.message);
+        alert('Erro ao processar alta: ' + error.message);
     }
 }
 
-// =================== COLETAR DADOS DO FORMULÁRIO ===================
+// =================== COLETAR DADOS V3.3 ===================
 function coletarDados() {
     const dados = {};
     
@@ -972,34 +1355,43 @@ function coletarDados() {
     dados.isolamento = document.getElementById('isolamento').value;
     dados.identificacaoLeito = document.getElementById('identificacaoLeito').value.trim().toUpperCase();
     dados.regiao = document.getElementById('regiao').value;
-    dados.genero = document.getElementById('genero').value;
-    dados.diretivas = document.getElementById('diretivas').value;
+    dados.genero = document.getElementById('sexo').value; // ⭐ CORREÇÃO: enviar como genero
+    dados.diretivas = document.getElementById('diretivas').value; // ⭐ NOVO V3.3
     
+    // ⭐ TIPO DE QUARTO (todos os hospitais)
     const tipoQuartoField = document.getElementById('tipoQuarto');
     const tipoQuartoValue = document.getElementById('tipoQuartoValue');
     
     if (tipoQuartoValue) {
-        dados.categoriaEscolhida = tipoQuartoValue.value;
+        // Cruz Azul com valor fixo (hidden input)
+        dados.tipoQuarto = tipoQuartoValue.value;
+        dados.categoria = tipoQuartoValue.value; // Para compatibilidade
+        dados.categoriaEscolhida = tipoQuartoValue.value; // Para planilha BU
     } else if (tipoQuartoField && tipoQuartoField.value) {
-        dados.categoriaEscolhida = tipoQuartoField.value;
+        // Outros hospitais com select editável
+        dados.tipoQuarto = tipoQuartoField.value;
+        dados.categoria = tipoQuartoField.value; // Para compatibilidade
+        dados.categoriaEscolhida = tipoQuartoField.value; // Para planilha BU
     }
     
     dados.concessoes = [];
-    window.CONCESSOES.forEach((_, i) => {
+    CONCESSOES.forEach((_, i) => {
         const cb = document.getElementById(`conc${i}`);
         if (cb && cb.checked) dados.concessoes.push(cb.value);
     });
     
     dados.linhas = [];
-    window.LINHAS_CUIDADO.forEach((_, i) => {
+    LINHAS_CUIDADO.forEach((_, i) => {
         const cb = document.getElementById(`linha${i}`);
         if (cb && cb.checked) dados.linhas.push(cb.value);
     });
     
+    console.log('📋 Dados V3.3 coletados (DIRETIVAS:', dados.diretivas, ')');
+    
     return dados;
 }
 
-// =================== VALIDAÇÕES ===================
+// =================== VALIDAR DADOS V3.3 ===================
 function validarDados(dados) {
     const erros = [];
     
@@ -1011,7 +1403,10 @@ function validarDados(dados) {
         erros.push('• Matrícula é obrigatória');
     }
     
-    if (!dados.idade) erros.push('• Idade é obrigatória');
+    if (!dados.idade) {
+        erros.push('• Idade é obrigatória');
+    }
+    
     if (!dados.pps) erros.push('• PPS é obrigatório');
     if (!dados.spict) erros.push('• SPICT-BR é obrigatório');
     if (!dados.prevAlta) erros.push('• Previsão de Alta é obrigatória');
@@ -1019,45 +1414,78 @@ function validarDados(dados) {
     if (!dados.identificacaoLeito) erros.push('• Identificação do Leito é obrigatória');
     if (!dados.regiao) erros.push('• Região é obrigatória');
     if (!dados.genero) erros.push('• Gênero é obrigatório');
-    if (!dados.diretivas) erros.push('• Diretivas é obrigatório');
+    if (!dados.diretivas) erros.push('• Diretivas são obrigatórias'); // ⭐ NOVO V3.3
     
-    const ehHibrido = window.HOSPITAIS_HIBRIDOS.includes(currentHospital) || currentHospital === 'H4';
-    if (ehHibrido && !dados.categoriaEscolhida) {
-        erros.push('• Tipo de Quarto é obrigatório');
+    if (dados.identificacaoLeito && !/^[A-Za-z0-9]{1,6}$/.test(dados.identificacaoLeito)) {
+        erros.push('• Identificação do Leito: máx. 6 caracteres alfanuméricos');
     }
     
     if (erros.length > 0) {
-        alert('⚠️ CAMPOS OBRIGATÓRIOS:\n\n' + erros.join('\n'));
+        alert('CAMPOS OBRIGATÓRIOS:\n\n' + erros.join('\n'));
         return false;
     }
     
     return true;
 }
 
-// =================== FUNÇÕES AUXILIARES ===================
+// =================== CANCELAR ===================
+function cancelar() {
+    if (confirm('Cancelar a operação?')) {
+        clearInterval(timerInterval);
+        showSuccess('Operação cancelada.');
+    }
+}
+
+// =================== ABRIR QR SCANNER ===================
+function openQRScanner() {
+    alert('Abrindo câmera para leitura de QR Code...\n\n(Requer biblioteca de scanner QR integrada)');
+}
+
+// =================== UTILS ===================
 function hideLoading() {
-    document.getElementById('loading').classList.add('hidden');
+    const loading = document.getElementById('loading');
+    if (loading) loading.classList.add('hidden');
 }
 
 function showError(message) {
     hideLoading();
+    
+    document.getElementById('mainContainer').style.display = 'none';
+    document.getElementById('successContainer').style.display = 'none';
+    
     document.getElementById('errorMessage').textContent = message;
     document.getElementById('errorContainer').style.display = 'flex';
+    
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
 }
 
 function showSuccess(message) {
     hideLoading();
+    
     document.getElementById('mainContainer').style.display = 'none';
+    document.getElementById('errorContainer').style.display = 'none';
+    
     document.getElementById('successMessage').textContent = message;
     document.getElementById('successContainer').style.display = 'flex';
-}
-
-function cancelar() {
-    if (confirm('Cancelar edição? Todas as alterações serão perdidas.')) {
-        window.close();
-        location.href = 'about:blank';
+    
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
     }
 }
+
+// =================== LOG INICIALIZAÇÃO V3.3 ===================
+console.log('✅ Archipelago QR V3.3 MOBILE FINAL');
+console.log('📱 Otimizado para mobile');
+console.log('⏱️ Timer: 2 minutos com fechamento forçado');
+console.log('🏥 Total Rede: 79 leitos | 5 hospitais');
+console.log('📋 Listas V3.3: 11 concessões + 45 linhas + 9 regiões + 2 gêneros + 3 diretivas');
+console.log('⭐ NOVO V3.3: Campo DIRETIVAS (BV/73) implementado!');
+console.log('🎯 Campos obrigatórios: ID Leito + Isolamento + Região + Gênero + Diretivas');
+console.log('📊 74 colunas (A-BV) | BV = DIRETIVAS ANTECIPADAS');
     </script>
 </body>
 </html>
