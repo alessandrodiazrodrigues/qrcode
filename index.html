@@ -228,6 +228,30 @@
             background: #1f2937;
             color: #6b7280;
             border-color: #374151;
+        }
+        
+        /* =================== GRID 3 COLUNAS (IGUAL CARDS.JS) =================== */
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row-3 .form-group {
+            margin-bottom: 0;
+        }
+        
+        /* Grid 2 colunas para alguns campos */
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row-2 .form-group {
+            margin-bottom: 0;
             cursor: not-allowed;
         }
         
@@ -854,8 +878,9 @@ function renderForm(leito) {
         
         <!-- Rodapé -->
         <div class="footer">
-            Archipelago Dashboard V3.3 MOBILE - Sistema Médico QR<br>
-            Total Rede: 79 leitos | 5 hospitais | 74 colunas (A-BV) | ⭐ DIRETIVAS (BV/73)
+            Archipelago Dashboard V3.3 FINAL - Sistema Médico QR<br>
+            Total Rede: 79 leitos | 5 hospitais<br>
+            <strong>Criado por:</strong> Dr. Guilherme Santoro | <strong>Desenvolvido por:</strong> Alessandro Rodrigues
         </div>
     `;
     
