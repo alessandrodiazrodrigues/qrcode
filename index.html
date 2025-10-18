@@ -723,14 +723,26 @@ function renderForm(leito) {
             <div class="form-row-3">
                 <div class="form-group">
                     <label>ID LEITO <span class="required">*</span></label>
-                    <input type="text" id="identificacaoLeito" value="${leito.identificacaoLeito || ''}" 
-                           placeholder="Ex: NEO1" maxlength="6" required>
+                    ${(() => {
+                        const hospital = localStorage.getItem('hospital');
+                        const leitoNum = parseInt(localStorage.getItem('leito'));
+                        const isCruzAzulEnfermaria = (hospital === 'H2' && leitoNum >= 21 && leitoNum <= 36);
+                        
+                        if (isCruzAzulEnfermaria) {
+                            const numFixo = NUMERACAO_FIXA_CRUZ_AZUL[String(leitoNum)];
+                            return `<input type="text" id="identificacaoLeito" value="${numFixo}" readonly 
+                                     style="background: #1f2937; color: #9ca3af; cursor: not-allowed;" required>`;
+                        } else {
+                            return `<input type="text" id="identificacaoLeito" value="${leito.identificacaoLeito || ''}" 
+                                     placeholder="Ex: NEO1" maxlength="6" required>`;
+                        }
+                    })()}
                 </div>
                 <div class="form-group">
                     <label>DIRETIVAS <span class="required">*</span></label>
                     <select id="diretivas" required>
                         ${DIRETIVAS_OPTIONS.map((opcao, index) => 
-                            `<option value="\${opcao}" \${(leito.diretivas === opcao || (index === 0 && !leito.diretivas)) ? 'selected' : ''}>\${opcao}</option>`
+                            `<option value="${opcao}" ${(leito.diretivas === opcao || (index === 0 && !leito.diretivas)) ? 'selected' : ''}>${opcao}</option>`
                         ).join('')}
                     </select>
                 </div>
@@ -889,6 +901,29 @@ function renderForm(leito) {
     `;
     
     container.style.display = 'flex';
+    
+    // ⭐ V3.3: Mostrar/ocultar TIPO DE QUARTO após renderizar
+    setTimeout(() => {
+        const hospital = localStorage.getItem('hospital');
+        const tipoQuartoGroup = document.getElementById('tipoQuartoGroup');
+        
+        if (tipoQuartoGroup) {
+            const hospitaisComTipoQuarto = ['H1', 'H3', 'H4', 'H5'];
+            if (hospitaisComTipoQuarto.includes(hospital)) {
+                tipoQuartoGroup.style.display = 'block';
+                const tipoQuartoSelect = document.getElementById('tipoQuarto');
+                if (tipoQuartoSelect) {
+                    tipoQuartoSelect.required = true;
+                }
+            } else {
+                tipoQuartoGroup.style.display = 'none';
+                const tipoQuartoSelect = document.getElementById('tipoQuarto');
+                if (tipoQuartoSelect) {
+                    tipoQuartoSelect.required = false;
+                }
+            }
+        }
+    }, 100);
 }
 
 // =================== TIMER 2 MINUTOS COM FECHAMENTO FORÇADO ===================
@@ -921,6 +956,64 @@ function startTimer() {
 
 function forceClose(message) {
     showSuccess(message);
+}
+
+// =================== VALIDAR BLOQUEIO CRUZ AZUL (LEITOS IRMÃOS) ===================
+async function validarBloqueioCruzAzul(dados) {
+    // Só valida se for Cruz Azul enfermaria (leitos 21-36)
+    if (dados.hospital !== 'H2') return { valido: true };
+    
+    const leitoNum = parseInt(dados.leito);
+    if (leitoNum < 21 || leitoNum > 36) return { valido: true };
+    
+    try {
+        // Buscar leito irmão
+        const leitoIrmao = CRUZ_AZUL_LEITOS_IRMAOS[dados.leito];
+        if (!leitoIrmao) return { valido: true };
+        
+        // Buscar dados atuais
+        const response = await fetch(API_URL);
+        const result = await response.json();
+        
+        if (!result.hospitais || !result.hospitais.H2) {
+            return { valido: true };
+        }
+        
+        // Encontrar dados do leito irmão
+        const dadosIrmao = result.hospitais.H2.leitos.find(l => 
+            String(l.leito || l.numero) === String(leitoIrmao)
+        );
+        
+        // Se irmão está vago, libera
+        if (!dadosIrmao || dadosIrmao.status === 'Vago' || dadosIrmao.status === 'vago') {
+            return { valido: true };
+        }
+        
+        const numFixoIrmao = NUMERACAO_FIXA_CRUZ_AZUL[leitoIrmao];
+        
+        // PRIORIDADE 1: ISOLAMENTO
+        if (dadosIrmao.isolamento && dadosIrmao.isolamento !== 'Não Isolamento') {
+            return {
+                valido: false,
+                mensagem: `❌ BLOQUEADO POR ISOLAMENTO!\n\nO leito irmão (${numFixoIrmao}) está em ${dadosIrmao.isolamento}.\n\nAguarde a alta para admitir neste leito.`
+            };
+        }
+        
+        // PRIORIDADE 2: GÊNERO
+        if (dados.sexo && dadosIrmao.sexo && dados.sexo !== dadosIrmao.sexo) {
+            return {
+                valido: false,
+                mensagem: `❌ BLOQUEADO POR GÊNERO!\n\nLeito irmão (${numFixoIrmao}) ocupado por paciente ${dadosIrmao.sexo}.\n\nEste leito só pode receber pacientes do sexo ${dadosIrmao.sexo}.`
+            };
+        }
+        
+        console.log(`Cruz Azul: Leito ${dados.leito} liberado (irmão ${leitoIrmao} compatível)`);
+        return { valido: true };
+        
+    } catch (error) {
+        console.error('Erro ao validar Cruz Azul:', error);
+        return { valido: true }; // Em caso de erro, permite continuar
+    }
 }
 
 // =================== VALIDAR LIMITE ENFERMARIAS SANTA CLARA ===================
@@ -972,10 +1065,17 @@ async function saveData() {
     try {
         const dados = coletarDados();
         
+        // ⭐ V3.3: Validar Cruz Azul leitos irmãos
+        const validacaoCA = await validarBloqueioCruzAzul(dados);
+        if (!validacaoCA.valido) {
+            alert(validacaoCA.mensagem);
+            return;
+        }
+        
         // ⭐ V3.3: Validar limite de enfermarias Santa Clara
-        const validacao = await validarLimiteSantaClara(dados);
-        if (!validacao.valido) {
-            alert(validacao.mensagem);
+        const validacaoSC = await validarLimiteSantaClara(dados);
+        if (!validacaoSC.valido) {
+            alert(validacaoSC.mensagem);
             return;
         }
         
