@@ -922,26 +922,6 @@ function renderForm(leito) {
                 </div>
             </div>
             
-            
-            <!-- BOTÕES DE AÇÃO -->
-            <div style="margin-top: 20px;">
-                ${isVago ? `
-                    <button onclick="saveData()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
-                        Admitir Paciente
-                    </button>
-                ` : `
-                    <button onclick="saveData()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
-                        Salvar Alterações
-                    </button>
-                    <button onclick="darAlta()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
-                        Dar Alta
-                    </button>
-                `}
-                <button onclick="location.reload()" style="width: 100%; padding: 16px; background: #334155; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-transform: uppercase;">
-                    Cancelar
-                </button>
-            </div>
-            
             <!-- CONCESSÕES -->
             <div class="form-section">
                 <div class="section-title">CONCESSÕES PREVISTAS NA ALTA (${CONCESSOES.length})</div>
