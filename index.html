@@ -545,6 +545,37 @@ const SEXO_OPTIONS = [
     'Feminino'
 ];
 
+// ⭐ NOVO V3.3: HOSPITAIS HÍBRIDOS (H1, H3, H5)
+const HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5'];
+
+// ⭐ NOVO V3.3: SANTA CLARA - TODOS OS LEITOS SÃO HÍBRIDOS
+// Mas com limite máximo de 4 enfermarias ocupadas
+const SANTA_CLARA_MAX_ENFERMARIAS = 4;
+
+// ⭐ NOVO V3.3: CRUZ AZUL - MAPEAMENTO LEITOS IRMÃOS
+const CRUZ_AZUL_LEITOS_IRMAOS = {
+    '21': '22', '22': '21',  // 711.1 ↔ 711.2
+    '23': '24', '24': '23',  // 713.1 ↔ 713.2
+    '25': '26', '26': '25',  // 715.1 ↔ 715.2
+    '27': '28', '28': '27',  // 717.1 ↔ 717.2
+    '29': '30', '30': '29',  // 719.1 ↔ 719.2
+    '31': '32', '32': '31',  // 721.1 ↔ 721.2
+    '33': '34', '34': '33',  // 723.1 ↔ 723.2
+    '35': '36', '36': '35'   // 725.1 ↔ 725.2
+};
+
+// ⭐ NOVO V3.3: CRUZ AZUL - NUMERAÇÃO FIXA ENFERMARIAS
+const NUMERACAO_FIXA_CRUZ_AZUL = {
+    '21': '711.1', '22': '711.2',
+    '23': '713.1', '24': '713.2',
+    '25': '715.1', '26': '715.2',
+    '27': '717.1', '28': '717.2',
+    '29': '719.1', '30': '719.2',
+    '31': '721.1', '32': '721.2',
+    '33': '723.1', '34': '723.2',
+    '35': '725.1', '36': '725.2'
+};
+
 // ⭐ NOVO V3.3: DIRETIVAS ANTECIPADAS (BV/73)
 const DIRETIVAS_OPTIONS = [
     'Não se aplica',
@@ -811,15 +842,22 @@ function renderForm(leito) {
                             </small>`;
                         }
                         
-                        // Outros hospitais: editável (será ajustado depois para Santa Clara)
-                        return `<select id="tipoQuarto" required>
-                            <option value="">Selecionar...</option>
-                            <option value="Apartamento" ${leito.tipo === 'Apartamento' ? 'selected' : ''}>Apartamento</option>
-                            <option value="Enfermaria" ${leito.tipo === 'Enfermaria' ? 'selected' : ''} id="opcaoEnfermaria">Enfermaria</option>
-                        </select>
-                        <div id="avisoLimiteEnfermaria" style="display: none; color: #f59e0b; font-size: 10px; margin-top: 4px; font-weight: 600;">
-                            ⚠️ Limite de enfermarias atingido (4/4)
-                        </div>`;
+                        // Hospitais Híbridos (H1, H3, H5) e Santa Clara (H4): editável
+                        if (HOSPITAIS_HIBRIDOS.includes(hospital) || hospital === 'H4') {
+                            return `<select id="tipoQuarto" required>
+                                <option value="">Selecionar...</option>
+                                <option value="Apartamento" ${leito.categoria === 'Apartamento' || leito.categoriaEscolhida === 'Apartamento' ? 'selected' : ''}>Apartamento</option>
+                                <option value="Enfermaria" ${leito.categoria === 'Enfermaria' || leito.categoriaEscolhida === 'Enfermaria' ? 'selected' : ''} id="opcaoEnfermaria">Enfermaria</option>
+                            </select>
+                            <div id="avisoLimiteEnfermaria" style="display: none; color: #f59e0b; font-size: 10px; margin-top: 4px; font-weight: 600;">
+                                ⚠️ Limite de enfermarias atingido (4/4)
+                            </div>`;
+                        }
+                        
+                        // Outros casos: não deveria existir mas por segurança
+                        return `<select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af;">
+                            <option value="">Não aplicável</option>
+                        </select>`;
                     })()}
                 </div>
             </div>
@@ -974,6 +1012,7 @@ function renderForm(leito) {
     setTimeout(async () => {
         const hospital = localStorage.getItem('hospital');
         
+        // SANTA CLARA - Verificar limite de enfermarias
         if (hospital === 'H4') {
             try {
                 const response = await fetch(API_URL);
@@ -983,11 +1022,11 @@ function renderForm(leito) {
                     let enfermariasOcupadas = 0;
                     result.hospitais.H4.leitos.forEach(l => {
                         const ocupado = l.status === 'Em uso' || l.status === 'Ocupado';
-                        const tipoEnf = l.tipo === 'Enfermaria';
+                        const tipoEnf = l.categoria === 'Enfermaria' || l.categoriaEscolhida === 'Enfermaria' || l.tipo === 'Enfermaria';
                         if (ocupado && tipoEnf) enfermariasOcupadas++;
                     });
                     
-                    if (enfermariasOcupadas >= 4) {
+                    if (enfermariasOcupadas >= SANTA_CLARA_MAX_ENFERMARIAS) {
                         const opcaoEnf = document.getElementById('opcaoEnfermaria');
                         const avisoLimite = document.getElementById('avisoLimiteEnfermaria');
                         
@@ -1004,6 +1043,41 @@ function renderForm(leito) {
                 }
             } catch (error) {
                 console.error('Erro ao verificar limite Santa Clara:', error);
+            }
+        }
+        
+        // CRUZ AZUL - Verificar bloqueio de gênero para leitos irmãos
+        if (hospital === 'H2' && isVago) {
+            const leitoNum = parseInt(localStorage.getItem('leito'));
+            if (leitoNum >= 21 && leitoNum <= 36) {
+                const leitoIrmao = CRUZ_AZUL_LEITOS_IRMAOS[String(leitoNum)];
+                if (leitoIrmao && result.hospitais && result.hospitais.H2) {
+                    const dadosIrmao = result.hospitais.H2.leitos.find(l => 
+                        String(l.leito || l.numero) === String(leitoIrmao)
+                    );
+                    
+                    if (dadosIrmao && (dadosIrmao.status === 'Em uso' || dadosIrmao.status === 'Ocupado')) {
+                        // Se não tem isolamento, pré-definir gênero
+                        if (!dadosIrmao.isolamento || dadosIrmao.isolamento === 'Não Isolamento') {
+                            if (dadosIrmao.sexo || dadosIrmao.genero) {
+                                const generoIrmao = dadosIrmao.sexo || dadosIrmao.genero;
+                                const sexoField = document.getElementById('sexo');
+                                if (sexoField) {
+                                    sexoField.value = generoIrmao;
+                                    sexoField.disabled = true;
+                                    sexoField.style.background = '#1f2937';
+                                    sexoField.style.color = '#9ca3af';
+                                    
+                                    // Adicionar aviso
+                                    const avisoGenero = document.createElement('small');
+                                    avisoGenero.style.cssText = 'color: rgba(255,255,255,0.5); font-size: 10px; margin-top: 4px; display: block;';
+                                    avisoGenero.textContent = `🔒 Gênero definido pelo leito irmão ${NUMERACAO_FIXA_CRUZ_AZUL[leitoIrmao]}`;
+                                    sexoField.parentElement.appendChild(avisoGenero);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }, 100);
@@ -1162,10 +1236,29 @@ async function saveData() {
         }
         
         // ⭐ V3.3: Validar limite de enfermarias Santa Clara
-        const validacaoSC = await validarLimiteSantaClara(dados);
-        if (!validacaoSC.valido) {
-            alert(validacaoSC.mensagem);
-            return;
+        const leito = hospitalData[currentHospital].leitos.find(l => 
+            String(l.leito || l.numero) === String(currentLeito)
+        );
+        const isAtualizacao = leito && (leito.status === 'Em uso' || leito.status === 'Ocupado');
+        
+        // Se é atualização e está mudando PARA enfermaria, validar
+        if (isAtualizacao && currentHospital === 'H4') {
+            const tipoAtual = leito.categoria || leito.categoriaEscolhida || leito.tipo;
+            if (tipoAtual !== 'Enfermaria' && dados.tipoQuarto === 'Enfermaria') {
+                // Mudando de Apartamento para Enfermaria - precisa validar
+                const validacaoSC = await validarLimiteSantaClara(dados);
+                if (!validacaoSC.valido) {
+                    alert(validacaoSC.mensagem);
+                    return;
+                }
+            }
+        } else {
+            // Admissão nova - sempre valida
+            const validacaoSC = await validarLimiteSantaClara(dados);
+            if (!validacaoSC.valido) {
+                alert(validacaoSC.mensagem);
+                return;
+            }
         }
         
         if (!validarDados(dados)) return;
@@ -1242,6 +1335,10 @@ async function darAlta() {
 function coletarDados() {
     const dados = {};
     
+    // Adicionar hospital e leito para validações
+    dados.hospital = currentHospital;
+    dados.leito = currentLeito;
+    
     const iniciais = document.getElementById('iniciais');
     if (iniciais) dados.iniciais = iniciais.value.trim();
     
@@ -1267,9 +1364,13 @@ function coletarDados() {
     if (tipoQuartoValue) {
         // Cruz Azul com valor fixo (hidden input)
         dados.tipoQuarto = tipoQuartoValue.value;
+        dados.categoria = tipoQuartoValue.value; // Para compatibilidade
+        dados.categoriaEscolhida = tipoQuartoValue.value; // Para planilha BU
     } else if (tipoQuartoField && tipoQuartoField.value) {
         // Outros hospitais com select editável
         dados.tipoQuarto = tipoQuartoField.value;
+        dados.categoria = tipoQuartoField.value; // Para compatibilidade
+        dados.categoriaEscolhida = tipoQuartoField.value; // Para planilha BU
     }
     
     dados.concessoes = [];
