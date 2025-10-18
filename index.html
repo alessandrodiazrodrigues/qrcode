@@ -549,7 +549,6 @@ const SEXO_OPTIONS = [
 const HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5'];
 
 // ⭐ NOVO V3.3: SANTA CLARA - TODOS OS LEITOS SÃO HÍBRIDOS
-// Mas com limite máximo de 4 enfermarias ocupadas
 const SANTA_CLARA_MAX_ENFERMARIAS = 4;
 
 // ⭐ NOVO V3.3: CRUZ AZUL - MAPEAMENTO LEITOS IRMÃOS
@@ -724,12 +723,18 @@ async function loadHospitalData(hospitalId) {
 
 // =================== RENDERIZAR FORMULÁRIO V3.3 ===================
 function renderForm(leito) {
+    // ⭐ DEBUG: Ver estrutura do leito
+    console.log('📋 Dados do leito recebidos:', leito);
+    
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
     const hospitalNome = HOSPITAIS[currentHospital].nome;
     const idSequencial = String(currentLeito).padStart(2, '0');
-    const leitoPersonalizado = (leito.identificacaoLeito && leito.identificacaoLeito.trim()) 
-        ? leito.identificacaoLeito.trim().toUpperCase()
+    
+    // ⭐ Tentar múltiplos nomes possíveis para identificação
+    const identificacao = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
+    const leitoPersonalizado = (identificacao && identificacao.trim()) 
+        ? identificacao.trim().toUpperCase()
         : `LEITO ${currentLeito}`;
     
     const idadeOptions = IDADE_OPTIONS.map(idade => 
@@ -801,7 +806,8 @@ function renderForm(leito) {
                             return `<input type="text" id="identificacaoLeito" value="${numFixo}" readonly 
                                      style="background: #1f2937; color: #9ca3af; cursor: not-allowed;" required>`;
                         } else {
-                            return `<input type="text" id="identificacaoLeito" value="${leito.identificacaoLeito || ''}" 
+                            const identificacaoValue = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
+                            return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}" 
                                      placeholder="Ex: NEO1" maxlength="6" required>`;
                         }
                     })()}
@@ -842,15 +848,23 @@ function renderForm(leito) {
                             </small>`;
                         }
                         
-                        // Outros hospitais: editável (será ajustado depois para Santa Clara)
-                        return `<select id="tipoQuarto" required>
-                            <option value="">Selecionar...</option>
-                            <option value="Apartamento" ${leito.tipo === 'Apartamento' ? 'selected' : ''}>Apartamento</option>
-                            <option value="Enfermaria" ${leito.tipo === 'Enfermaria' ? 'selected' : ''} id="opcaoEnfermaria">Enfermaria</option>
-                        </select>
-                        <div id="avisoLimiteEnfermaria" style="display: none; color: #f59e0b; font-size: 10px; margin-top: 4px; font-weight: 600;">
-                            ⚠️ Limite de enfermarias atingido (4/4)
-                        </div>`;
+                        // Hospitais Híbridos (H1, H3, H5) e Santa Clara (H4): editável
+                        if (HOSPITAIS_HIBRIDOS.includes(hospital) || hospital === 'H4') {
+                            const tipoAtual = leito.categoria || leito.categoriaEscolhida || leito.categoria_escolhida || leito.tipo || '';
+                            return `<select id="tipoQuarto" required>
+                                <option value="">Selecionar...</option>
+                                <option value="Apartamento" ${tipoAtual === 'Apartamento' ? 'selected' : ''}>Apartamento</option>
+                                <option value="Enfermaria" ${tipoAtual === 'Enfermaria' ? 'selected' : ''} id="opcaoEnfermaria">Enfermaria</option>
+                            </select>
+                            <div id="avisoLimiteEnfermaria" style="display: none; color: #f59e0b; font-size: 10px; margin-top: 4px; font-weight: 600;">
+                                ⚠️ Limite de enfermarias atingido (4/4)
+                            </div>`;
+                        }
+                        
+                        // Outros casos: não deveria existir
+                        return `<select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af;">
+                            <option value="">Não aplicável</option>
+                        </select>`;
                     })()}
                 </div>
             </div>
@@ -878,9 +892,10 @@ function renderForm(leito) {
                     <label>GÊNERO <span class="required">*</span></label>
                     <select id="sexo" required>
                         <option value="">Selecionar...</option>
-                        ${SEXO_OPTIONS.map(sexo => 
-                            `<option value="${sexo}" ${leito.sexo === sexo ? 'selected' : ''}>${sexo}</option>`
-                        ).join('')}
+                        ${SEXO_OPTIONS.map(sexo => {
+                            const generoAtual = leito.genero || leito.sexo || '';
+                            return `<option value="${sexo}" ${generoAtual === sexo ? 'selected' : ''}>${sexo}</option>`;
+                        }).join('')}
                     </select>
                 </div>
             </div>
