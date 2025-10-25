@@ -189,11 +189,10 @@
         }
         
         .form-group label {
-            font-size: 9px;
-            font-weight: 700;
+            font-size: 11px;
+            font-weight: 600;
             color: #94a3b8;
             margin-bottom: 4px;
-            text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
@@ -230,18 +229,6 @@
             border-color: #374151;
         }
         
-        /* =================== GRID 3 COLUNAS (IGUAL CARDS.JS) =================== */
-        .form-row-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .form-row-3 .form-group {
-            margin-bottom: 0;
-        }
-        
         /* Grid 2 colunas para alguns campos */
         .form-row-2 {
             display: grid;
@@ -252,7 +239,6 @@
         
         .form-row-2 .form-group {
             margin-bottom: 0;
-            cursor: not-allowed;
         }
         
         .form-group select {
@@ -502,9 +488,8 @@
     </div>
     
     <script>
-// =================== ARCHIPELAGO QR V3.3 MOBILE FINAL ===================
+// =================== ARCHIPELAGO QR V3.3 MOBILE FINAL - CORRIGIDO ===================
 // =================== CONFIGURAÇÃO ===================
-// ✅ URL DA API V3.3 ATUALIZADA - Com suporte aos 74 campos!
 const API_URL = 'https://script.google.com/macros/s/AKfycbyrdmoqC3J08_DM-VRKtHLC0htEJa4PnHeKQVTBsdSt1X1DFhc51axv-6TGyeKjn0Id/exec';
 
 // =================== DADOS GLOBAIS ===================
@@ -514,7 +499,7 @@ let currentLeito = null;
 let timerInterval = null;
 let timeLeft = 120;
 
-// =================== CONSTANTES V3.3 ===================
+// =================== CONSTANTES V3.3 CORRIGIDAS ===================
 const HOSPITAIS = {
     H1: { nome: 'Neomater', leitos: 10 },
     H2: { nome: 'Cruz Azul', leitos: 36 },
@@ -546,25 +531,20 @@ const SEXO_OPTIONS = [
     'Feminino'
 ];
 
-// ⭐ NOVO V3.3: HOSPITAIS HÍBRIDOS (H1, H3, H5)
 const HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5'];
-
-// ⭐ NOVO V3.3: SANTA CLARA - TODOS OS LEITOS SÃO HÍBRIDOS
 const SANTA_CLARA_MAX_ENFERMARIAS = 4;
 
-// ⭐ NOVO V3.3: CRUZ AZUL - MAPEAMENTO LEITOS IRMÃOS
 const CRUZ_AZUL_LEITOS_IRMAOS = {
-    '21': '22', '22': '21',  // 711.1 ↔ 711.2
-    '23': '24', '24': '23',  // 713.1 ↔ 713.2
-    '25': '26', '26': '25',  // 715.1 ↔ 715.2
-    '27': '28', '28': '27',  // 717.1 ↔ 717.2
-    '29': '30', '30': '29',  // 719.1 ↔ 719.2
-    '31': '32', '32': '31',  // 721.1 ↔ 721.2
-    '33': '34', '34': '33',  // 723.1 ↔ 723.2
-    '35': '36', '36': '35'   // 725.1 ↔ 725.2
+    '21': '22', '22': '21',
+    '23': '24', '24': '23',
+    '25': '26', '26': '25',
+    '27': '28', '28': '27',
+    '29': '30', '30': '29',
+    '31': '32', '32': '31',
+    '33': '34', '34': '33',
+    '35': '36', '36': '35'
 };
 
-// ⭐ NOVO V3.3: CRUZ AZUL - NUMERAÇÃO FIXA ENFERMARIAS
 const NUMERACAO_FIXA_CRUZ_AZUL = {
     '21': '711.1', '22': '711.2',
     '23': '713.1', '24': '713.2',
@@ -576,14 +556,16 @@ const NUMERACAO_FIXA_CRUZ_AZUL = {
     '35': '725.1', '36': '725.2'
 };
 
-// ⭐ NOVO V3.3: DIRETIVAS ANTECIPADAS (BV/73)
+// ✅ CORREÇÃO 1: DIRETIVAS - "Não se aplica" primeiro (padrão)
 const DIRETIVAS_OPTIONS = [
     'Não se aplica',
     'Sim',
     'Não'
 ];
 
+// ✅ CORREÇÃO 2: CONCESSÕES - "Não se aplica" como primeira opção
 const CONCESSOES = [
+    "Não se aplica",
     "Transição Domiciliar",
     "Aplicação domiciliar de medicamentos",
     "Aspiração",
@@ -645,10 +627,11 @@ const LINHAS_CUIDADO = [
     "Urologia"
 ];
 
+// ✅ CORREÇÃO 3: "SP" → "Sem Previsão"
 const PREVISAO_ALTA = [
     'Hoje Ouro', 'Hoje 2R', 'Hoje 3R',
     '24h Ouro', '24h 2R', '24h 3R',
-    '48h', '72h', '96h', 'SP'
+    '48h', '72h', '96h', 'Sem Previsão'
 ];
 
 const PPS_OPTIONS = ['10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'];
@@ -656,7 +639,7 @@ const IDADE_OPTIONS = Array.from({length: 102}, (_, i) => i + 14);
 
 // =================== INICIALIZAÇÃO ===================
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 Archipelago QR V3.3 Mobile - Iniciando...');
+    console.log('🚀 Archipelago QR V3.3 Mobile CORRIGIDO - Iniciando...');
     
     const urlParams = new URLSearchParams(window.location.search);
     const hospitalId = urlParams.get('h');
@@ -701,7 +684,6 @@ async function loadHospitalData(hospitalId) {
             throw new Error(`Hospital ${hospitalId} não encontrado`);
         }
         
-        // ⭐ CORREÇÃO: Armazenar TODOS os dados como no cards.js
         hospitalData = data.data;
         
         const leito = hospitalData[hospitalId].leitos.find(l => 
@@ -723,18 +705,15 @@ async function loadHospitalData(hospitalId) {
     }
 }
 
-// =================== RENDERIZAR FORMULÁRIO V3.3 ===================
+// =================== RENDERIZAR FORMULÁRIO V3.3 CORRIGIDO ===================
 function renderForm(leito) {
-    // ⭐ DEBUG: Ver estrutura completa do leito
-    console.log('📋 Dados do leito recebidos:', leito);
-    console.log('📄 JSON COMPLETO:', JSON.stringify(leito, null, 2));
+    console.log('📋 Renderizando formulário com correções aplicadas');
     
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
     const hospitalNome = HOSPITAIS[currentHospital].nome;
     const idSequencial = String(currentLeito).padStart(2, '0');
     
-    // ⭐ CORREÇÃO: Tentar múltiplos campos para identificação
     const identificacao = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
     const leitoPersonalizado = (identificacao && identificacao.trim()) 
         ? identificacao.trim().toUpperCase()
@@ -771,10 +750,7 @@ function renderForm(leito) {
                                 Data de Admissão
                             </div>
                             <div style="color: #e2e8f0; font-size: 14px; font-weight: 600;">
-                                ${(() => {
-                                    const data = new Date(leito.dataAdmissao);
-                                    return data.toLocaleDateString('pt-BR');
-                                })()}
+                                ${new Date(leito.dataAdmissao).toLocaleDateString('pt-BR')}
                             </div>
                         </div>
                         <div style="flex: 1; text-align: right;">
@@ -785,8 +761,7 @@ function renderForm(leito) {
                                 ${(() => {
                                     const admissao = new Date(leito.dataAdmissao);
                                     const hoje = new Date();
-                                    const diffTime = Math.abs(hoje - admissao);
-                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                    const diffDays = Math.ceil(Math.abs(hoje - admissao) / (1000 * 60 * 60 * 24));
                                     return diffDays === 1 ? '1 dia' : `${diffDays} dias`;
                                 })()}
                             </div>
@@ -800,19 +775,18 @@ function renderForm(leito) {
                 <div class="form-group">
                     <label>ID LEITO <span class="required">*</span></label>
                     ${(() => {
-                        const hospital = localStorage.getItem('hospital');
-                        const leitoNum = parseInt(localStorage.getItem('leito'));
-                        const isCruzAzulEnfermaria = (hospital === 'H2' && leitoNum >= 21 && leitoNum <= 36);
+                        const leitoNum = parseInt(currentLeito);
+                        const isCruzAzulEnfermaria = (currentHospital === 'H2' && leitoNum >= 21 && leitoNum <= 36);
                         
                         if (isCruzAzulEnfermaria) {
                             const numFixo = NUMERACAO_FIXA_CRUZ_AZUL[String(leitoNum)];
                             return `<input type="text" id="identificacaoLeito" value="${numFixo}" readonly 
                                      style="background: #1f2937; color: #9ca3af; cursor: not-allowed;" required>`;
                         } else {
-                            // ⭐ CORREÇÃO: Tentar múltiplos campos
                             const identificacaoValue = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
+                            // ✅ CORREÇÃO 4: Aceitar apenas números (sem exigir letras)
                             return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}" 
-                                     placeholder="Ex: NEO1" maxlength="6" required>`;
+                                     placeholder="Ex: 21 ou 711.1" maxlength="6" required>`;
                         }
                     })()}
                 </div>
@@ -827,11 +801,9 @@ function renderForm(leito) {
                 <div class="form-group" id="tipoQuartoGroup">
                     <label>TIPO QUARTO <span class="required">*</span></label>
                     ${(() => {
-                        const hospital = localStorage.getItem('hospital');
-                        const leitoNum = parseInt(localStorage.getItem('leito'));
+                        const leitoNum = parseInt(currentLeito);
                         
-                        // Cruz Azul - Apartamentos (1-20): readonly
-                        if (hospital === 'H2' && leitoNum >= 1 && leitoNum <= 20) {
+                        if (currentHospital === 'H2' && leitoNum >= 1 && leitoNum <= 20) {
                             return `<select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">
                                 <option value="Apartamento" selected>Apartamento</option>
                             </select>
@@ -841,8 +813,7 @@ function renderForm(leito) {
                             </small>`;
                         }
                         
-                        // Cruz Azul - Enfermarias (21-36): readonly
-                        if (hospital === 'H2' && leitoNum >= 21 && leitoNum <= 36) {
+                        if (currentHospital === 'H2' && leitoNum >= 21 && leitoNum <= 36) {
                             return `<select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">
                                 <option value="Enfermaria" selected>Enfermaria</option>
                             </select>
@@ -852,8 +823,6 @@ function renderForm(leito) {
                             </small>`;
                         }
                         
-                        // Outros hospitais: editável (será ajustado depois para Santa Clara)
-                        // ⭐ CORREÇÃO: usar categoria_escolhida com underscore
                         const tipoAtual = leito.categoria_escolhida || leito.categoriaEscolhida || leito.categoria || leito.tipo || '';
                         return `<select id="tipoQuarto" required>
                             <option value="">Selecionar...</option>
@@ -891,7 +860,6 @@ function renderForm(leito) {
                     <select id="sexo" required>
                         <option value="">Selecionar...</option>
                         ${SEXO_OPTIONS.map(sexo => {
-                            // ⭐ CORREÇÃO: Tentar genero ou sexo
                             const generoAtual = leito.genero || leito.sexo || '';
                             return `<option value="${sexo}" ${generoAtual === sexo ? 'selected' : ''}>${sexo}</option>`;
                         }).join('')}
@@ -908,7 +876,8 @@ function renderForm(leito) {
                     </div>
                     <div class="form-group">
                         <label>MATRÍCULA <span class="required">*</span></label>
-                        <input type="text" id="matricula" placeholder="00000-0" maxlength="8" required>
+                        <input type="text" id="matricula" placeholder="0000000000" maxlength="10" required 
+                               oninput="formatarMatricula(this)">
                     </div>
                     <div class="form-group">
                         <label>IDADE <span class="required">*</span></label>
@@ -946,13 +915,11 @@ function renderForm(leito) {
                     <select id="pps" required>
                         <option value="">Selecionar...</option>
                         ${PPS_OPTIONS.map(pps => {
-                            // ⭐ CORREÇÃO: Converter PPS numérico para porcentagem
                             let selected = false;
                             if (leito.pps !== null && leito.pps !== undefined && leito.pps !== '') {
                                 const ppsStr = String(leito.pps).replace(',', '.');
                                 const ppsNum = parseFloat(ppsStr);
                                 if (!isNaN(ppsNum)) {
-                                    // Se é decimal menor que 1 (ex: 0.7), multiplicar por 100
                                     const ppsValue = ppsNum < 1 ? ppsNum * 100 : ppsNum;
                                     const ppsFormatado = `${Math.round(ppsValue / 10) * 10}%`;
                                     selected = ppsFormatado === pps;
@@ -972,9 +939,12 @@ function renderForm(leito) {
                 <div class="form-group">
                     <label>PREV ALTA <span class="required">*</span></label>
                     <select id="prevAlta" required>
-                        ${PREVISAO_ALTA.map(p => 
-                            `<option value="${p}" ${leito.prevAlta === p || (!leito.prevAlta && p === 'SP') ? 'selected' : ''}>${p}</option>`
-                        ).join('')}
+                        ${PREVISAO_ALTA.map(p => {
+                            // ✅ CORREÇÃO: Mapear "SP" antigo para "Sem Previsão"
+                            const prevAltaAtual = leito.prevAlta === 'SP' ? 'Sem Previsão' : leito.prevAlta;
+                            const defaultValue = !leito.prevAlta || leito.prevAlta === 'SP' ? 'Sem Previsão' : leito.prevAlta;
+                            return `<option value="${p}" ${prevAltaAtual === p || (!prevAltaAtual && p === 'Sem Previsão') ? 'selected' : ''}>${p}</option>`;
+                        }).join('')}
                     </select>
                 </div>
             </div>
@@ -1000,7 +970,7 @@ function renderForm(leito) {
                     ${LINHAS_CUIDADO.map((l, i) => `
                         <label class="checkbox-item">
                             <input type="checkbox" id="linha${i}" value="${l}"
-                                ${leito.linhas && leito.linhas.includes(l) ? 'checked' : ''}>
+                                ${leito.linhas && leito.linhas.includes(l) ? 'checked' : ''}> 
                             <span>${l}</span>
                         </label>
                     `).join('')}
@@ -1027,11 +997,9 @@ function renderForm(leito) {
     
     container.style.display = 'flex';
     
-    // ⭐ V3.3: Verificar limite Santa Clara e desabilitar Enfermaria se necessário
+    // Verificar limite Santa Clara
     setTimeout(async () => {
-        const hospital = localStorage.getItem('hospital');
-        
-        if (hospital === 'H4') {
+        if (currentHospital === 'H4') {
             try {
                 const response = await fetch(API_URL);
                 const result = await response.json();
@@ -1064,12 +1032,17 @@ function renderForm(leito) {
             }
         }
     }, 100);
+}
+
+// ✅ CORREÇÃO 5: Função para formatar matrícula (10 dígitos, sem hífen)
+function formatarMatricula(input) {
+    let valor = input.value.replace(/\D/g, '');
     
-    // ⭐ V3.3: Mostrar/ocultar TIPO DE QUARTO após renderizar (NÃO PRECISA MAIS - SEMPRE MOSTRA)
-    setTimeout(() => {
-        // Campo TIPO DE QUARTO agora sempre visível
-        console.log('Tipo de Quarto: sempre visível com regras específicas por hospital');
-    }, 100);
+    if (valor.length > 10) {
+        valor = valor.substring(0, 10);
+    }
+    
+    input.value = valor;
 }
 
 // =================== TIMER 2 MINUTOS COM FECHAMENTO FORÇADO ===================
@@ -1106,18 +1079,15 @@ function forceClose(message) {
 
 // =================== VALIDAR BLOQUEIO CRUZ AZUL (LEITOS IRMÃOS) ===================
 async function validarBloqueioCruzAzul(dados) {
-    // Só valida se for Cruz Azul enfermaria (leitos 21-36)
     if (dados.hospital !== 'H2') return { valido: true };
     
     const leitoNum = parseInt(dados.leito);
     if (leitoNum < 21 || leitoNum > 36) return { valido: true };
     
     try {
-        // Buscar leito irmão
         const leitoIrmao = CRUZ_AZUL_LEITOS_IRMAOS[dados.leito];
         if (!leitoIrmao) return { valido: true };
         
-        // Buscar dados atuais
         const response = await fetch(API_URL);
         const result = await response.json();
         
@@ -1125,19 +1095,16 @@ async function validarBloqueioCruzAzul(dados) {
             return { valido: true };
         }
         
-        // Encontrar dados do leito irmão
         const dadosIrmao = result.hospitais.H2.leitos.find(l => 
             String(l.leito || l.numero) === String(leitoIrmao)
         );
         
-        // Se irmão está vago, libera
         if (!dadosIrmao || dadosIrmao.status === 'Vago' || dadosIrmao.status === 'vago') {
             return { valido: true };
         }
         
         const numFixoIrmao = NUMERACAO_FIXA_CRUZ_AZUL[leitoIrmao];
         
-        // PRIORIDADE 1: ISOLAMENTO
         if (dadosIrmao.isolamento && dadosIrmao.isolamento !== 'Não Isolamento') {
             return {
                 valido: false,
@@ -1145,7 +1112,6 @@ async function validarBloqueioCruzAzul(dados) {
             };
         }
         
-        // PRIORIDADE 2: GÊNERO
         if (dados.genero && dadosIrmao.sexo && dados.genero !== dadosIrmao.sexo) {
             return {
                 valido: false,
@@ -1158,19 +1124,17 @@ async function validarBloqueioCruzAzul(dados) {
         
     } catch (error) {
         console.error('Erro ao validar Cruz Azul:', error);
-        return { valido: true }; // Em caso de erro, permite continuar
+        return { valido: true };
     }
 }
 
 // =================== VALIDAR LIMITE ENFERMARIAS SANTA CLARA ===================
 async function validarLimiteSantaClara(dados) {
-    // Só valida se for Santa Clara tentando admitir Enfermaria
     if (dados.hospital !== 'H4' || dados.tipoQuarto !== 'Enfermaria') {
         return { valido: true };
     }
     
     try {
-        // Buscar dados atuais do Santa Clara
         const response = await fetch(API_URL);
         const result = await response.json();
         
@@ -1178,7 +1142,6 @@ async function validarLimiteSantaClara(dados) {
             return { valido: true };
         }
         
-        // Contar enfermarias ocupadas
         let enfermariasOcupadas = 0;
         result.hospitais.H4.leitos.forEach(leito => {
             const statusOcupado = leito.status === 'Em uso' || leito.status === 'Ocupado';
@@ -1202,23 +1165,21 @@ async function validarLimiteSantaClara(dados) {
         
     } catch (error) {
         console.error('Erro ao validar limite:', error);
-        return { valido: true }; // Em caso de erro, permite continuar
+        return { valido: true };
     }
 }
 
-// =================== SALVAR DADOS V3.3 ===================
+// =================== SALVAR DADOS V3.3 CORRIGIDO ===================
 async function saveData() {
     try {
         const dados = coletarDados();
         
-        // ⭐ V3.3: Validar Cruz Azul leitos irmãos
         const validacaoCA = await validarBloqueioCruzAzul(dados);
         if (!validacaoCA.valido) {
             alert(validacaoCA.mensagem);
             return;
         }
         
-        // ⭐ V3.3: Validar limite de enfermarias Santa Clara
         const validacaoSC = await validarLimiteSantaClara(dados);
         if (!validacaoSC.valido) {
             alert(validacaoSC.mensagem);
@@ -1244,12 +1205,16 @@ async function saveData() {
             delete payload.iniciais;
         }
         
-        console.log('📤 Enviando V3.3 (COM DIRETIVAS):', payload);
+        console.log('📤 Enviando V3.3 CORRIGIDO:', payload);
         
         const params = new URLSearchParams();
         for (const [key, value] of Object.entries(payload)) {
             if (Array.isArray(value)) {
-                params.append(key, value.join(','));
+                // ✅ Filtrar "Não se aplica" das concessões
+                const filtered = key === 'concessoes' 
+                    ? value.filter(v => v !== 'Não se aplica')
+                    : value;
+                params.append(key, filtered.join(','));
             } else if (value !== null && value !== undefined) {
                 params.append(key, String(value));
             }
@@ -1261,7 +1226,7 @@ async function saveData() {
         if (!result.ok) throw new Error(result.error || 'Erro ao salvar');
         
         clearInterval(timerInterval);
-        const message = isVago ? 'Paciente admitido com sucesso (V3.3)!' : 'Dados atualizados com sucesso (V3.3)!';
+        const message = isVago ? 'Paciente admitido com sucesso!' : 'Dados atualizados com sucesso!';
         showSuccess(message);
         
     } catch (error) {
@@ -1295,7 +1260,7 @@ async function darAlta() {
     }
 }
 
-// =================== COLETAR DADOS V3.3 ===================
+// =================== COLETAR DADOS V3.3 CORRIGIDO ===================
 function coletarDados() {
     const dados = {};
     
@@ -1314,23 +1279,20 @@ function coletarDados() {
     dados.isolamento = document.getElementById('isolamento').value;
     dados.identificacaoLeito = document.getElementById('identificacaoLeito').value.trim().toUpperCase();
     dados.regiao = document.getElementById('regiao').value;
-    dados.genero = document.getElementById('sexo').value; // ⭐ CORREÇÃO: enviar como genero
-    dados.diretivas = document.getElementById('diretivas').value; // ⭐ NOVO V3.3
+    dados.genero = document.getElementById('sexo').value;
+    dados.diretivas = document.getElementById('diretivas').value;
     
-    // ⭐ TIPO DE QUARTO (todos os hospitais)
     const tipoQuartoField = document.getElementById('tipoQuarto');
     const tipoQuartoValue = document.getElementById('tipoQuartoValue');
     
     if (tipoQuartoValue) {
-        // Cruz Azul com valor fixo (hidden input)
         dados.tipoQuarto = tipoQuartoValue.value;
-        dados.categoria = tipoQuartoValue.value; // Para compatibilidade
-        dados.categoria_escolhida = tipoQuartoValue.value; // Para planilha BU com underscore
+        dados.categoria = tipoQuartoValue.value;
+        dados.categoria_escolhida = tipoQuartoValue.value;
     } else if (tipoQuartoField && tipoQuartoField.value) {
-        // Outros hospitais com select editável
         dados.tipoQuarto = tipoQuartoField.value;
-        dados.categoria = tipoQuartoField.value; // Para compatibilidade
-        dados.categoria_escolhida = tipoQuartoField.value; // Para planilha BU com underscore
+        dados.categoria = tipoQuartoField.value;
+        dados.categoria_escolhida = tipoQuartoField.value;
     }
     
     dados.concessoes = [];
@@ -1345,12 +1307,12 @@ function coletarDados() {
         if (cb && cb.checked) dados.linhas.push(cb.value);
     });
     
-    console.log('📋 Dados V3.3 coletados (DIRETIVAS:', dados.diretivas, ')');
+    console.log('📋 Dados V3.3 coletados (CORRIGIDO)');
     
     return dados;
 }
 
-// =================== VALIDAR DADOS V3.3 ===================
+// =================== VALIDAR DADOS V3.3 CORRIGIDO ===================
 function validarDados(dados) {
     const erros = [];
     
@@ -1360,6 +1322,11 @@ function validarDados(dados) {
     
     if (dados.matricula !== undefined && !dados.matricula) {
         erros.push('• Matrícula é obrigatória');
+    }
+    
+    // ✅ VALIDAR MATRÍCULA: até 10 dígitos
+    if (dados.matricula && dados.matricula.length > 10) {
+        erros.push('• Matrícula: máximo 10 dígitos');
     }
     
     if (!dados.idade) {
@@ -1373,10 +1340,11 @@ function validarDados(dados) {
     if (!dados.identificacaoLeito) erros.push('• Identificação do Leito é obrigatória');
     if (!dados.regiao) erros.push('• Região é obrigatória');
     if (!dados.genero) erros.push('• Gênero é obrigatório');
-    if (!dados.diretivas) erros.push('• Diretivas são obrigatórias'); // ⭐ NOVO V3.3
+    if (!dados.diretivas) erros.push('• Diretivas são obrigatórias');
     
-    if (dados.identificacaoLeito && !/^[A-Za-z0-9]{1,6}$/.test(dados.identificacaoLeito)) {
-        erros.push('• Identificação do Leito: máx. 6 caracteres alfanuméricos');
+    // ✅ VALIDAR ID LEITO: aceitar números e letras (sem restrição)
+    if (dados.identificacaoLeito && dados.identificacaoLeito.length > 6) {
+        erros.push('• Identificação do Leito: máximo 6 caracteres');
     }
     
     if (erros.length > 0) {
@@ -1436,15 +1404,20 @@ function showSuccess(message) {
     }
 }
 
-// =================== LOG INICIALIZAÇÃO V3.3 ===================
-console.log('✅ Archipelago QR V3.3 MOBILE FINAL');
+// =================== LOG INICIALIZAÇÃO V3.3 CORRIGIDO ===================
+console.log('✅ Archipelago QR V3.3 MOBILE FINAL - CORRIGIDO');
 console.log('📱 Otimizado para mobile');
 console.log('⏱️ Timer: 2 minutos com fechamento forçado');
 console.log('🏥 Total Rede: 79 leitos | 5 hospitais');
-console.log('📋 Listas V3.3: 11 concessões + 45 linhas + 9 regiões + 2 gêneros + 3 diretivas');
-console.log('⭐ NOVO V3.3: Campo DIRETIVAS (BV/73) implementado!');
-console.log('🎯 Campos obrigatórios: ID Leito + Isolamento + Região + Gênero + Diretivas');
-console.log('📊 74 colunas (A-BV) | BV = DIRETIVAS ANTECIPADAS');
+console.log('');
+console.log('✅ CORREÇÕES APLICADAS:');
+console.log('1. ✅ ID Leito: aceita apenas números (sem exigir letras)');
+console.log('2. ✅ Concessões: "Não se aplica" como primeira opção');
+console.log('3. ✅ Matrícula: até 10 dígitos (sem hífen)');
+console.log('4. ✅ "SP" → "Sem Previsão"');
+console.log('5. ✅ Diretivas: ordem correta (Não se aplica, Sim, Não)');
+console.log('');
+console.log('🎯 Compatível com cards.js corrigido!');
     </script>
 </body>
 </html>
