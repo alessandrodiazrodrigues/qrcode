@@ -488,7 +488,7 @@
     </div>
     
     <script>
-// =================== ARCHIPELAGO QR V3.3 MOBILE FINAL - ORDEM CORRIGIDA ===================
+// =================== ARCHIPELAGO QR V3.3 MOBILE FINAL - COM LÓGICA DE CONCESSÕES ===================
 // =================== CONFIGURAÇÃO ===================
 const API_URL = 'https://script.google.com/macros/s/AKfycbyrdmoqC3J08_DM-VRKtHLC0htEJa4PnHeKQVTBsdSt1X1DFhc51axv-6TGyeKjn0Id/exec';
 
@@ -636,7 +636,7 @@ const IDADE_OPTIONS = Array.from({length: 102}, (_, i) => i + 14);
 
 // =================== INICIALIZAÇÃO ===================
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 Archipelago QR V3.3 Mobile - ORDEM CORRIGIDA');
+    console.log('🚀 Archipelago QR V3.3 Mobile - COM LÓGICA DE CONCESSÕES');
     
     const urlParams = new URLSearchParams(window.location.search);
     const hospitalId = urlParams.get('h');
@@ -702,9 +702,9 @@ async function loadHospitalData(hospitalId) {
     }
 }
 
-// =================== RENDERIZAR FORMULÁRIO - ORDEM CORRIGIDA ===================
+// =================== RENDERIZAR FORMULÁRIO ===================
 function renderForm(leito) {
-    console.log('📋 Renderizando formulário - ORDEM CORRIGIDA');
+    console.log('📋 Renderizando formulário - ORDEM CORRIGIDA + LÓGICA CONCESSÕES');
     
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
@@ -767,7 +767,7 @@ function renderForm(leito) {
                 </div>
             ` : ''}
             
-            <!-- ✅ LINHA 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO -->
+            <!-- LINHA 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO -->
             <div class="form-row-3">
                 <div class="form-group">
                     <label>IDENTIFICAÇÃO <span class="required">*</span></label>
@@ -832,7 +832,7 @@ function renderForm(leito) {
                 </div>
             </div>
             
-            <!-- ✅ LINHA 2: GÊNERO | REGIÃO | PREVISÃO ALTA -->
+            <!-- LINHA 2: GÊNERO | REGIÃO | PREVISÃO ALTA -->
             <div class="form-row-3">
                 <div class="form-group">
                     <label>GÊNERO <span class="required">*</span></label>
@@ -865,7 +865,7 @@ function renderForm(leito) {
                 </div>
             </div>
             
-            <!-- ✅ LINHA 3: INICIAIS | MATRÍCULA | IDADE -->
+            <!-- LINHA 3: INICIAIS | MATRÍCULA | IDADE -->
             ${isVago ? `
                 <div class="form-row-3">
                     <div class="form-group">
@@ -905,7 +905,7 @@ function renderForm(leito) {
                 </div>
             `}
             
-            <!-- ✅ LINHA 4: PPS | SPICT-BR | DIRETIVAS -->
+            <!-- LINHA 4: PPS | SPICT-BR | DIRETIVAS -->
             <div class="form-row-3">
                 <div class="form-group">
                     <label>PPS <span class="required">*</span></label>
@@ -991,6 +991,11 @@ function renderForm(leito) {
     
     container.style.display = 'flex';
     
+    // ✅ APLICAR LÓGICA DE CONCESSÕES
+    setTimeout(() => {
+        configurarLogicaConcessoes(leito);
+    }, 100);
+    
     // Verificar limite Santa Clara
     setTimeout(async () => {
         if (currentHospital === 'H4') {
@@ -1026,6 +1031,67 @@ function renderForm(leito) {
             }
         }
     }, 100);
+}
+
+// =================== ✅ LÓGICA DE CONCESSÕES ===================
+function configurarLogicaConcessoes(leito) {
+    console.log('🎯 Configurando lógica de concessões');
+    
+    // Pegar todos os checkboxes de concessões
+    const checkboxes = [];
+    CONCESSOES.forEach((c, i) => {
+        const checkbox = document.getElementById(`conc${i}`);
+        if (checkbox) checkboxes.push(checkbox);
+    });
+    
+    if (checkboxes.length === 0) {
+        console.warn('⚠️ Nenhum checkbox de concessão encontrado');
+        return;
+    }
+    
+    const checkboxNaoSeAplica = checkboxes[0]; // Primeiro checkbox é "Não se aplica"
+    const outrosCheckboxes = checkboxes.slice(1); // Resto são as concessões reais
+    
+    // ✅ REGRA 1: Se nenhuma concessão está marcada, marcar "Não se aplica" automaticamente
+    function verificarDefault() {
+        const algumaMarcada = outrosCheckboxes.some(cb => cb.checked);
+        
+        if (!algumaMarcada && !checkboxNaoSeAplica.checked) {
+            checkboxNaoSeAplica.checked = true;
+            console.log('✅ Nenhuma concessão marcada → "Não se aplica" ativado');
+        }
+    }
+    
+    // ✅ REGRA 2: Se "Não se aplica" for marcado, desmarcar todas as outras
+    checkboxNaoSeAplica.addEventListener('change', function() {
+        if (this.checked) {
+            outrosCheckboxes.forEach(cb => {
+                cb.checked = false;
+            });
+            console.log('✅ "Não se aplica" marcado → Todas as outras desmarcadas');
+        } else {
+            // Se desmarcar "Não se aplica" e não tiver nada marcado, reativar
+            setTimeout(verificarDefault, 50);
+        }
+    });
+    
+    // ✅ REGRA 3: Se qualquer outra concessão for marcada, desmarcar "Não se aplica"
+    outrosCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                checkboxNaoSeAplica.checked = false;
+                console.log(`✅ Concessão "${this.value}" marcada → "Não se aplica" desmarcado`);
+            } else {
+                // Verificar se alguma outra ainda está marcada
+                setTimeout(verificarDefault, 50);
+            }
+        });
+    });
+    
+    // ✅ APLICAR REGRA INICIAL
+    verificarDefault();
+    
+    console.log('✅ Lógica de concessões configurada com sucesso');
 }
 
 // =================== FORMATAR MATRÍCULA ===================
@@ -1396,7 +1462,7 @@ function showSuccess(message) {
 }
 
 // =================== LOG INICIALIZAÇÃO ===================
-console.log('✅ Archipelago QR V3.3 MOBILE - ORDEM CORRIGIDA');
+console.log('✅ Archipelago QR V3.3 MOBILE - ORDEM CORRIGIDA + LÓGICA CONCESSÕES');
 console.log('📱 Otimizado para mobile');
 console.log('⏱️ Timer: 2 minutos com fechamento forçado');
 console.log('🏥 Total Rede: 79 leitos | 5 hospitais');
@@ -1406,6 +1472,11 @@ console.log('Linha 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO');
 console.log('Linha 2: GÊNERO | REGIÃO | PREVISÃO ALTA');
 console.log('Linha 3: INICIAIS | MATRÍCULA | IDADE');
 console.log('Linha 4: PPS | SPICT-BR | DIRETIVAS');
+console.log('');
+console.log('✅ LÓGICA DE CONCESSÕES:');
+console.log('• Se nenhuma marcada → "Não se aplica" ativado');
+console.log('• Se "Não se aplica" marcado → Outras desmarcadas');
+console.log('• Se outra marcada → "Não se aplica" desmarcado');
     </script>
 </body>
 </html>
