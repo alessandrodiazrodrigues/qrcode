@@ -488,7 +488,7 @@
     </div>
     
     <script>
-// =================== ARCHIPELAGO QR V3.3 MOBILE FINAL - CORRIGIDO ===================
+// =================== ARCHIPELAGO QR V3.3 MOBILE FINAL - ORDEM CORRIGIDA ===================
 // =================== CONFIGURAÇÃO ===================
 const API_URL = 'https://script.google.com/macros/s/AKfycbyrdmoqC3J08_DM-VRKtHLC0htEJa4PnHeKQVTBsdSt1X1DFhc51axv-6TGyeKjn0Id/exec';
 
@@ -499,7 +499,7 @@ let currentLeito = null;
 let timerInterval = null;
 let timeLeft = 120;
 
-// =================== CONSTANTES V3.3 CORRIGIDAS ===================
+// =================== CONSTANTES V3.3 ===================
 const HOSPITAIS = {
     H1: { nome: 'Neomater', leitos: 10 },
     H2: { nome: 'Cruz Azul', leitos: 36 },
@@ -556,14 +556,12 @@ const NUMERACAO_FIXA_CRUZ_AZUL = {
     '35': '725.1', '36': '725.2'
 };
 
-// ✅ CORREÇÃO 1: DIRETIVAS - "Não se aplica" primeiro (padrão)
 const DIRETIVAS_OPTIONS = [
     'Não se aplica',
     'Sim',
     'Não'
 ];
 
-// ✅ CORREÇÃO 2: CONCESSÕES - "Não se aplica" como primeira opção
 const CONCESSOES = [
     "Não se aplica",
     "Transição Domiciliar",
@@ -627,7 +625,6 @@ const LINHAS_CUIDADO = [
     "Urologia"
 ];
 
-// ✅ CORREÇÃO 3: "SP" → "Sem Previsão"
 const PREVISAO_ALTA = [
     'Hoje Ouro', 'Hoje 2R', 'Hoje 3R',
     '24h Ouro', '24h 2R', '24h 3R',
@@ -639,7 +636,7 @@ const IDADE_OPTIONS = Array.from({length: 102}, (_, i) => i + 14);
 
 // =================== INICIALIZAÇÃO ===================
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 Archipelago QR V3.3 Mobile CORRIGIDO - Iniciando...');
+    console.log('🚀 Archipelago QR V3.3 Mobile - ORDEM CORRIGIDA');
     
     const urlParams = new URLSearchParams(window.location.search);
     const hospitalId = urlParams.get('h');
@@ -705,9 +702,9 @@ async function loadHospitalData(hospitalId) {
     }
 }
 
-// =================== RENDERIZAR FORMULÁRIO V3.3 CORRIGIDO ===================
+// =================== RENDERIZAR FORMULÁRIO - ORDEM CORRIGIDA ===================
 function renderForm(leito) {
-    console.log('📋 Renderizando formulário com correções aplicadas');
+    console.log('📋 Renderizando formulário - ORDEM CORRIGIDA');
     
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
@@ -770,10 +767,10 @@ function renderForm(leito) {
                 </div>
             ` : ''}
             
-            <!-- LINHA 1: IDENTIFICAÇÃO | DIRETIVAS | TIPO QUARTO (3 COLUNAS) -->
+            <!-- ✅ LINHA 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO -->
             <div class="form-row-3">
                 <div class="form-group">
-                    <label>ID LEITO <span class="required">*</span></label>
+                    <label>IDENTIFICAÇÃO <span class="required">*</span></label>
                     ${(() => {
                         const leitoNum = parseInt(currentLeito);
                         const isCruzAzulEnfermaria = (currentHospital === 'H2' && leitoNum >= 21 && leitoNum <= 36);
@@ -784,19 +781,10 @@ function renderForm(leito) {
                                      style="background: #1f2937; color: #9ca3af; cursor: not-allowed;" required>`;
                         } else {
                             const identificacaoValue = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
-                            // ✅ CORREÇÃO 4: Aceitar apenas números (sem exigir letras)
                             return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}" 
                                      placeholder="Ex: 21 ou 711.1" maxlength="6" required>`;
                         }
                     })()}
-                </div>
-                <div class="form-group">
-                    <label>DIRETIVAS <span class="required">*</span></label>
-                    <select id="diretivas" required>
-                        ${DIRETIVAS_OPTIONS.map((opcao, index) => 
-                            `<option value="${opcao}" ${(leito.diretivas === opcao || (index === 0 && !leito.diretivas)) ? 'selected' : ''}>${opcao}</option>`
-                        ).join('')}
-                    </select>
                 </div>
                 <div class="form-group" id="tipoQuartoGroup">
                     <label>TIPO QUARTO <span class="required">*</span></label>
@@ -834,16 +822,26 @@ function renderForm(leito) {
                         </div>`;
                     })()}
                 </div>
-            </div>
-            
-            <!-- LINHA 2: ISOLAMENTO | REGIÃO | GÊNERO (3 COLUNAS) -->
-            <div class="form-row-3">
                 <div class="form-group">
                     <label>ISOLAMENTO <span class="required">*</span></label>
                     <select id="isolamento" required>
                         ${ISOLAMENTO_OPTIONS.map((opt, index) => 
                             `<option value="${opt}" ${(leito.isolamento === opt || (index === 0 && !leito.isolamento)) ? 'selected' : ''}>${opt}</option>`
                         ).join('')}
+                    </select>
+                </div>
+            </div>
+            
+            <!-- ✅ LINHA 2: GÊNERO | REGIÃO | PREVISÃO ALTA -->
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label>GÊNERO <span class="required">*</span></label>
+                    <select id="sexo" required>
+                        <option value="">Selecionar...</option>
+                        ${SEXO_OPTIONS.map(sexo => {
+                            const generoAtual = leito.genero || leito.sexo || '';
+                            return `<option value="${sexo}" ${generoAtual === sexo ? 'selected' : ''}>${sexo}</option>`;
+                        }).join('')}
                     </select>
                 </div>
                 <div class="form-group">
@@ -856,19 +854,19 @@ function renderForm(leito) {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>GÊNERO <span class="required">*</span></label>
-                    <select id="sexo" required>
-                        <option value="">Selecionar...</option>
-                        ${SEXO_OPTIONS.map(sexo => {
-                            const generoAtual = leito.genero || leito.sexo || '';
-                            return `<option value="${sexo}" ${generoAtual === sexo ? 'selected' : ''}>${sexo}</option>`;
+                    <label>PREVISÃO ALTA <span class="required">*</span></label>
+                    <select id="prevAlta" required>
+                        ${PREVISAO_ALTA.map(p => {
+                            const prevAltaAtual = leito.prevAlta === 'SP' ? 'Sem Previsão' : leito.prevAlta;
+                            const defaultValue = !leito.prevAlta || leito.prevAlta === 'SP' ? 'Sem Previsão' : leito.prevAlta;
+                            return `<option value="${p}" ${prevAltaAtual === p || (!prevAltaAtual && p === 'Sem Previsão') ? 'selected' : ''}>${p}</option>`;
                         }).join('')}
                     </select>
                 </div>
             </div>
             
+            <!-- ✅ LINHA 3: INICIAIS | MATRÍCULA | IDADE -->
             ${isVago ? `
-                <!-- ADMISSÃO: INICIAIS, MATRÍCULA, IDADE -->
                 <div class="form-row-3">
                     <div class="form-group">
                         <label>INICIAIS <span class="required">*</span></label>
@@ -888,7 +886,6 @@ function renderForm(leito) {
                     </div>
                 </div>
             ` : `
-                <!-- ATUALIZAÇÃO: INICIAIS E MATRÍCULA READONLY -->
                 <div class="form-row-3">
                     <div class="form-group">
                         <label>INICIAIS</label>
@@ -908,7 +905,7 @@ function renderForm(leito) {
                 </div>
             `}
             
-            <!-- PPS, SPICT, PREVISÃO ALTA - 3 COLUNAS -->
+            <!-- ✅ LINHA 4: PPS | SPICT-BR | DIRETIVAS -->
             <div class="form-row-3">
                 <div class="form-group">
                     <label>PPS <span class="required">*</span></label>
@@ -937,14 +934,11 @@ function renderForm(leito) {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>PREV ALTA <span class="required">*</span></label>
-                    <select id="prevAlta" required>
-                        ${PREVISAO_ALTA.map(p => {
-                            // ✅ CORREÇÃO: Mapear "SP" antigo para "Sem Previsão"
-                            const prevAltaAtual = leito.prevAlta === 'SP' ? 'Sem Previsão' : leito.prevAlta;
-                            const defaultValue = !leito.prevAlta || leito.prevAlta === 'SP' ? 'Sem Previsão' : leito.prevAlta;
-                            return `<option value="${p}" ${prevAltaAtual === p || (!prevAltaAtual && p === 'Sem Previsão') ? 'selected' : ''}>${p}</option>`;
-                        }).join('')}
+                    <label>DIRETIVAS <span class="required">*</span></label>
+                    <select id="diretivas" required>
+                        ${DIRETIVAS_OPTIONS.map((opcao, index) => 
+                            `<option value="${opcao}" ${(leito.diretivas === opcao || (index === 0 && !leito.diretivas)) ? 'selected' : ''}>${opcao}</option>`
+                        ).join('')}
                     </select>
                 </div>
             </div>
@@ -1034,7 +1028,7 @@ function renderForm(leito) {
     }, 100);
 }
 
-// ✅ CORREÇÃO 5: Função para formatar matrícula (10 dígitos, sem hífen)
+// =================== FORMATAR MATRÍCULA ===================
 function formatarMatricula(input) {
     let valor = input.value.replace(/\D/g, '');
     
@@ -1045,7 +1039,7 @@ function formatarMatricula(input) {
     input.value = valor;
 }
 
-// =================== TIMER 2 MINUTOS COM FECHAMENTO FORÇADO ===================
+// =================== TIMER 2 MINUTOS ===================
 function startTimer() {
     timeLeft = 120;
     
@@ -1077,7 +1071,7 @@ function forceClose(message) {
     showSuccess(message);
 }
 
-// =================== VALIDAR BLOQUEIO CRUZ AZUL (LEITOS IRMÃOS) ===================
+// =================== VALIDAR BLOQUEIO CRUZ AZUL ===================
 async function validarBloqueioCruzAzul(dados) {
     if (dados.hospital !== 'H2') return { valido: true };
     
@@ -1128,7 +1122,7 @@ async function validarBloqueioCruzAzul(dados) {
     }
 }
 
-// =================== VALIDAR LIMITE ENFERMARIAS SANTA CLARA ===================
+// =================== VALIDAR LIMITE SANTA CLARA ===================
 async function validarLimiteSantaClara(dados) {
     if (dados.hospital !== 'H4' || dados.tipoQuarto !== 'Enfermaria') {
         return { valido: true };
@@ -1169,7 +1163,7 @@ async function validarLimiteSantaClara(dados) {
     }
 }
 
-// =================== SALVAR DADOS V3.3 CORRIGIDO ===================
+// =================== SALVAR DADOS ===================
 async function saveData() {
     try {
         const dados = coletarDados();
@@ -1205,12 +1199,11 @@ async function saveData() {
             delete payload.iniciais;
         }
         
-        console.log('📤 Enviando V3.3 CORRIGIDO:', payload);
+        console.log('📤 Enviando V3.3:', payload);
         
         const params = new URLSearchParams();
         for (const [key, value] of Object.entries(payload)) {
             if (Array.isArray(value)) {
-                // ✅ Filtrar "Não se aplica" das concessões
                 const filtered = key === 'concessoes' 
                     ? value.filter(v => v !== 'Não se aplica')
                     : value;
@@ -1260,7 +1253,7 @@ async function darAlta() {
     }
 }
 
-// =================== COLETAR DADOS V3.3 CORRIGIDO ===================
+// =================== COLETAR DADOS ===================
 function coletarDados() {
     const dados = {};
     
@@ -1307,12 +1300,12 @@ function coletarDados() {
         if (cb && cb.checked) dados.linhas.push(cb.value);
     });
     
-    console.log('📋 Dados V3.3 coletados (CORRIGIDO)');
+    console.log('📋 Dados coletados');
     
     return dados;
 }
 
-// =================== VALIDAR DADOS V3.3 CORRIGIDO ===================
+// =================== VALIDAR DADOS ===================
 function validarDados(dados) {
     const erros = [];
     
@@ -1324,7 +1317,6 @@ function validarDados(dados) {
         erros.push('• Matrícula é obrigatória');
     }
     
-    // ✅ VALIDAR MATRÍCULA: até 10 dígitos
     if (dados.matricula && dados.matricula.length > 10) {
         erros.push('• Matrícula: máximo 10 dígitos');
     }
@@ -1342,7 +1334,6 @@ function validarDados(dados) {
     if (!dados.genero) erros.push('• Gênero é obrigatório');
     if (!dados.diretivas) erros.push('• Diretivas são obrigatórias');
     
-    // ✅ VALIDAR ID LEITO: aceitar números e letras (sem restrição)
     if (dados.identificacaoLeito && dados.identificacaoLeito.length > 6) {
         erros.push('• Identificação do Leito: máximo 6 caracteres');
     }
@@ -1404,20 +1395,17 @@ function showSuccess(message) {
     }
 }
 
-// =================== LOG INICIALIZAÇÃO V3.3 CORRIGIDO ===================
-console.log('✅ Archipelago QR V3.3 MOBILE FINAL - CORRIGIDO');
+// =================== LOG INICIALIZAÇÃO ===================
+console.log('✅ Archipelago QR V3.3 MOBILE - ORDEM CORRIGIDA');
 console.log('📱 Otimizado para mobile');
 console.log('⏱️ Timer: 2 minutos com fechamento forçado');
 console.log('🏥 Total Rede: 79 leitos | 5 hospitais');
 console.log('');
-console.log('✅ CORREÇÕES APLICADAS:');
-console.log('1. ✅ ID Leito: aceita apenas números (sem exigir letras)');
-console.log('2. ✅ Concessões: "Não se aplica" como primeira opção');
-console.log('3. ✅ Matrícula: até 10 dígitos (sem hífen)');
-console.log('4. ✅ "SP" → "Sem Previsão"');
-console.log('5. ✅ Diretivas: ordem correta (Não se aplica, Sim, Não)');
-console.log('');
-console.log('🎯 Compatível com cards.js corrigido!');
+console.log('✅ ORDEM DOS CAMPOS CORRIGIDA:');
+console.log('Linha 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO');
+console.log('Linha 2: GÊNERO | REGIÃO | PREVISÃO ALTA');
+console.log('Linha 3: INICIAIS | MATRÍCULA | IDADE');
+console.log('Linha 4: PPS | SPICT-BR | DIRETIVAS');
     </script>
 </body>
 </html>
