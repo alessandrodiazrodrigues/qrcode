@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Archipelago QR V3.3 FINAL - Acesso Médico</title>
+    <title>Archipelago QR V3.3 FINAL CORRIGIDO - Acesso Médico</title>
     
     <style>
         /* =================== RESET E BASE MOBILE =================== */
@@ -143,7 +143,7 @@
         
         @keyframes pulse-danger {
             0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.08); opacity: 0.8; }
+            50% { transform: scale(1.08); opacity: 0.8); }
         }
         
         /* =================== FORM BODY MOBILE =================== */
@@ -250,6 +250,13 @@
             padding-right: 32px;
         }
         
+        /* ⭐ HELP TEXT */
+        .help-text {
+            font-size: 10px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 3px;
+        }
+        
         /* =================== SEÇÕES CHECKBOX MOBILE =================== */
         .form-section {
             margin: 20px 0;
@@ -266,6 +273,25 @@
             margin-bottom: 12px;
             letter-spacing: 0.5px;
             text-align: center;
+        }
+        
+        /* ⭐ CAMPO DE BUSCA */
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            background: #374151;
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 8px;
+            font-family: inherit;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
         }
         
         .checkbox-grid {
@@ -311,6 +337,14 @@
             font-weight: 500;
             line-height: 1.3;
             user-select: none;
+        }
+        
+        /* ⭐ MENSAGEM "NENHUM RESULTADO" */
+        .no-results-message {
+            padding: 10px;
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
         }
         
         /* =================== ACTIONS MOBILE =================== */
@@ -488,7 +522,11 @@
     </div>
     
     <script>
-// =================== ARCHIPELAGO QR V3.3 MOBILE FINAL - COM LÓGICA DE CONCESSÕES ===================
+// =================== ARCHIPELAGO QR V3.3 MOBILE FINAL CORRIGIDO ===================
+// ✅ CORREÇÃO 1: Identificação aceita números + letras
+// ✅ CORREÇÃO 2: Matrícula com hífen visual
+// ✅ CORREÇÃO 3: Busca dinâmica em Concessões e Linhas
+
 // =================== CONFIGURAÇÃO ===================
 const API_URL = 'https://script.google.com/macros/s/AKfycbyrdmoqC3J08_DM-VRKtHLC0htEJa4PnHeKQVTBsdSt1X1DFhc51axv-6TGyeKjn0Id/exec';
 
@@ -634,9 +672,68 @@ const PREVISAO_ALTA = [
 const PPS_OPTIONS = ['10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'];
 const IDADE_OPTIONS = Array.from({length: 102}, (_, i) => i + 14);
 
+// =================== ✅ CORREÇÃO 2: FUNÇÃO FORMATAÇÃO MATRÍCULA ===================
+function formatarMatriculaExibicao(matricula) {
+    if (!matricula || matricula === '—') return '—';
+    const mat = String(matricula).replace(/\D/g, '');
+    if (mat.length === 0) return '—';
+    if (mat.length === 1) return mat;
+    // ✅ Adiciona hífen no último dígito
+    return mat.slice(0, -1) + '-' + mat.slice(-1);
+}
+
+// =================== ✅ CORREÇÃO 3: FUNÇÃO BUSCA DINÂMICA ===================
+function configurarBuscaDinamica(containerId, searchId) {
+    const searchInput = document.getElementById(searchId);
+    const container = document.getElementById(containerId);
+    
+    if (!searchInput || !container) {
+        console.error(`❌ Elementos não encontrados: ${searchId} ou ${containerId}`);
+        return;
+    }
+    
+    const labels = container.querySelectorAll('label.checkbox-item');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        labels.forEach(label => {
+            const text = label.textContent.toLowerCase();
+            
+            if (searchTerm === '' || text.includes(searchTerm)) {
+                label.style.display = 'flex';
+            } else {
+                label.style.display = 'none';
+            }
+        });
+        
+        // Mensagem se não encontrar nada
+        const visibleLabels = Array.from(labels).filter(l => l.style.display !== 'none');
+        let msgNoResults = container.querySelector('.no-results-message');
+        
+        if (visibleLabels.length === 0) {
+            if (!msgNoResults) {
+                msgNoResults = document.createElement('div');
+                msgNoResults.className = 'no-results-message';
+                msgNoResults.textContent = `Nenhum resultado para "${searchTerm}"`;
+                container.appendChild(msgNoResults);
+            }
+        } else {
+            if (msgNoResults) {
+                msgNoResults.remove();
+            }
+        }
+    });
+    
+    console.log(`✅ Busca dinâmica configurada: ${searchId}`);
+}
+
 // =================== INICIALIZAÇÃO ===================
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 Archipelago QR V3.3 Mobile - COM LÓGICA DE CONCESSÕES');
+    console.log('🚀 Archipelago QR V3.3 Mobile CORRIGIDO');
+    console.log('✅ CORREÇÃO 1: Identificação aceita números + letras');
+    console.log('✅ CORREÇÃO 2: Matrícula com hífen visual');
+    console.log('✅ CORREÇÃO 3: Busca dinâmica em Concessões e Linhas');
     
     const urlParams = new URLSearchParams(window.location.search);
     const hospitalId = urlParams.get('h');
@@ -704,7 +801,7 @@ async function loadHospitalData(hospitalId) {
 
 // =================== RENDERIZAR FORMULÁRIO ===================
 function renderForm(leito) {
-    console.log('📋 Renderizando formulário - ORDEM CORRIGIDA + LÓGICA CONCESSÕES');
+    console.log('📋 Renderizando formulário V3.3 CORRIGIDO');
     
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
@@ -723,7 +820,7 @@ function renderForm(leito) {
     container.innerHTML = `
         <!-- Header Mobile -->
         <div class="header">
-            <div class="header-title">ARCHIPELAGO MEDICAL V3.3</div>
+            <div class="header-title">ARCHIPELAGO MEDICAL V3.3 CORRIGIDO</div>
             <div class="header-info">
                 <div class="hospital-badge">
                     ${hospitalNome} • ID ${idSequencial} • ${leitoPersonalizado}
@@ -767,7 +864,7 @@ function renderForm(leito) {
                 </div>
             ` : ''}
             
-            <!-- LINHA 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO -->
+            <!-- ✅ LINHA 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO -->
             <div class="form-row-3">
                 <div class="form-group">
                     <label>IDENTIFICAÇÃO <span class="required">*</span></label>
@@ -778,11 +875,13 @@ function renderForm(leito) {
                         if (isCruzAzulEnfermaria) {
                             const numFixo = NUMERACAO_FIXA_CRUZ_AZUL[String(leitoNum)];
                             return `<input type="text" id="identificacaoLeito" value="${numFixo}" readonly 
-                                     style="background: #1f2937; color: #9ca3af; cursor: not-allowed;" required>`;
+                                     style="background: #1f2937; color: #9ca3af; cursor: not-allowed;" required>
+                               <div class="help-text">🔒 Numeração fixa (Cruz Azul)</div>`;
                         } else {
                             const identificacaoValue = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
                             return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}" 
-                                     placeholder="Ex: 21 ou 711.1" maxlength="6" required>`;
+                                     placeholder="Ex: 1A, 21, 711.1" maxlength="6" required>
+                               <div class="help-text">✅ Aceita números e letras (1-6)</div>`;
                         }
                     })()}
                 </div>
@@ -796,9 +895,7 @@ function renderForm(leito) {
                                 <option value="Apartamento" selected>Apartamento</option>
                             </select>
                             <input type="hidden" id="tipoQuartoValue" value="Apartamento">
-                            <small style="color: rgba(255,255,255,0.5); font-size: 10px; margin-top: 4px; display: block;">
-                                🔒 Tipo fixo para este leito
-                            </small>`;
+                            <div class="help-text">🔒 Tipo fixo para este leito</div>`;
                         }
                         
                         if (currentHospital === 'H2' && leitoNum >= 21 && leitoNum <= 36) {
@@ -806,9 +903,7 @@ function renderForm(leito) {
                                 <option value="Enfermaria" selected>Enfermaria</option>
                             </select>
                             <input type="hidden" id="tipoQuartoValue" value="Enfermaria">
-                            <small style="color: rgba(255,255,255,0.5); font-size: 10px; margin-top: 4px; display: block;">
-                                🔒 Tipo fixo para este leito
-                            </small>`;
+                            <div class="help-text">🔒 Tipo fixo para este leito</div>`;
                         }
                         
                         const tipoAtual = leito.categoria_escolhida || leito.categoriaEscolhida || leito.categoria || leito.tipo || '';
@@ -865,7 +960,7 @@ function renderForm(leito) {
                 </div>
             </div>
             
-            <!-- LINHA 3: INICIAIS | MATRÍCULA | IDADE -->
+            <!-- ✅ LINHA 3: INICIAIS | MATRÍCULA | IDADE -->
             ${isVago ? `
                 <div class="form-row-3">
                     <div class="form-group">
@@ -874,8 +969,9 @@ function renderForm(leito) {
                     </div>
                     <div class="form-group">
                         <label>MATRÍCULA <span class="required">*</span></label>
-                        <input type="text" id="matricula" placeholder="0000000000" maxlength="10" required 
+                        <input type="text" id="matricula" placeholder="Ex: 123456789-0" maxlength="11" required 
                                oninput="formatarMatricula(this)">
+                        <div class="help-text">✅ Máximo 10 dígitos</div>
                     </div>
                     <div class="form-group">
                         <label>IDADE <span class="required">*</span></label>
@@ -893,7 +989,7 @@ function renderForm(leito) {
                     </div>
                     <div class="form-group">
                         <label>MATRÍCULA</label>
-                        <input type="text" value="${leito.matricula || ''}" readonly>
+                        <input type="text" value="${formatarMatriculaExibicao(leito.matricula)}" readonly>
                     </div>
                     <div class="form-group">
                         <label>IDADE <span class="required">*</span></label>
@@ -943,10 +1039,17 @@ function renderForm(leito) {
                 </div>
             </div>
             
-            <!-- CONCESSÕES -->
+            <!-- ✅ CONCESSÕES COM BUSCA -->
             <div class="form-section">
                 <div class="section-title">CONCESSÕES PREVISTAS NA ALTA (${CONCESSOES.length})</div>
-                <div class="checkbox-grid">
+                
+                <!-- ⭐ CAMPO DE BUSCA -->
+                <input type="text" 
+                       id="searchConcessoes" 
+                       class="search-input"
+                       placeholder="🔍 Digite para buscar... (ex: 'o2', 'banho')">
+                
+                <div id="qrcodeConcessoes" class="checkbox-grid">
                     ${CONCESSOES.map((c, i) => `
                         <label class="checkbox-item">
                             <input type="checkbox" id="conc${i}" value="${c}" 
@@ -957,10 +1060,17 @@ function renderForm(leito) {
                 </div>
             </div>
             
-            <!-- LINHAS DE CUIDADO -->
+            <!-- ✅ LINHAS DE CUIDADO COM BUSCA -->
             <div class="form-section">
                 <div class="section-title">LINHAS DE CUIDADO PREVISTAS NA ALTA (${LINHAS_CUIDADO.length})</div>
-                <div class="checkbox-grid">
+                
+                <!-- ⭐ CAMPO DE BUSCA -->
+                <input type="text" 
+                       id="searchLinhas" 
+                       class="search-input"
+                       placeholder="🔍 Digite para buscar... (ex: 'onco', 'cardio')">
+                
+                <div id="qrcodeLinhas" class="checkbox-grid">
                     ${LINHAS_CUIDADO.map((l, i) => `
                         <label class="checkbox-item">
                             <input type="checkbox" id="linha${i}" value="${l}"
@@ -983,7 +1093,7 @@ function renderForm(leito) {
         
         <!-- Rodapé -->
         <div class="footer">
-            Archipelago Dashboard V3.3 FINAL - Sistema Médico QR<br>
+            Archipelago Dashboard V3.3 FINAL CORRIGIDO - Sistema Médico QR<br>
             Total Rede: 79 leitos | 5 hospitais<br>
             <strong>Criado por:</strong> Dr. Guilherme Santoro | <strong>Desenvolvido por:</strong> Alessandro Rodrigues
         </div>
@@ -991,9 +1101,11 @@ function renderForm(leito) {
     
     container.style.display = 'flex';
     
-    // ✅ APLICAR LÓGICA DE CONCESSÕES
+    // ✅ APLICAR LÓGICA DE CONCESSÕES + BUSCA
     setTimeout(() => {
         configurarLogicaConcessoes(leito);
+        configurarBuscaDinamica('qrcodeConcessoes', 'searchConcessoes');
+        configurarBuscaDinamica('qrcodeLinhas', 'searchLinhas');
     }, 100);
     
     // Verificar limite Santa Clara
@@ -1037,7 +1149,6 @@ function renderForm(leito) {
 function configurarLogicaConcessoes(leito) {
     console.log('🎯 Configurando lógica de concessões');
     
-    // Pegar todos os checkboxes de concessões
     const checkboxes = [];
     CONCESSOES.forEach((c, i) => {
         const checkbox = document.getElementById(`conc${i}`);
@@ -1049,10 +1160,9 @@ function configurarLogicaConcessoes(leito) {
         return;
     }
     
-    const checkboxNaoSeAplica = checkboxes[0]; // Primeiro checkbox é "Não se aplica"
-    const outrosCheckboxes = checkboxes.slice(1); // Resto são as concessões reais
+    const checkboxNaoSeAplica = checkboxes[0];
+    const outrosCheckboxes = checkboxes.slice(1);
     
-    // ✅ REGRA 1: Se nenhuma concessão está marcada, marcar "Não se aplica" automaticamente
     function verificarDefault() {
         const algumaMarcada = outrosCheckboxes.some(cb => cb.checked);
         
@@ -1062,7 +1172,6 @@ function configurarLogicaConcessoes(leito) {
         }
     }
     
-    // ✅ REGRA 2: Se "Não se aplica" for marcado, desmarcar todas as outras
     checkboxNaoSeAplica.addEventListener('change', function() {
         if (this.checked) {
             outrosCheckboxes.forEach(cb => {
@@ -1070,31 +1179,27 @@ function configurarLogicaConcessoes(leito) {
             });
             console.log('✅ "Não se aplica" marcado → Todas as outras desmarcadas');
         } else {
-            // Se desmarcar "Não se aplica" e não tiver nada marcado, reativar
             setTimeout(verificarDefault, 50);
         }
     });
     
-    // ✅ REGRA 3: Se qualquer outra concessão for marcada, desmarcar "Não se aplica"
     outrosCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             if (this.checked) {
                 checkboxNaoSeAplica.checked = false;
                 console.log(`✅ Concessão "${this.value}" marcada → "Não se aplica" desmarcado`);
             } else {
-                // Verificar se alguma outra ainda está marcada
                 setTimeout(verificarDefault, 50);
             }
         });
     });
     
-    // ✅ APLICAR REGRA INICIAL
     verificarDefault();
     
     console.log('✅ Lógica de concessões configurada com sucesso');
 }
 
-// =================== FORMATAR MATRÍCULA ===================
+// =================== ✅ CORREÇÃO 2: FORMATAR MATRÍCULA COM HÍFEN ===================
 function formatarMatricula(input) {
     let valor = input.value.replace(/\D/g, '');
     
@@ -1102,7 +1207,12 @@ function formatarMatricula(input) {
         valor = valor.substring(0, 10);
     }
     
-    input.value = valor;
+    // ✅ ADICIONA HÍFEN NO ÚLTIMO DÍGITO
+    if (valor.length > 1) {
+        input.value = valor.slice(0, -1) + '-' + valor.slice(-1);
+    } else {
+        input.value = valor;
+    }
 }
 
 // =================== TIMER 2 MINUTOS ===================
@@ -1265,7 +1375,7 @@ async function saveData() {
             delete payload.iniciais;
         }
         
-        console.log('📤 Enviando V3.3:', payload);
+        console.log('📤 Enviando V3.3 CORRIGIDO:', payload);
         
         const params = new URLSearchParams();
         for (const [key, value] of Object.entries(payload)) {
@@ -1327,7 +1437,10 @@ function coletarDados() {
     if (iniciais) dados.iniciais = iniciais.value.trim();
     
     const matricula = document.getElementById('matricula');
-    if (matricula) dados.matricula = matricula.value.trim();
+    if (matricula) {
+        // ✅ REMOVE HÍFEN AO SALVAR
+        dados.matricula = matricula.value.replace(/-/g, '').trim();
+    }
     
     const idade = document.getElementById('idade');
     if (idade && idade.value) dados.idade = parseInt(idade.value);
@@ -1366,7 +1479,7 @@ function coletarDados() {
         if (cb && cb.checked) dados.linhas.push(cb.value);
     });
     
-    console.log('📋 Dados coletados');
+    console.log('📋 Dados coletados V3.3 CORRIGIDO');
     
     return dados;
 }
@@ -1462,12 +1575,18 @@ function showSuccess(message) {
 }
 
 // =================== LOG INICIALIZAÇÃO ===================
-console.log('✅ Archipelago QR V3.3 MOBILE - ORDEM CORRIGIDA + LÓGICA CONCESSÕES');
+console.log('✅ Archipelago QR V3.3 MOBILE - CORRIGIDO');
 console.log('📱 Otimizado para mobile');
 console.log('⏱️ Timer: 2 minutos com fechamento forçado');
 console.log('🏥 Total Rede: 79 leitos | 5 hospitais');
 console.log('');
-console.log('✅ ORDEM DOS CAMPOS CORRIGIDA:');
+console.log('✅ CORREÇÕES IMPLEMENTADAS:');
+console.log('1️⃣ Identificação aceita números + letras (1-6 caracteres)');
+console.log('2️⃣ Matrícula com hífen visual (ex: 12345678-9)');
+console.log('3️⃣ Busca dinâmica em Concessões (12 opções)');
+console.log('4️⃣ Busca dinâmica em Linhas de Cuidado (45 especialidades)');
+console.log('');
+console.log('✅ ORDEM DOS CAMPOS:');
 console.log('Linha 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO');
 console.log('Linha 2: GÊNERO | REGIÃO | PREVISÃO ALTA');
 console.log('Linha 3: INICIAIS | MATRÍCULA | IDADE');
