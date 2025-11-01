@@ -693,9 +693,11 @@ function renderForm(leito) {
     const hospitalNome = HOSPITAIS[currentHospital].nome;
     const idSequencial = String(currentLeito).padStart(2, '0');
     
-    const identificacao = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
-    const leitoPersonalizado = (identificacao && identificacao.trim()) 
-        ? identificacao.trim().toUpperCase()
+    // ✅ Correção: garantir que identificacao seja sempre string
+    const identificacaoRaw = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao;
+    const identificacao = identificacaoRaw ? String(identificacaoRaw).trim() : '';
+    const leitoPersonalizado = identificacao 
+        ? identificacao.toUpperCase()
         : `LEITO ${currentLeito}`;
     
     const idadeOptions = IDADE_OPTIONS.map(idade => 
