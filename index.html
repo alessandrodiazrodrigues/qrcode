@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Archipelago QR V3.3 FINAL CORRIGIDO - Acesso Médico</title>
+    <title>Archipelago QR V4.0 - Acesso Médico</title>
+    
+    <!-- ✅ POPPINS BOLD - GOOGLE FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* =================== RESET E BASE MOBILE =================== */
+        /* =================== RESET E BASE MOBILE V4.0 =================== */
         * {
             margin: 0;
             padding: 0;
@@ -17,7 +22,8 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-weight: 600; /* ✅ Semi-bold como padrão */
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
             color: #ffffff;
@@ -26,14 +32,14 @@
             touch-action: pan-y;
         }
         
-        /* =================== LOADING =================== */
+        /* =================== LOADING V4.0 =================== */
         .loading {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 23, 42, 0.98);
+            background: rgba(15, 23, 42, 0.85); /* ✅ Mais transparente */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -49,7 +55,7 @@
             width: 60px;
             height: 60px;
             border: 4px solid #334155;
-            border-top-color: #60a5fa;
+            border-top-color: #60a5fa; /* ✅ NOVA COR */
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -60,9 +66,10 @@
         
         .loading-text {
             margin-top: 20px;
-            color: #60a5fa;
+            color: #60a5fa; /* ✅ NOVA COR */
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700; /* ✅ Bold */
+            font-family: 'Poppins', sans-serif;
         }
         
         /* =================== CONTAINER MOBILE =================== */
@@ -74,9 +81,9 @@
             flex-direction: column;
         }
         
-        /* =================== HEADER MOBILE =================== */
+        /* =================== HEADER MOBILE V4.0 =================== */
         .header {
-            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            background: linear-gradient(135deg, #60a5fa 0%, #4a8fd8 100%); /* ✅ NOVA COR */
             padding: 20px 15px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             position: sticky;
@@ -85,8 +92,9 @@
         }
         
         .header-title {
+            font-family: 'Poppins', sans-serif;
             font-size: 18px;
-            font-weight: 700;
+            font-weight: 700; /* ✅ Bold */
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 8px;
@@ -143,7 +151,7 @@
         
         @keyframes pulse-danger {
             0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.08); opacity: 0.8); }
+            50% { transform: scale(1.08); opacity: 0.8; }
         }
         
         /* =================== FORM BODY MOBILE =================== */
@@ -155,17 +163,18 @@
         }
         
         .form-title {
+            font-family: 'Poppins', sans-serif;
             text-align: center;
             margin-bottom: 20px;
             font-size: 16px;
-            color: #60a5fa;
+            color: #60a5fa; /* ✅ NOVA COR */
             text-transform: uppercase;
             letter-spacing: 1px;
-            font-weight: 700;
+            font-weight: 700; /* ✅ Bold */
             padding: 12px;
-            background: rgba(96, 165, 250, 0.1);
+            background: rgba(96, 165, 250, 0.1); /* ✅ NOVA COR */
             border-radius: 8px;
-            border: 1px solid rgba(96, 165, 250, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.2); /* ✅ NOVA COR */
         }
         
         /* LAYOUT 3 COLUNAS MOBILE */
@@ -181,6 +190,18 @@
             display: grid;
             grid-template-columns: 1fr;
             margin-bottom: 15px;
+        }
+        
+        /* LAYOUT 2 COLUNAS */
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row-2 .form-group {
+            margin-bottom: 0;
         }
         
         .form-group {
@@ -212,14 +233,15 @@
             width: 100%;
             box-sizing: border-box;
             font-weight: 500;
+            font-family: 'Poppins', sans-serif;
             transition: all 0.2s;
         }
         
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+            border-color: #60a5fa; /* ✅ NOVA COR */
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15); /* ✅ NOVA COR */
             background: #1e293b;
         }
         
@@ -227,18 +249,6 @@
             background: #1f2937;
             color: #6b7280;
             border-color: #374151;
-        }
-        
-        /* Grid 2 colunas para alguns campos */
-        .form-row-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .form-row-2 .form-group {
-            margin-bottom: 0;
         }
         
         .form-group select {
@@ -250,7 +260,7 @@
             padding-right: 32px;
         }
         
-        /* ⭐ HELP TEXT */
+        /* HELP TEXT */
         .help-text {
             font-size: 10px;
             color: rgba(255,255,255,0.5);
@@ -263,19 +273,20 @@
         }
         
         .section-title {
-            background: #60a5fa;
+            font-family: 'Poppins', sans-serif;
+            background: #60a5fa; /* ✅ NOVA COR */
             color: #000000;
             padding: 10px 12px;
             border-radius: 8px;
             font-size: 11px;
-            font-weight: 700;
+            font-weight: 700; /* ✅ Bold */
             text-transform: uppercase;
             margin-bottom: 12px;
             letter-spacing: 0.5px;
             text-align: center;
         }
         
-        /* ⭐ CAMPO DE BUSCA */
+        /* CAMPO DE BUSCA */
         .search-input {
             width: 100%;
             padding: 10px;
@@ -285,13 +296,13 @@
             border-radius: 6px;
             font-size: 13px;
             margin-bottom: 8px;
-            font-family: inherit;
+            font-family: 'Poppins', sans-serif;
         }
         
         .search-input:focus {
             outline: none;
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+            border-color: #60a5fa; /* ✅ NOVA COR */
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2); /* ✅ NOVA COR */
         }
         
         .checkbox-grid {
@@ -313,12 +324,12 @@
             background: rgba(255,255,255,0.05);
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.1s ease; /* ✅ Transição suave */
             min-height: 44px;
         }
         
         .checkbox-item:active {
-            background: rgba(96, 165, 250, 0.15);
+            background: rgba(96, 165, 250, 0.15); /* ✅ NOVA COR */
             transform: scale(0.98);
         }
         
@@ -326,7 +337,7 @@
             margin-right: 10px;
             width: 20px;
             height: 20px;
-            accent-color: #60a5fa;
+            accent-color: #60a5fa; /* ✅ NOVA COR */
             cursor: pointer;
             flex-shrink: 0;
         }
@@ -339,7 +350,7 @@
             user-select: none;
         }
         
-        /* ⭐ MENSAGEM "NENHUM RESULTADO" */
+        /* MENSAGEM "NENHUM RESULTADO" */
         .no-results-message {
             padding: 10px;
             text-align: center;
@@ -347,7 +358,7 @@
             font-size: 12px;
         }
         
-        /* =================== ACTIONS MOBILE =================== */
+        /* =================== ACTIONS MOBILE V4.0 =================== */
         .actions {
             padding: 15px;
             background: #111827;
@@ -360,11 +371,12 @@
         }
         
         .btn {
+            font-family: 'Poppins', sans-serif;
             width: 100%;
             padding: 16px;
             border: none;
             border-radius: 12px;
-            font-weight: 700;
+            font-weight: 700; /* ✅ Bold */
             font-size: 14px;
             cursor: pointer;
             text-transform: uppercase;
@@ -389,12 +401,12 @@
         }
         
         .btn-secondary {
-            background: #374151;
+            background: rgba(156, 163, 175, 0.5); /* ✅ NOVA COR (#9ca3af transparente) */
             color: white;
         }
         
         .btn-qrcode {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: linear-gradient(135deg, #60a5fa 0%, #4a8fd8 100%); /* ✅ NOVA COR */
             color: white;
         }
         
@@ -422,10 +434,11 @@
         }
         
         .message-container h2 {
-            color: #60a5fa;
+            font-family: 'Poppins', sans-serif;
+            color: #60a5fa; /* ✅ NOVA COR */
             margin-bottom: 15px;
             font-size: 22px;
-            font-weight: 700;
+            font-weight: 700; /* ✅ Bold */
         }
         
         .message-container.error h2 {
@@ -437,6 +450,7 @@
         }
         
         .message-container p {
+            font-family: 'Poppins', sans-serif;
             color: #cbd5e1;
             margin-bottom: 25px;
             font-size: 15px;
@@ -444,7 +458,7 @@
             max-width: 400px;
         }
         
-        /* =================== RODAPÉ =================== */
+        /* =================== RODAPÉ V4.0 =================== */
         .footer {
             background: rgba(0,0,0,0.4);
             padding: 10px 15px;
@@ -481,7 +495,12 @@
         /* =================== ORIENTAÇÃO LANDSCAPE =================== */
         @media (orientation: landscape) and (max-height: 500px) {
             .header {
-                padding: 10px 15px;
+                padding: 8px 15px;
+            }
+            
+            .header-title {
+                font-size: 16px;
+                margin-bottom: 6px;
             }
             
             .form-body {
@@ -509,7 +528,7 @@
         <div class="message-icon">⚠️</div>
         <h2>Atenção</h2>
         <p id="errorMessage">Parâmetros inválidos.</p>
-        <button class="btn btn-qrcode" onclick="openQRScanner()">LER QR CODE</button>
+        <button class="btn btn-qrcode" onclick="openQRScanner()">Ler QR Code</button>
     </div>
     
     <!-- Container de Sucesso -->
@@ -518,17 +537,19 @@
         <h2>Sucesso!</h2>
         <p id="successMessage">Operação realizada.</p>
         <p style="margin-top: 15px; font-size: 13px; color: #94a3b8;">Para acessar outro leito, leia o QR Code novamente.</p>
-        <button class="btn btn-qrcode" onclick="openQRScanner()">LER QR CODE</button>
+        <button class="btn btn-qrcode" onclick="openQRScanner()">Ler QR Code</button>
     </div>
     
+    <!-- Carregando API.js -->
+    <script src="api.js"></script>
+    
     <script>
-// =================== ARCHIPELAGO QR V3.3 MOBILE FINAL CORRIGIDO ===================
-// ✅ CORREÇÃO 1: Identificação aceita números + letras
-// ✅ CORREÇÃO 2: Matrícula com hífen visual
-// ✅ CORREÇÃO 3: Busca dinâmica em Concessões e Linhas
-
-// =================== CONFIGURAÇÃO ===================
-const API_URL = 'https://script.google.com/macros/s/AKfycbyrdmoqC3J08_DM-VRKtHLC0htEJa4PnHeKQVTBsdSt1X1DFhc51axv-6TGyeKjn0Id/exec';
+// =================== ARCHIPELAGO QR V4.0 MOBILE ===================
+// ✅ Cores atualizadas: #60a5fa + #9ca3af
+// ✅ 7 hospitais | 93 leitos
+// ✅ Fonte Poppins Bold
+// ✅ Linhas de Cuidado INIBIDAS na UI
+// ✅ Title Case aplicado
 
 // =================== DADOS GLOBAIS ===================
 let hospitalData = {};
@@ -537,152 +558,16 @@ let currentLeito = null;
 let timerInterval = null;
 let timeLeft = 120;
 
-// =================== CONSTANTES V3.3 ===================
-const HOSPITAIS = {
-    H1: { nome: 'Neomater', leitos: 10 },
-    H2: { nome: 'Cruz Azul', leitos: 36 },
-    H3: { nome: 'Santa Marcelina', leitos: 7 },
-    H4: { nome: 'Santa Clara', leitos: 13 },
-    H5: { nome: 'Adventista', leitos: 13 }
-};
-
-const ISOLAMENTO_OPTIONS = [
-    "Não Isolamento",
-    "Isolamento de Contato", 
-    "Isolamento Respiratório"
-];
-
-const REGIAO_OPTIONS = [
-    'Zona Central',
-    'Zona Sul',
-    'Zona Norte',
-    'Zona Leste',
-    'Zona Oeste',
-    'ABC',
-    'Guarulhos',
-    'Osasco',
-    'Outra'
-];
-
-const SEXO_OPTIONS = [
-    'Masculino',
-    'Feminino'
-];
-
-const HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5'];
-const SANTA_CLARA_MAX_ENFERMARIAS = 4;
-
-const CRUZ_AZUL_LEITOS_IRMAOS = {
-    '21': '22', '22': '21',
-    '23': '24', '24': '23',
-    '25': '26', '26': '25',
-    '27': '28', '28': '27',
-    '29': '30', '30': '29',
-    '31': '32', '32': '31',
-    '33': '34', '34': '33',
-    '35': '36', '36': '35'
-};
-
-const NUMERACAO_FIXA_CRUZ_AZUL = {
-    '21': '711.1', '22': '711.2',
-    '23': '713.1', '24': '713.2',
-    '25': '715.1', '26': '715.2',
-    '27': '717.1', '28': '717.2',
-    '29': '719.1', '30': '719.2',
-    '31': '721.1', '32': '721.2',
-    '33': '723.1', '34': '723.2',
-    '35': '725.1', '36': '725.2'
-};
-
-const DIRETIVAS_OPTIONS = [
-    'Não se aplica',
-    'Sim',
-    'Não'
-];
-
-const CONCESSOES = [
-    "Não se aplica",
-    "Transição Domiciliar",
-    "Aplicação domiciliar de medicamentos",
-    "Aspiração",
-    "Banho",
-    "Curativo",
-    "Curativo PICC",
-    "Fisioterapia Domiciliar",
-    "Fonoaudiologia Domiciliar",
-    "Oxigenoterapia",
-    "Remoção",
-    "Solicitação domiciliar de exames"
-];
-
-const LINHAS_CUIDADO = [
-    "Assiste",
-    "APS SP",
-    "Cuidados Paliativos",
-    "ICO (Insuficiência Coronariana)",
-    "Nexus SP Cardiologia",
-    "Nexus SP Gastroentereologia",
-    "Nexus SP Geriatria",
-    "Nexus SP Pneumologia",
-    "Nexus SP Psiquiatria",
-    "Nexus SP Reumatologia",
-    "Nexus SP Saúde do Fígado",
-    "Generalista",
-    "Bucomaxilofacial",
-    "Cardiologia",
-    "Cirurgia Cardíaca",
-    "Cirurgia de Cabeça e Pescoço",
-    "Cirurgia do Aparelho Digestivo",
-    "Cirurgia Geral",
-    "Cirurgia Oncológica",
-    "Cirurgia Plástica",
-    "Cirurgia Torácica",
-    "Cirurgia Vascular",
-    "Clínica Médica",
-    "Coloproctologia",
-    "Dermatologia",
-    "Endocrinologia",
-    "Fisiatria",
-    "Gastroenterologia",
-    "Geriatria",
-    "Ginecologia e Obstetrícia",
-    "Hematologia",
-    "Infectologia",
-    "Mastologia",
-    "Nefrologia",
-    "Neurocirurgia",
-    "Neurologia",
-    "Oftalmologia",
-    "Oncologia Clínica",
-    "Ortopedia",
-    "Otorrinolaringologia",
-    "Pediatria",
-    "Pneumologia",
-    "Psiquiatria",
-    "Reumatologia",
-    "Urologia"
-];
-
-const PREVISAO_ALTA = [
-    'Hoje Ouro', 'Hoje 2R', 'Hoje 3R',
-    '24h Ouro', '24h 2R', '24h 3R',
-    '48h', '72h', '96h', 'Sem Previsão'
-];
-
-const PPS_OPTIONS = ['10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'];
-const IDADE_OPTIONS = Array.from({length: 102}, (_, i) => i + 14);
-
-// =================== ✅ CORREÇÃO 2: FUNÇÃO FORMATAÇÃO MATRÍCULA ===================
+// =================== FUNÇÃO FORMATAÇÃO MATRÍCULA ===================
 function formatarMatriculaExibicao(matricula) {
     if (!matricula || matricula === '—') return '—';
     const mat = String(matricula).replace(/\D/g, '');
     if (mat.length === 0) return '—';
     if (mat.length === 1) return mat;
-    // ✅ Adiciona hífen no último dígito
     return mat.slice(0, -1) + '-' + mat.slice(-1);
 }
 
-// =================== ✅ CORREÇÃO 3: FUNÇÃO BUSCA DINÂMICA ===================
+// =================== FUNÇÃO BUSCA DINÂMICA ===================
 function configurarBuscaDinamica(containerId, searchId) {
     const searchInput = document.getElementById(searchId);
     const container = document.getElementById(containerId);
@@ -707,7 +592,6 @@ function configurarBuscaDinamica(containerId, searchId) {
             }
         });
         
-        // Mensagem se não encontrar nada
         const visibleLabels = Array.from(labels).filter(l => l.style.display !== 'none');
         let msgNoResults = container.querySelector('.no-results-message');
         
@@ -730,10 +614,11 @@ function configurarBuscaDinamica(containerId, searchId) {
 
 // =================== INICIALIZAÇÃO ===================
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 Archipelago QR V3.3 Mobile CORRIGIDO');
-    console.log('✅ CORREÇÃO 1: Identificação aceita números + letras');
-    console.log('✅ CORREÇÃO 2: Matrícula com hífen visual');
-    console.log('✅ CORREÇÃO 3: Busca dinâmica em Concessões e Linhas');
+    console.log('🚀 Archipelago QR V4.0 Mobile');
+    console.log('🎨 Cores: #60a5fa + #9ca3af');
+    console.log('✍️ Fonte: Poppins Bold');
+    console.log('🏥 Total: 7 hospitais | 93 leitos');
+    console.log('🚫 Linhas de Cuidado: INIBIDAS na UI');
     
     const urlParams = new URLSearchParams(window.location.search);
     const hospitalId = urlParams.get('h');
@@ -766,7 +651,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 // =================== CARREGAR DADOS ===================
 async function loadHospitalData(hospitalId) {
     try {
-        console.log('📡 Carregando dados V3.3...');
+        console.log('📡 Carregando dados V4.0...');
         
         const response = await fetch(`${API_URL}?action=all`);
         if (!response.ok) throw new Error('Erro na API');
@@ -799,9 +684,9 @@ async function loadHospitalData(hospitalId) {
     }
 }
 
-// =================== RENDERIZAR FORMULÁRIO ===================
+// =================== RENDERIZAR FORMULÁRIO V4.0 ===================
 function renderForm(leito) {
-    console.log('📋 Renderizando formulário V3.3 CORRIGIDO');
+    console.log('📋 Renderizando formulário V4.0');
     
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
@@ -820,7 +705,7 @@ function renderForm(leito) {
     container.innerHTML = `
         <!-- Header Mobile -->
         <div class="header">
-            <div class="header-title">ARCHIPELAGO MEDICAL V3.3 CORRIGIDO</div>
+            <div class="header-title">ARCHIPELAGO MEDICAL V4.0</div>
             <div class="header-info">
                 <div class="hospital-badge">
                     ${hospitalNome} • ID ${idSequencial} • ${leitoPersonalizado}
@@ -834,10 +719,10 @@ function renderForm(leito) {
         
         <!-- Form Body -->
         <div class="form-body">
-            <h2 class="form-title">${isVago ? 'ADMISSÃO DE PACIENTE' : 'ATUALIZAÇÃO DE DADOS'}</h2>
+            <h2 class="form-title">${isVago ? 'Admissão de Paciente' : 'Atualização de Dados'}</h2>
             
             ${!isVago && leito.dataAdmissao ? `
-                <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #3b82f6;">
+                <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #60a5fa;">
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
                         <div style="flex: 1;">
                             <div style="color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">
@@ -864,10 +749,10 @@ function renderForm(leito) {
                 </div>
             ` : ''}
             
-            <!-- ✅ LINHA 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO -->
+            <!-- LINHA 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO -->
             <div class="form-row-3">
                 <div class="form-group">
-                    <label>IDENTIFICAÇÃO <span class="required">*</span></label>
+                    <label>Identificação <span class="required">*</span></label>
                     ${(() => {
                         const leitoNum = parseInt(currentLeito);
                         const isCruzAzulEnfermaria = (currentHospital === 'H2' && leitoNum >= 21 && leitoNum <= 36);
@@ -886,7 +771,7 @@ function renderForm(leito) {
                     })()}
                 </div>
                 <div class="form-group" id="tipoQuartoGroup">
-                    <label>TIPO QUARTO <span class="required">*</span></label>
+                    <label>Tipo Quarto <span class="required">*</span></label>
                     ${(() => {
                         const leitoNum = parseInt(currentLeito);
                         
@@ -918,7 +803,7 @@ function renderForm(leito) {
                     })()}
                 </div>
                 <div class="form-group">
-                    <label>ISOLAMENTO <span class="required">*</span></label>
+                    <label>Isolamento <span class="required">*</span></label>
                     <select id="isolamento" required>
                         ${ISOLAMENTO_OPTIONS.map((opt, index) => 
                             `<option value="${opt}" ${(leito.isolamento === opt || (index === 0 && !leito.isolamento)) ? 'selected' : ''}>${opt}</option>`
@@ -930,7 +815,7 @@ function renderForm(leito) {
             <!-- LINHA 2: GÊNERO | REGIÃO | PREVISÃO ALTA -->
             <div class="form-row-3">
                 <div class="form-group">
-                    <label>GÊNERO <span class="required">*</span></label>
+                    <label>Gênero <span class="required">*</span></label>
                     <select id="sexo" required>
                         <option value="">Selecionar...</option>
                         ${SEXO_OPTIONS.map(sexo => {
@@ -940,7 +825,7 @@ function renderForm(leito) {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>REGIÃO <span class="required">*</span></label>
+                    <label>Região <span class="required">*</span></label>
                     <select id="regiao" required>
                         <option value="">Selecionar...</option>
                         ${REGIAO_OPTIONS.map(regiao => 
@@ -949,7 +834,7 @@ function renderForm(leito) {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>PREVISÃO ALTA <span class="required">*</span></label>
+                    <label>Previsão Alta <span class="required">*</span></label>
                     <select id="prevAlta" required>
                         ${PREVISAO_ALTA.map(p => {
                             const prevAltaAtual = leito.prevAlta === 'SP' ? 'Sem Previsão' : leito.prevAlta;
@@ -960,21 +845,21 @@ function renderForm(leito) {
                 </div>
             </div>
             
-            <!-- ✅ LINHA 3: INICIAIS | MATRÍCULA | IDADE -->
+            <!-- LINHA 3: INICIAIS | MATRÍCULA | IDADE -->
             ${isVago ? `
                 <div class="form-row-3">
                     <div class="form-group">
-                        <label>INICIAIS <span class="required">*</span></label>
+                        <label>Iniciais <span class="required">*</span></label>
                         <input type="text" id="iniciais" placeholder="Ex: J S M" maxlength="10" required>
                     </div>
                     <div class="form-group">
-                        <label>MATRÍCULA <span class="required">*</span></label>
+                        <label>Matrícula <span class="required">*</span></label>
                         <input type="text" id="matricula" placeholder="Ex: 123456789-0" maxlength="11" required 
                                oninput="formatarMatricula(this)">
                         <div class="help-text">✅ Máximo 10 dígitos</div>
                     </div>
                     <div class="form-group">
-                        <label>IDADE <span class="required">*</span></label>
+                        <label>Idade <span class="required">*</span></label>
                         <select id="idade" required>
                             <option value="">Selecionar...</option>
                             ${idadeOptions}
@@ -984,15 +869,15 @@ function renderForm(leito) {
             ` : `
                 <div class="form-row-3">
                     <div class="form-group">
-                        <label>INICIAIS</label>
+                        <label>Iniciais</label>
                         <input type="text" value="${leito.nome?.split(' ').map(n => n[0]).join(' ') || ''}" readonly>
                     </div>
                     <div class="form-group">
-                        <label>MATRÍCULA</label>
+                        <label>Matrícula</label>
                         <input type="text" value="${formatarMatriculaExibicao(leito.matricula)}" readonly>
                     </div>
                     <div class="form-group">
-                        <label>IDADE <span class="required">*</span></label>
+                        <label>Idade <span class="required">*</span></label>
                         <select id="idade" required>
                             <option value="">Selecionar...</option>
                             ${idadeOptions}
@@ -1030,7 +915,7 @@ function renderForm(leito) {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>DIRETIVAS <span class="required">*</span></label>
+                    <label>Diretivas <span class="required">*</span></label>
                     <select id="diretivas" required>
                         ${DIRETIVAS_OPTIONS.map((opcao, index) => 
                             `<option value="${opcao}" ${(leito.diretivas === opcao || (index === 0 && !leito.diretivas)) ? 'selected' : ''}>${opcao}</option>`
@@ -1039,11 +924,10 @@ function renderForm(leito) {
                 </div>
             </div>
             
-            <!-- ✅ CONCESSÕES COM BUSCA -->
+            <!-- CONCESSÕES COM BUSCA (VISÍVEL) -->
             <div class="form-section">
-                <div class="section-title">CONCESSÕES PREVISTAS NA ALTA (${CONCESSOES.length})</div>
+                <div class="section-title">Concessões Previstas na Alta (${CONCESSOES.length})</div>
                 
-                <!-- ⭐ CAMPO DE BUSCA -->
                 <input type="text" 
                        id="searchConcessoes" 
                        class="search-input"
@@ -1060,52 +944,53 @@ function renderForm(leito) {
                 </div>
             </div>
             
-            <!-- ✅ LINHAS DE CUIDADO COM BUSCA -->
-            <div class="form-section">
-                <div class="section-title">LINHAS DE CUIDADO PREVISTAS NA ALTA (${LINHAS_CUIDADO.length})</div>
-                
-                <!-- ⭐ CAMPO DE BUSCA -->
-                <input type="text" 
-                       id="searchLinhas" 
-                       class="search-input"
-                       placeholder="🔍 Digite para buscar... (ex: 'onco', 'cardio')">
-                
-                <div id="qrcodeLinhas" class="checkbox-grid">
-                    ${LINHAS_CUIDADO.map((l, i) => `
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="linha${i}" value="${l}"
-                                ${leito.linhas && leito.linhas.includes(l) ? 'checked' : ''}> 
-                            <span>${l}</span>
-                        </label>
-                    `).join('')}
+            <!-- ⚠️ LINHAS DE CUIDADO: INIBIDAS NA UI V4.0 -->
+            <!-- Mantido no código para compatibilidade, mas NÃO renderizado -->
+            ${false ? `
+                <div class="form-section">
+                    <div class="section-title">Linhas de Cuidado Previstas na Alta (${LINHAS_CUIDADO.length})</div>
+                    
+                    <input type="text" 
+                           id="searchLinhas" 
+                           class="search-input"
+                           placeholder="🔍 Digite para buscar... (ex: 'onco', 'cardio')">
+                    
+                    <div id="qrcodeLinhas" class="checkbox-grid">
+                        ${LINHAS_CUIDADO.map((l, i) => `
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="linha${i}" value="${l}"
+                                    ${leito.linhas && leito.linhas.includes(l) ? 'checked' : ''}> 
+                                <span>${l}</span>
+                            </label>
+                        `).join('')}
+                    </div>
                 </div>
-            </div>
+            ` : ''}
         </div>
         
         <!-- Actions -->
         <div class="actions">
             <button class="btn btn-primary" onclick="saveData()">
-                ${isVago ? 'ADMITIR PACIENTE' : 'SALVAR ALTERAÇÕES'}
+                ${isVago ? 'Admitir Paciente' : 'Salvar Alterações'}
             </button>
-            ${!isVago ? '<button class="btn btn-danger" onclick="darAlta()">DAR ALTA</button>' : ''}
-            <button class="btn btn-secondary" onclick="cancelar()">CANCELAR</button>
+            ${!isVago ? '<button class="btn btn-danger" onclick="darAlta()">Dar Alta</button>' : ''}
+            <button class="btn btn-secondary" onclick="cancelar()">Cancelar</button>
         </div>
         
-        <!-- Rodapé -->
+        <!-- Rodapé V4.0 -->
         <div class="footer">
-            Archipelago Dashboard V3.3 FINAL CORRIGIDO - Sistema Médico QR<br>
-            Total Rede: 79 leitos | 5 hospitais<br>
+            Archipelago Dashboard V4.0 - Sistema Médico QR<br>
+            Total Rede: 93 leitos | 7 hospitais<br>
             <strong>Criado por:</strong> Dr. Guilherme Santoro | <strong>Desenvolvido por:</strong> Alessandro Rodrigues
         </div>
     `;
     
     container.style.display = 'flex';
     
-    // ✅ APLICAR LÓGICA DE CONCESSÕES + BUSCA
+    // Aplicar lógica de concessões + busca
     setTimeout(() => {
         configurarLogicaConcessoes(leito);
         configurarBuscaDinamica('qrcodeConcessoes', 'searchConcessoes');
-        configurarBuscaDinamica('qrcodeLinhas', 'searchLinhas');
     }, 100);
     
     // Verificar limite Santa Clara
@@ -1145,7 +1030,7 @@ function renderForm(leito) {
     }, 100);
 }
 
-// =================== ✅ LÓGICA DE CONCESSÕES ===================
+// =================== LÓGICA DE CONCESSÕES ===================
 function configurarLogicaConcessoes(leito) {
     console.log('🎯 Configurando lógica de concessões');
     
@@ -1199,7 +1084,7 @@ function configurarLogicaConcessoes(leito) {
     console.log('✅ Lógica de concessões configurada com sucesso');
 }
 
-// =================== ✅ CORREÇÃO 2: FORMATAR MATRÍCULA COM HÍFEN ===================
+// =================== FORMATAR MATRÍCULA COM HÍFEN ===================
 function formatarMatricula(input) {
     let valor = input.value.replace(/\D/g, '');
     
@@ -1207,7 +1092,6 @@ function formatarMatricula(input) {
         valor = valor.substring(0, 10);
     }
     
-    // ✅ ADICIONA HÍFEN NO ÚLTIMO DÍGITO
     if (valor.length > 1) {
         input.value = valor.slice(0, -1) + '-' + valor.slice(-1);
     } else {
@@ -1375,7 +1259,7 @@ async function saveData() {
             delete payload.iniciais;
         }
         
-        console.log('📤 Enviando V3.3 CORRIGIDO:', payload);
+        console.log('📤 Enviando V4.0:', payload);
         
         const params = new URLSearchParams();
         for (const [key, value] of Object.entries(payload)) {
@@ -1438,7 +1322,6 @@ function coletarDados() {
     
     const matricula = document.getElementById('matricula');
     if (matricula) {
-        // ✅ REMOVE HÍFEN AO SALVAR
         dados.matricula = matricula.value.replace(/-/g, '').trim();
     }
     
@@ -1473,13 +1356,10 @@ function coletarDados() {
         if (cb && cb.checked) dados.concessoes.push(cb.value);
     });
     
+    // ⚠️ Linhas inibidas na UI, mas enviando array vazio para backend
     dados.linhas = [];
-    LINHAS_CUIDADO.forEach((_, i) => {
-        const cb = document.getElementById(`linha${i}`);
-        if (cb && cb.checked) dados.linhas.push(cb.value);
-    });
     
-    console.log('📋 Dados coletados V3.3 CORRIGIDO');
+    console.log('📋 Dados coletados V4.0');
     
     return dados;
 }
@@ -1574,28 +1454,26 @@ function showSuccess(message) {
     }
 }
 
-// =================== LOG INICIALIZAÇÃO ===================
-console.log('✅ Archipelago QR V3.3 MOBILE - CORRIGIDO');
+// =================== LOG INICIALIZAÇÃO V4.0 ===================
+console.log('✅ Archipelago QR V4.0 MOBILE');
 console.log('📱 Otimizado para mobile');
 console.log('⏱️ Timer: 2 minutos com fechamento forçado');
-console.log('🏥 Total Rede: 79 leitos | 5 hospitais');
+console.log('🏥 Total Rede: 93 leitos | 7 hospitais');
 console.log('');
-console.log('✅ CORREÇÕES IMPLEMENTADAS:');
+console.log('✅ NOVIDADES V4.0:');
+console.log('🎨 Cores: #60a5fa (azul vibrante) + #9ca3af (cinza)');
+console.log('✍️ Fonte: Poppins Bold aplicada');
+console.log('🏥 Hospitais: H6 (Santa Cruz) + H7 (Santa Virgínia) adicionados');
+console.log('🚫 Linhas de Cuidado: INIBIDAS na UI (backend compatível)');
+console.log('✅ Concessões: VISÍVEIS (12 opções com busca)');
+console.log('');
+console.log('✅ CORREÇÕES MANTIDAS:');
 console.log('1️⃣ Identificação aceita números + letras (1-6 caracteres)');
 console.log('2️⃣ Matrícula com hífen visual (ex: 12345678-9)');
-console.log('3️⃣ Busca dinâmica em Concessões (12 opções)');
-console.log('4️⃣ Busca dinâmica em Linhas de Cuidado (45 especialidades)');
-console.log('');
-console.log('✅ ORDEM DOS CAMPOS:');
-console.log('Linha 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO');
-console.log('Linha 2: GÊNERO | REGIÃO | PREVISÃO ALTA');
-console.log('Linha 3: INICIAIS | MATRÍCULA | IDADE');
-console.log('Linha 4: PPS | SPICT-BR | DIRETIVAS');
-console.log('');
-console.log('✅ LÓGICA DE CONCESSÕES:');
-console.log('• Se nenhuma marcada → "Não se aplica" ativado');
-console.log('• Se "Não se aplica" marcado → Outras desmarcadas');
-console.log('• Se outra marcada → "Não se aplica" desmarcado');
+console.log('3️⃣ Busca dinâmica em Concessões');
+console.log('4️⃣ Lógica "Não se aplica" em Concessões');
+console.log('5️⃣ Validação Cruz Azul (leitos irmãos)');
+console.log('6️⃣ Validação Santa Clara (limite 4 enfermarias)');
     </script>
 </body>
 </html>
