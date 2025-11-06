@@ -1,33 +1,29 @@
-// =================== API V4.0 - QR CODE MOBILE ===================
+// =================== API V4.1 - QR CODE MOBILE ===================
 // Cliente: Guilherme Santoro
 // Desenvolvedor: Alessandro Rodrigues
 // Data: Novembro/2025
-// Versão: V4.0 (Alinhado com Dashboard Principal)
-// =================== CHANGELOG V3.3 → V4.0 ===================
-// ✅ Cores atualizadas: #60a5fa + #9ca3af
-// ✅ Adicionados H6 (Santa Cruz) e H7 (Santa Virgínia)
-// ✅ Total: 7 hospitais | 93 leitos
-// ✅ Linhas de Cuidado inibidas na UI (mantidas no backend)
-// ✅ URL da API atualizada
-// ✅ Fonte Poppins Bold
+// Versão: V4.1 (Alinhado com Dashboard Principal)
+// ✅ 7 hospitais | 93 leitos | 13 concessões (12 + "Não se aplica")
+// ✅ 45 Linhas de Cuidado RESTAURADAS
+// ✅ Sistema de normalização implementado
 // ==================================================================================
 
-// *** URL DA API V4.0 ***
-const API_URL = 'https://script.google.com/macros/s/AKfycbxduw4WmDBu_SNJnDJ6WCR1M4kOAtibKeXd2IwBJ3HpImiHtricIlxyxdYpBp6g3UzJ/exec';
+// *** URL DA API V4.1 ***
+const API_URL = 'https://script.google.com/macros/s/AKfycbzvPln452fG3MqgrA6r_06vgGA8ZDD7vmI1zTNKZ7ZGgkmg7Czjnvpur5CEx_MuOhtA/exec';
 
-// =================== CONFIGURAÇÃO DE HOSPITAIS V4.0 (7 HOSPITAIS - 93 LEITOS) ===================
+// =================== CONFIGURAÇÃO DE HOSPITAIS V4.1 (7 HOSPITAIS - 93 LEITOS) ===================
 const HOSPITAIS = {
     H1: { nome: 'Neomater', leitos: 10 },
     H2: { nome: 'Cruz Azul', leitos: 36 },
     H3: { nome: 'Santa Marcelina', leitos: 7 },
     H4: { nome: 'Santa Clara', leitos: 13 },
     H5: { nome: 'Adventista', leitos: 13 },
-    H6: { nome: 'Santa Cruz', leitos: 7 },      // ✅ NOVO V4.0
-    H7: { nome: 'Santa Virgínia', leitos: 7 }   // ✅ NOVO V4.0
+    H6: { nome: 'Santa Cruz', leitos: 7 },
+    H7: { nome: 'Santa Virgínia', leitos: 7 }
 };
 
-// =================== HOSPITAIS HÍBRIDOS V4.0 ===================
-const HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5', 'H6', 'H7']; // ✅ +H6 e H7
+// =================== HOSPITAIS HÍBRIDOS V4.1 ===================
+const HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5', 'H6', 'H7'];
 
 // =================== SANTA CLARA (LIMITE 4 ENFERMARIAS) ===================
 const SANTA_CLARA_MAX_ENFERMARIAS = 4;
@@ -95,7 +91,7 @@ const PREVISAO_ALTA = [
 const PPS_OPTIONS = ['10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'];
 const IDADE_OPTIONS = Array.from({length: 102}, (_, i) => i + 14);
 
-// =================== CONCESSÕES (12 OPÇÕES - VISÍVEL NA UI) ===================
+// =================== CONCESSÕES (13 OPÇÕES - 12 + "Não se aplica") ===================
 const CONCESSOES = [
     "Não se aplica",
     "Transição Domiciliar",
@@ -104,16 +100,15 @@ const CONCESSOES = [
     "Banho",
     "Curativo",
     "Curativo PICC",
-    "Fisioterapia Domiciliar",
+    "Fisioterapia Motora Domiciliar",
     "Fonoaudiologia Domiciliar",
     "Oxigenoterapia",
     "Remoção",
-    "Solicitação domiciliar de exames"
+    "Solicitação domiciliar de exames",
+    "Fisioterapia Respiratória Domiciliar"
 ];
 
-// =================== LINHAS DE CUIDADO (45 OPÇÕES - INIBIDA NA UI V4.0) ===================
-// ⚠️ MANTIDO NO CÓDIGO PARA COMPATIBILIDADE COM BACKEND
-// ⚠️ NÃO É RENDERIZADO NA INTERFACE (ver função renderForm)
+// =================== LINHAS DE CUIDADO (45 OPÇÕES - RESTAURADAS V4.1) ===================
 const LINHAS_CUIDADO = [
     "Assiste",
     "APS SP",
@@ -162,11 +157,100 @@ const LINHAS_CUIDADO = [
     "Urologia"
 ];
 
+// =================== SISTEMA DE NORMALIZAÇÃO/DESNORMALIZAÇÃO ===================
+function normalizarTexto(texto) {
+    if (!texto || typeof texto !== 'string') return texto;
+    return texto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ç/g, 'c')
+        .replace(/Ç/g, 'C');
+}
+
+// Mapas de exibição (SEM acentos → COM acentos)
+const CONCESSOES_DISPLAY_MAP = {
+    "Transicao Domiciliar": "Transição Domiciliar",
+    "Aplicacao domiciliar de medicamentos": "Aplicação domiciliar de medicamentos",
+    "Aspiracao": "Aspiração",
+    "Banho": "Banho",
+    "Curativo": "Curativo",
+    "Curativo PICC": "Curativo PICC",
+    "Fisioterapia Motora Domiciliar": "Fisioterapia Motora Domiciliar",
+    "Fonoaudiologia Domiciliar": "Fonoaudiologia Domiciliar",
+    "Oxigenoterapia": "Oxigenoterapia",
+    "Remocao": "Remoção",
+    "Solicitacao domiciliar de exames": "Solicitação domiciliar de exames",
+    "Fisioterapia Respiratoria Domiciliar": "Fisioterapia Respiratória Domiciliar"
+};
+
+const LINHAS_DISPLAY_MAP = {
+    "Assiste": "Assiste",
+    "APS SP": "APS SP",
+    "Cuidados Paliativos": "Cuidados Paliativos",
+    "ICO (Insuficiencia Coronariana)": "ICO (Insuficiência Coronariana)",
+    "Nexus SP Cardiologia": "Nexus SP Cardiologia",
+    "Nexus SP Gastroentereologia": "Nexus SP Gastroentereologia",
+    "Nexus SP Geriatria": "Nexus SP Geriatria",
+    "Nexus SP Pneumologia": "Nexus SP Pneumologia",
+    "Nexus SP Psiquiatria": "Nexus SP Psiquiatria",
+    "Nexus SP Reumatologia": "Nexus SP Reumatologia",
+    "Nexus SP Saude do Figado": "Nexus SP Saúde do Fígado",
+    "Generalista": "Generalista",
+    "Bucomaxilofacial": "Bucomaxilofacial",
+    "Cardiologia": "Cardiologia",
+    "Cirurgia Cardiaca": "Cirurgia Cardíaca",
+    "Cirurgia de Cabeca e Pescoco": "Cirurgia de Cabeça e Pescoço",
+    "Cirurgia do Aparelho Digestivo": "Cirurgia do Aparelho Digestivo",
+    "Cirurgia Geral": "Cirurgia Geral",
+    "Cirurgia Oncologica": "Cirurgia Oncológica",
+    "Cirurgia Plastica": "Cirurgia Plástica",
+    "Cirurgia Toracica": "Cirurgia Torácica",
+    "Cirurgia Vascular": "Cirurgia Vascular",
+    "Clinica Medica": "Clínica Médica",
+    "Coloproctologia": "Coloproctologia",
+    "Dermatologia": "Dermatologia",
+    "Endocrinologia": "Endocrinologia",
+    "Fisiatria": "Fisiatria",
+    "Gastroenterologia": "Gastroenterologia",
+    "Geriatria": "Geriatria",
+    "Ginecologia e Obstetricia": "Ginecologia e Obstetrícia",
+    "Hematologia": "Hematologia",
+    "Infectologia": "Infectologia",
+    "Mastologia": "Mastologia",
+    "Nefrologia": "Nefrologia",
+    "Neurocirurgia": "Neurocirurgia",
+    "Neurologia": "Neurologia",
+    "Oftalmologia": "Oftalmologia",
+    "Oncologia Clinica": "Oncologia Clínica",
+    "Ortopedia": "Ortopedia",
+    "Otorrinolaringologia": "Otorrinolaringologia",
+    "Pediatria": "Pediatria",
+    "Pneumologia": "Pneumologia",
+    "Psiquiatria": "Psiquiatria",
+    "Reumatologia": "Reumatologia",
+    "Urologia": "Urologia"
+};
+
+function desnormalizarTexto(texto) {
+    if (!texto || typeof texto !== 'string') return texto;
+    
+    if (CONCESSOES_DISPLAY_MAP[texto]) {
+        return CONCESSOES_DISPLAY_MAP[texto];
+    }
+    
+    if (LINHAS_DISPLAY_MAP[texto]) {
+        return LINHAS_DISPLAY_MAP[texto];
+    }
+    
+    return texto;
+}
+
 // =================== LOGS ===================
-console.log('✅ API.js V4.0 QR Code Mobile carregado');
+console.log('✅ API.js V4.1 QR Code Mobile carregado');
 console.log(`🔗 URL: ${API_URL}`);
 console.log(`🏥 Hospitais: ${Object.keys(HOSPITAIS).length} (93 leitos)`);
 console.log(`🎨 Cores: #60a5fa (azul vibrante) + #9ca3af (cinza)`);
 console.log(`✍️ Fonte: Poppins Bold`);
-console.log(`🚫 Linhas de Cuidado: INIBIDAS na UI`);
-console.log(`✅ Concessões: VISÍVEIS (${CONCESSOES.length} opções)`);
+console.log(`✅ Concessões: ${CONCESSOES.length} opções (12 + "Não se aplica")`);
+console.log(`✅ Linhas de Cuidado: ${LINHAS_CUIDADO.length} opções RESTAURADAS`);
+console.log(`✅ Sistema de normalização implementado`);
