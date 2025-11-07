@@ -209,9 +209,11 @@
             margin-bottom: 0;
         }
         
+        /* =================== ALTURA UNIFORME PARA FORM-GROUP =================== */
         .form-group {
             display: flex;
             flex-direction: column;
+            min-height: 68px; /* Altura mínima para consistência */
         }
         
         /* =================== LABELS DOS CAMPOS - BRANCO =================== */
@@ -221,6 +223,7 @@
             color: #ffffff; /* BRANCO */
             margin-bottom: 4px;
             letter-spacing: 0.5px;
+            flex-shrink: 0; /* Não encolhe */
         }
         
         .form-group label .required {
@@ -228,7 +231,7 @@
             font-size: 10px;
         }
         
-        /* =================== INPUTS E SELECTS - BORDA AZUL IGUAL MODAL DE SENHA =================== */
+        /* =================== INPUTS E SELECTS - ALTURA UNIFORME =================== */
         .form-group input,
         .form-group select {
             padding: 10px 8px;
@@ -238,10 +241,13 @@
             border-radius: 8px;
             font-size: 13px;
             width: 100%;
+            min-height: 42px; /* ALTURA MÍNIMA UNIFORME */
+            height: 42px; /* ALTURA FIXA */
             box-sizing: border-box;
             font-weight: 500;
             font-family: 'Poppins', sans-serif;
             transition: all 0.2s;
+            flex-shrink: 0; /* Não encolhe */
         }
         
         .form-group input:focus,
@@ -271,6 +277,7 @@
             font-size: 10px;
             color: rgba(255,255,255,0.5);
             margin-top: 3px;
+            flex-shrink: 0; /* Não encolhe */
         }
         
         .form-section {
@@ -785,8 +792,7 @@ function renderForm(leito) {
                         } else {
                             const identificacaoValue = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
                             return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}" 
-                                     placeholder="Ex: 1A, 21, 711.1" maxlength="6" required>
-                               <div class="help-text">✅ Aceita números e letras (1-6)</div>`;
+                                     placeholder="Ex: 1A, 21, 711.1" maxlength="6" required>`;
                         }
                     })()}
                 </div>
@@ -874,7 +880,6 @@ function renderForm(leito) {
                         <label>Matrícula <span class="required">*</span></label>
                         <input type="text" id="matricula" placeholder="Ex: 123456789-0" maxlength="11" required 
                                oninput="formatarMatricula(this)">
-                        <div class="help-text">✅ Máximo 10 dígitos</div>
                     </div>
                     <div class="form-group">
                         <label>Idade <span class="required">*</span></label>
@@ -1467,13 +1472,15 @@ console.log('📱 Otimizado para mobile');
 console.log('⏱️ Timer: 2 minutos com fechamento forçado');
 console.log('🏥 Total Rede: 93 leitos | 7 hospitais');
 console.log('');
-console.log('✅ CORREÇÕES V4.1.1:');
+console.log('✅ CORREÇÕES V4.1.2:');
 console.log('🎨 Header: Azul escuro (#1e293b) + Título azul claro (#60a5fa)');
 console.log('✍️ Fonte: Poppins Bold aplicada globalmente');
 console.log('🔷 Campos: Bordas azuis iguais ao modal de senha');
 console.log('⚪ Labels: Todos os títulos em branco');
 console.log('🔍 Lupa: SVG simples + placeholder "Digite para buscar..."');
 console.log('🔘 Botões: 3 na mesma linha (Alta laranja + Salvar azul + Cancelar cinza)');
+console.log('📏 Campos: Altura uniforme (42px) para todos os inputs/selects');
+console.log('🧹 Legendas removidas: "Aceita números e letras" e "Máximo 10 dígitos"');
     </script>
 </body>
 </html>
