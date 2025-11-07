@@ -77,8 +77,9 @@
             flex-direction: column;
         }
         
+        /* =================== HEADER CORRIGIDO - AZUL ESCURO =================== */
         .header {
-            background: linear-gradient(135deg, #60a5fa 0%, #4a8fd8 100%);
+            background: #1e293b; /* Azul escuro igual modal de senha */
             padding: 20px 15px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             position: sticky;
@@ -88,12 +89,13 @@
         
         .header-title {
             font-family: 'Poppins', sans-serif;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
             text-align: center;
+            color: #60a5fa; /* Azul claro igual título do modal de senha */
         }
         
         .header-info {
@@ -103,14 +105,16 @@
             gap: 10px;
             font-size: 13px;
             font-weight: 600;
+            margin-bottom: 8px;
         }
         
         .hospital-badge {
-            background: rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
             padding: 6px 12px;
             border-radius: 20px;
             flex: 1;
             text-align: center;
+            color: #9ca3af; /* Cinza */
         }
         
         .timer {
@@ -149,6 +153,15 @@
             50% { transform: scale(1.08); opacity: 0.8; }
         }
         
+        /* NOVA LINHA: Rede Externa */
+        .header-network {
+            text-align: center;
+            font-size: 11px;
+            color: #9ca3af; /* Cinza */
+            font-style: italic;
+            font-weight: 400;
+        }
+        
         .form-body {
             flex: 1;
             padding: 20px 15px;
@@ -156,12 +169,13 @@
             -webkit-overflow-scrolling: touch;
         }
         
+        /* =================== TÍTULO DO FORMULÁRIO - BRANCO =================== */
         .form-title {
             font-family: 'Poppins', sans-serif;
             text-align: center;
             margin-bottom: 20px;
             font-size: 16px;
-            color: #60a5fa;
+            color: #ffffff; /* BRANCO */
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 700;
@@ -200,10 +214,11 @@
             flex-direction: column;
         }
         
+        /* =================== LABELS DOS CAMPOS - BRANCO =================== */
         .form-group label {
             font-size: 11px;
             font-weight: 600;
-            color: #94a3b8;
+            color: #ffffff; /* BRANCO */
             margin-bottom: 4px;
             letter-spacing: 0.5px;
         }
@@ -213,12 +228,13 @@
             font-size: 10px;
         }
         
+        /* =================== INPUTS E SELECTS - BORDA AZUL IGUAL MODAL DE SENHA =================== */
         .form-group input,
         .form-group select {
             padding: 10px 8px;
-            background: #0f172a;
+            background: #0f172a; /* Fundo escuro igual modal de senha */
             color: #ffffff;
-            border: 2px solid #334155;
+            border: 2px solid #334155; /* Borda cinza escura igual modal de senha */
             border-radius: 8px;
             font-size: 13px;
             width: 100%;
@@ -231,7 +247,7 @@
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #60a5fa;
+            border-color: #60a5fa; /* Azul vibrante no focus */
             box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
             background: #1e293b;
         }
@@ -261,10 +277,11 @@
             margin: 20px 0;
         }
         
+        /* =================== TÍTULOS DAS SEÇÕES - FUNDO AZUL + FONTE BRANCA =================== */
         .section-title {
             font-family: 'Poppins', sans-serif;
-            background: #60a5fa;
-            color: #000000;
+            background: #60a5fa; /* Fundo azul vibrante */
+            color: #ffffff; /* FONTE BRANCA */
             padding: 10px 12px;
             border-radius: 8px;
             font-size: 11px;
@@ -275,15 +292,31 @@
             text-align: center;
         }
         
+        /* =================== CAMPO DE BUSCA - LUPA SIMPLES =================== */
+        .search-input-container {
+            position: relative;
+            margin-bottom: 8px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: #9ca3af;
+            pointer-events: none;
+        }
+        
         .search-input {
             width: 100%;
-            padding: 10px;
+            padding: 10px 10px 10px 36px;
             background: #374151;
             color: #ffffff;
             border: 1px solid rgba(255,255,255,0.3);
             border-radius: 6px;
             font-size: 13px;
-            margin-bottom: 8px;
             font-family: 'Poppins', sans-serif;
         }
         
@@ -345,11 +378,13 @@
             font-size: 12px;
         }
         
+        /* =================== BOTÕES INFERIORES - 3 NA MESMA LINHA =================== */
         .actions {
             padding: 15px;
             background: #111827;
             display: flex;
-            flex-direction: column;
+            flex-direction: row; /* LINHA HORIZONTAL */
+            justify-content: center;
             gap: 10px;
             box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
             position: sticky;
@@ -358,17 +393,18 @@
         
         .btn {
             font-family: 'Poppins', sans-serif;
-            width: 100%;
-            padding: 16px;
+            flex: 1; /* MESMO TAMANHO */
+            max-width: 140px; /* LIMITA LARGURA MÁXIMA */
+            padding: 14px 20px;
             border: none;
             border-radius: 12px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.2s;
-            min-height: 54px;
+            min-height: 50px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
@@ -376,16 +412,19 @@
             transform: scale(0.97);
         }
         
-        .btn-primary {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-        
+        /* ALTA - LARANJA (IGUAL CARDS.JS) */
         .btn-danger {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: linear-gradient(135deg, #f59a1d 0%, #d97706 100%);
+            color: #ffffff;
+        }
+        
+        /* SALVAR - AZUL VIBRANTE */
+        .btn-primary {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
             color: white;
         }
         
+        /* CANCELAR - CINZA */
         .btn-secondary {
             background: rgba(156, 163, 175, 0.5);
             color: white;
@@ -472,6 +511,19 @@
         
         .container {
             animation: fadeIn 0.3s ease;
+        }
+        
+        /* =================== RESPONSIVIDADE MOBILE =================== */
+        @media (max-width: 768px) {
+            .actions {
+                flex-wrap: wrap; /* Permite quebra de linha em telas muito pequenas */
+            }
+            
+            .btn {
+                min-width: 100px;
+                font-size: 11px;
+                padding: 12px 16px;
+            }
         }
         
         @media (orientation: landscape) and (max-height: 500px) {
@@ -671,18 +723,20 @@ function renderForm(leito) {
     const concessoesExibicao = (leito.concessoes || []).map(c => desnormalizarTexto(c));
     const linhasExibicao = (leito.linhas || []).map(l => desnormalizarTexto(l));
     
+    // Status formatado
+    const statusTexto = isVago ? 'VAGO' : 'OCUPADO';
+    
     container.innerHTML = `
+        <!-- =================== HEADER CORRIGIDO =================== -->
         <div class="header">
-            <div class="header-title">ARCHIPELAGO MEDICAL V4.1</div>
+            <div class="header-title">ARCHIPELAGO</div>
             <div class="header-info">
                 <div class="hospital-badge">
-                    ${hospitalNome} • ID ${idSequencial} • ${leitoPersonalizado}
-                    <span style="color: ${isVago ? '#10b981' : '#f59e0b'}; font-weight: 700; margin-left: 8px;">
-                        • ${isVago ? 'VAGO' : 'OCUPADO'}
-                    </span>
+                    ${hospitalNome} • ID ${idSequencial} • ${leitoPersonalizado} • ${statusTexto}
                 </div>
                 <div class="timer" id="timer">2:00</div>
             </div>
+            <div class="header-network">Rede Externa</div>
         </div>
         
         <div class="form-body">
@@ -737,7 +791,7 @@ function renderForm(leito) {
                     })()}
                 </div>
                 <div class="form-group" id="tipoQuartoGroup">
-                    <label>Tipo Quarto <span class="required">*</span></label>
+                    <label>Tipo de Quarto <span class="required">*</span></label>
                     ${(() => {
                         const leitoNum = parseInt(currentLeito);
                         
@@ -890,10 +944,13 @@ function renderForm(leito) {
             <div class="form-section">
                 <div class="section-title">Concessões Previstas na Alta (${CONCESSOES.length})</div>
                 
-                <input type="text" 
-                       id="searchConcessoes" 
-                       class="search-input"
-                       placeholder="🔍 Digite para buscar... (ex: 'o2', 'banho')">
+                <div class="search-input-container">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchConcessoes" class="search-input" placeholder="Digite para buscar...">
+                </div>
                 
                 <div id="qrcodeConcessoes" class="checkbox-grid">
                     ${CONCESSOES.map((c, i) => `
@@ -909,10 +966,13 @@ function renderForm(leito) {
             <div class="form-section">
                 <div class="section-title">Linhas de Cuidado (${LINHAS_CUIDADO.length})</div>
                 
-                <input type="text" 
-                       id="searchLinhas" 
-                       class="search-input"
-                       placeholder="🔍 Digite para buscar... (ex: 'cardio', 'onco')">
+                <div class="search-input-container">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchLinhas" class="search-input" placeholder="Digite para buscar...">
+                </div>
                 
                 <div id="qrcodeLinhas" class="checkbox-grid">
                     ${LINHAS_CUIDADO.map((l, i) => `
@@ -926,11 +986,12 @@ function renderForm(leito) {
             </div>
         </div>
         
+        <!-- =================== BOTÕES CORRIGIDOS - 3 NA MESMA LINHA =================== -->
         <div class="actions">
+            ${!isVago ? '<button class="btn btn-danger" onclick="darAlta()">Alta</button>' : ''}
             <button class="btn btn-primary" onclick="saveData()">
-                ${isVago ? 'Admitir Paciente' : 'Salvar Alterações'}
+                ${isVago ? 'Admitir' : 'Salvar'}
             </button>
-            ${!isVago ? '<button class="btn btn-danger" onclick="darAlta()">Dar Alta</button>' : ''}
             <button class="btn btn-secondary" onclick="cancelar()">Cancelar</button>
         </div>
         
@@ -1402,18 +1463,18 @@ function showSuccess(message) {
     }
 }
 
-console.log('✅ Archipelago QR V4.1 MOBILE');
+console.log('✅ Archipelago QR V4.1 MOBILE CORRIGIDO');
 console.log('📱 Otimizado para mobile');
 console.log('⏱️ Timer: 2 minutos com fechamento forçado');
 console.log('🏥 Total Rede: 93 leitos | 7 hospitais');
 console.log('');
-console.log('✅ NOVIDADES V4.1:');
-console.log('🎨 Cores: #60a5fa (azul vibrante) + #9ca3af (cinza)');
-console.log('✍️ Fonte: Poppins Bold aplicada');
-console.log('🏥 Hospitais: H6 (Santa Cruz) + H7 (Santa Virgínia)');
-console.log('✅ Concessões: 13 opções (12 + "Não se aplica")');
-console.log('✅ Linhas de Cuidado: 45 opções RESTAURADAS');
-console.log('✅ Sistema de normalização implementado');
+console.log('✅ CORREÇÕES V4.1.1:');
+console.log('🎨 Header: Azul escuro (#1e293b) + Título azul claro (#60a5fa)');
+console.log('✍️ Fonte: Poppins Bold aplicada globalmente');
+console.log('🔷 Campos: Bordas azuis iguais ao modal de senha');
+console.log('⚪ Labels: Todos os títulos em branco');
+console.log('🔍 Lupa: SVG simples + placeholder "Digite para buscar..."');
+console.log('🔘 Botões: 3 na mesma linha (Alta laranja + Salvar azul + Cancelar cinza)');
     </script>
 </body>
 </html>
