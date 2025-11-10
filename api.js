@@ -6,6 +6,7 @@
 // ✅ 7 hospitais | 93 leitos | 13 concessões (12 + "Não se aplica")
 // ✅ 45 Linhas de Cuidado RESTAURADAS
 // ✅ Sistema de normalização implementado
+// ✅ Numeração Cruz Azul lida diretamente da planilha (coluna AQ)
 // ==================================================================================
 
 // *** URL DA API V4.1 ***
@@ -38,18 +39,6 @@ const CRUZ_AZUL_LEITOS_IRMAOS = {
     '31': '32', '32': '31',
     '33': '34', '34': '33',
     '35': '36', '36': '35'
-};
-
-// =================== CRUZ AZUL - NUMERAÇÃO FÍSICA ===================
-const NUMERACAO_FIXA_CRUZ_AZUL = {
-    '21': '711.1', '22': '711.2',
-    '23': '713.1', '24': '713.2',
-    '25': '715.1', '26': '715.2',
-    '27': '717.1', '28': '717.2',
-    '29': '719.1', '30': '719.2',
-    '31': '721.1', '32': '721.2',
-    '33': '723.1', '34': '723.2',
-    '35': '725.1', '36': '725.2'
 };
 
 // =================== OPÇÕES DE FORMULÁRIO ===================
@@ -254,3 +243,4 @@ console.log(`✍️ Fonte: Poppins Bold`);
 console.log(`✅ Concessões: ${CONCESSOES.length} opções (12 + "Não se aplica")`);
 console.log(`✅ Linhas de Cuidado: ${LINHAS_CUIDADO.length} opções RESTAURADAS`);
 console.log(`✅ Sistema de normalização implementado`);
+console.log(`✅ Numeração Cruz Azul lida da planilha (coluna AQ)`);
