@@ -30,7 +30,6 @@
             touch-action: pan-y;
         }
         
-        /* =================== MODAL DE AUTENTICAÇÃO =================== */
         .modal-auth {
             position: fixed;
             top: 0;
@@ -148,7 +147,6 @@
             75% { transform: translateX(10px); }
         }
         
-        /* =================== LOADING =================== */
         .loading {
             position: fixed;
             top: 0;
@@ -191,12 +189,11 @@
         .container {
             width: 100%;
             min-height: 100vh;
-            background: #1a1f2e;
+            background: #1e293b;
             display: flex;
             flex-direction: column;
         }
         
-        /* =================== HEADER CORRIGIDO - AZUL ESCURO =================== */
         .header {
             background: #1e293b;
             padding: 20px 15px;
@@ -208,10 +205,9 @@
         
         .header-title {
             font-family: 'Poppins', sans-serif;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
+            line-height: 1.2;
             margin-bottom: 10px;
             text-align: center;
             color: #60a5fa;
@@ -272,19 +268,12 @@
             50% { transform: scale(1.08); opacity: 0.8; }
         }
         
-        .header-network {
-            text-align: center;
-            font-size: 11px;
-            color: #9ca3af;
-            font-style: italic;
-            font-weight: 400;
-        }
-        
         .form-body {
             flex: 1;
             padding: 20px 15px;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            background: #1e293b;
         }
         
         .form-title {
@@ -297,9 +286,8 @@
             letter-spacing: 1px;
             font-weight: 700;
             padding: 12px;
-            background: rgba(96, 165, 250, 0.1);
+            background: #60a5fa;
             border-radius: 8px;
-            border: 1px solid rgba(96, 165, 250, 0.2);
         }
         
         .form-row-3 {
@@ -374,8 +362,9 @@
         
         .form-group input[readonly] {
             background: #1f2937;
-            color: #6b7280;
+            color: #9ca3af;
             border-color: #374151;
+            cursor: not-allowed;
         }
         
         .form-group select {
@@ -402,9 +391,9 @@
             font-family: 'Poppins', sans-serif;
             background: #60a5fa;
             color: #ffffff;
-            padding: 10px 12px;
-            border-radius: 8px;
-            font-size: 11px;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
             margin-bottom: 12px;
@@ -452,9 +441,9 @@
             max-height: 200px;
             overflow-y: auto;
             padding: 12px;
-            background: rgba(255,255,255,0.03);
+            background: #374151;
             border-radius: 8px;
-            border: 2px solid #334155;
+            border: 1px solid rgba(255,255,255,0.3);
         }
         
         .checkbox-item {
@@ -499,7 +488,7 @@
         
         .actions {
             padding: 15px;
-            background: #111827;
+            background: #1e293b;
             display: flex;
             flex-direction: row;
             justify-content: center;
@@ -517,7 +506,7 @@
             border: none;
             border-radius: 12px;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 15px;
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -630,7 +619,7 @@
             
             .btn {
                 min-width: 100px;
-                font-size: 11px;
+                font-size: 13px;
                 padding: 12px 16px;
             }
         }
@@ -656,7 +645,6 @@
     </style>
 </head>
 <body>
-    <!-- =================== MODAL DE AUTENTICAÇÃO (PRIMEIRO) =================== -->
     <div id="authModal" class="modal-auth">
         <div class="auth-container">
             <h1>Archipelago Dashboard</h1>
@@ -673,16 +661,13 @@
         </div>
     </div>
     
-    <!-- =================== LOADING =================== -->
     <div id="loading" class="loading hidden">
         <div class="spinner"></div>
         <div class="loading-text">Carregando dados...</div>
     </div>
     
-    <!-- =================== CONTAINER PRINCIPAL =================== -->
     <div id="mainContainer" class="container" style="display: none;"></div>
     
-    <!-- =================== MENSAGEM DE ERRO =================== -->
     <div id="errorContainer" class="message-container error" style="display: none;">
         <div class="message-icon">⚠️</div>
         <h2>Atenção</h2>
@@ -690,7 +675,6 @@
         <button class="btn btn-danger" onclick="fecharJanela()">Fechar Janela</button>
     </div>
     
-    <!-- =================== MENSAGEM DE SUCESSO =================== -->
     <div id="successContainer" class="message-container success" style="display: none;">
         <div class="message-icon">✅</div>
         <h2>Sucesso!</h2>
@@ -702,7 +686,6 @@
     <script src="api.js"></script>
     
     <script>
-// =================== SISTEMA DE AUTENTICAÇÃO =================== 
 const SENHA_ACESSO = '1997';
 
 let hospitalData = {};
@@ -711,9 +694,6 @@ let currentLeito = null;
 let timerInterval = null;
 let timeLeft = 120;
 
-/**
- * Função de autenticação
- */
 function authenticate() {
     const senhaInput = document.getElementById('authPassword');
     const errorMsg = document.getElementById('authError');
@@ -722,42 +702,31 @@ function authenticate() {
     if (senha === SENHA_ACESSO) {
         console.log('✅ Senha correta! Autenticando...');
         
-        // Armazenar autenticação
         localStorage.setItem('archipelago_qr_auth', 'true');
         localStorage.setItem('archipelago_qr_auth_time', Date.now());
         
-        // Esconder modal de senha
         document.getElementById('authModal').classList.add('hidden');
-        
-        // Mostrar loading
         document.getElementById('loading').classList.remove('hidden');
         
-        // Continuar fluxo normal
         setTimeout(() => {
             continueAfterAuth();
         }, 300);
         
     } else {
-        // Mostrar erro
         console.log('❌ Senha incorreta');
         errorMsg.classList.remove('hidden');
         senhaInput.value = '';
         senhaInput.focus();
         
-        // Esconder erro após 3 segundos
         setTimeout(() => {
             errorMsg.classList.add('hidden');
         }, 3000);
     }
 }
 
-/**
- * Continuar após autenticação bem-sucedida
- */
 async function continueAfterAuth() {
     console.log('🚀 Continuando após autenticação...');
     
-    // Validar parâmetros da URL
     const urlParams = new URLSearchParams(window.location.search);
     const hospitalId = urlParams.get('h');
     const leitoNumero = urlParams.get('l');
@@ -783,19 +752,14 @@ async function continueAfterAuth() {
     
     console.log(`📍 ${HOSPITAIS[hospitalId].nome} - Leito ${leitoNumero}`);
     
-    // Carregar dados
     await loadHospitalData(hospitalId);
 }
 
-/**
- * Verificar autenticação ao carregar página
- */
 function checkAuthentication() {
     const isAuthenticated = localStorage.getItem('archipelago_qr_auth') === 'true';
     const authTime = parseInt(localStorage.getItem('archipelago_qr_auth_time') || '0');
     const now = Date.now();
     
-    // Autenticação expira após 24 horas
     const AUTH_EXPIRY = 24 * 60 * 60 * 1000;
     
     if (isAuthenticated && (now - authTime) < AUTH_EXPIRY) {
@@ -806,7 +770,6 @@ function checkAuthentication() {
         console.log('🔒 Autenticação necessária');
         document.getElementById('authModal').classList.remove('hidden');
         
-        // Focus no campo de senha
         setTimeout(() => {
             document.getElementById('authPassword').focus();
         }, 100);
@@ -814,8 +777,6 @@ function checkAuthentication() {
         return false;
     }
 }
-
-// =================== FUNÇÕES ORIGINAIS DO SISTEMA ===================
 
 function formatarMatriculaExibicao(matricula) {
     if (!matricula || matricula === '—') return '—';
@@ -869,25 +830,18 @@ function configurarBuscaDinamica(containerId, searchId) {
     console.log(`✅ Busca dinâmica configurada: ${searchId}`);
 }
 
-// =================== INICIALIZAÇÃO COM AUTENTICAÇÃO ===================
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('🚀 Archipelago QR V4.1 Mobile COM AUTENTICAÇÃO');
     console.log('🔐 Senha: 1997');
     console.log('🎨 Cores: #60a5fa + #9ca3af');
     console.log('✍️ Fonte: Poppins Bold');
     console.log('🏥 Total: 7 hospitais | 93 leitos');
-    console.log('✅ Concessões: 13 opções (12 + "Não se aplica")');
-    console.log('✅ Linhas de Cuidado: 45 opções RESTAURADAS');
     
-    // VERIFICAR AUTENTICAÇÃO PRIMEIRO
     const isAuthenticated = checkAuthentication();
     
     if (isAuthenticated) {
-        // Continuar fluxo normal (já autenticado)
         await continueAfterAuth();
     }
-    // Se não autenticado, modal de senha já está visível
-    // e aguarda usuário digitar senha
 });
 
 async function loadHospitalData(hospitalId) {
@@ -949,14 +903,16 @@ function renderForm(leito) {
     
     container.innerHTML = `
         <div class="header">
-            <div class="header-title">Archipelago Dashboard</div>
+            <div class="header-title">
+                <div>Archipelago</div>
+                <div>Dashboard</div>
+            </div>
             <div class="header-info">
                 <div class="hospital-badge">
                     ${hospitalNome} • ID ${idSequencial} • ${leitoPersonalizado} • ${statusTexto}
                 </div>
                 <div class="timer" id="timer">2:00</div>
             </div>
-            <div class="header-network">Rede Externa</div>
         </div>
         
         <div class="form-body">
@@ -994,14 +950,11 @@ function renderForm(leito) {
                 <div class="form-group">
                     <label>Identificação <span class="required">*</span></label>
                     ${(() => {
-                        const leitoNum = parseInt(currentLeito);
-                        const isCruzAzulEnfermaria = (currentHospital === 'H2' && leitoNum >= 21 && leitoNum <= 36);
-                        
-                        if (isCruzAzulEnfermaria) {
-                            const numFixo = NUMERACAO_FIXA_CRUZ_AZUL[String(leitoNum)];
-                            return `<input type="text" id="identificacaoLeito" value="${numFixo}" readonly 
+                        if (currentHospital === 'H2') {
+                            const identificacaoValue = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
+                            return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}" readonly 
                                      style="background: #1f2937; color: #9ca3af; cursor: not-allowed;" required>
-                               <div class="help-text">🔒 Numeração fixa (Cruz Azul)</div>`;
+                               <div class="help-text">Numeração fixa (Cruz Azul)</div>`;
                         } else {
                             const identificacaoValue = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
                             return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}" 
@@ -1019,7 +972,7 @@ function renderForm(leito) {
                                 <option value="Apartamento" selected>Apartamento</option>
                             </select>
                             <input type="hidden" id="tipoQuartoValue" value="Apartamento">
-                            <div class="help-text">🔒 Tipo fixo para este leito</div>`;
+                            <div class="help-text">Tipo fixo para este leito</div>`;
                         }
                         
                         if (currentHospital === 'H2' && leitoNum >= 21 && leitoNum <= 36) {
@@ -1027,7 +980,7 @@ function renderForm(leito) {
                                 <option value="Enfermaria" selected>Enfermaria</option>
                             </select>
                             <input type="hidden" id="tipoQuartoValue" value="Enfermaria">
-                            <div class="help-text">🔒 Tipo fixo para este leito</div>`;
+                            <div class="help-text">Tipo fixo para este leito</div>`;
                         }
                         
                         const tipoAtual = leito.categoria_escolhida || leito.categoriaEscolhida || leito.categoria || leito.tipo || '';
@@ -1159,7 +1112,7 @@ function renderForm(leito) {
             </div>
             
             <div class="form-section">
-                <div class="section-title">Concessões Previstas na Alta (${CONCESSOES.length})</div>
+                <div class="section-title">Concessões Previstas na Alta</div>
                 
                 <div class="search-input-container">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1181,7 +1134,7 @@ function renderForm(leito) {
             </div>
             
             <div class="form-section">
-                <div class="section-title">Linhas de Cuidado (${LINHAS_CUIDADO.length})</div>
+                <div class="section-title">Linhas de Cuidado</div>
                 
                 <div class="search-input-container">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1384,19 +1337,19 @@ async function validarBloqueioCruzAzul(dados) {
             return { valido: true };
         }
         
-        const numFixoIrmao = NUMERACAO_FIXA_CRUZ_AZUL[leitoIrmao];
+        const identificacaoIrmao = dadosIrmao.identificacaoLeito || dadosIrmao.identificacao_leito || `Leito ${leitoIrmao}`;
         
         if (dadosIrmao.isolamento && dadosIrmao.isolamento !== 'Não Isolamento') {
             return {
                 valido: false,
-                mensagem: `❌ BLOQUEADO POR ISOLAMENTO!\n\nO leito irmão (${numFixoIrmao}) está em ${dadosIrmao.isolamento}.\n\nAguarde a alta para admitir neste leito.`
+                mensagem: `❌ BLOQUEADO POR ISOLAMENTO!\n\nO leito irmão (${identificacaoIrmao}) está em ${dadosIrmao.isolamento}.\n\nAguarde a alta para admitir neste leito.`
             };
         }
         
         if (dados.genero && dadosIrmao.sexo && dados.genero !== dadosIrmao.sexo) {
             return {
                 valido: false,
-                mensagem: `❌ BLOQUEADO POR GÊNERO!\n\nLeito irmão (${numFixoIrmao}) ocupado por paciente ${dadosIrmao.sexo}.\n\nEste leito só pode receber pacientes do sexo ${dadosIrmao.sexo}.`
+                mensagem: `❌ BLOQUEADO POR GÊNERO!\n\nLeito irmão (${identificacaoIrmao}) ocupado por paciente ${dadosIrmao.sexo}.\n\nEste leito só pode receber pacientes do sexo ${dadosIrmao.sexo}.`
             };
         }
         
@@ -1639,26 +1592,17 @@ function cancelar() {
     }
 }
 
-/**
- * Fecha a janela/aba atual
- */
 function fecharJanela() {
     console.log('🔒 Fechando janela...');
     
-    // Limpar timer se ainda estiver rodando
     if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
     }
     
-    // Tentar fechar a janela
     window.close();
     
-    // Fallback: Se window.close() não funcionar (navegador bloqueia)
-    // Aguardar 500ms e verificar se ainda está aberta
     setTimeout(() => {
-        // Se chegou aqui, significa que window.close() falhou
-        // Mostrar mensagem para o usuário fechar manualmente
         const successContainer = document.getElementById('successContainer');
         const errorContainer = document.getElementById('errorContainer');
         
@@ -1709,12 +1653,11 @@ function showSuccess(message) {
     }
 }
 
-console.log('✅ Archipelago QR V4.1 MOBILE - VERSÃO FINAL');
+console.log('✅ Archipelago QR V4.1 MOBILE - VERSÃO FINAL COM CORREÇÕES');
 console.log('🔐 Senha: 1997 (válida por 24h)');
-console.log('🔒 Botão "Fechar Janela" implementado');
+console.log('🎨 Correções estéticas aplicadas');
+console.log('🏥 Cruz Azul: Campo identificação readonly');
 console.log('📱 Otimizado para mobile');
-console.log('⏱️ Timer: 2 minutos com fechamento forçado');
-console.log('🏥 Total Rede: 93 leitos | 7 hospitais');
     </script>
 </body>
 </html>
