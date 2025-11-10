@@ -30,6 +30,126 @@
             touch-action: pan-y;
         }
         
+        /* =================== MODAL DE AUTENTICAÇÃO =================== */
+        .modal-auth {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-auth.hidden {
+            display: none;
+        }
+        
+        .auth-container {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .auth-container h1 {
+            color: #60a5fa;
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+        }
+        
+        .auth-container p {
+            color: #9ca3af;
+            margin-bottom: 25px;
+            font-size: 14px;
+            font-weight: 400;
+        }
+        
+        .auth-container input {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            letter-spacing: 4px;
+            font-weight: 700;
+        }
+        
+        .auth-container input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+        }
+        
+        .auth-container button {
+            width: 100%;
+            padding: 12px;
+            background: #60a5fa;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .auth-container button:hover {
+            background: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+        }
+        
+        .auth-container button:active {
+            transform: translateY(0);
+        }
+        
+        .error-msg {
+            color: #f87171;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            animation: shake 0.3s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        /* =================== LOADING =================== */
         .loading {
             position: fixed;
             top: 0;
@@ -79,7 +199,7 @@
         
         /* =================== HEADER CORRIGIDO - AZUL ESCURO =================== */
         .header {
-            background: #1e293b; /* Azul escuro igual modal de senha */
+            background: #1e293b;
             padding: 20px 15px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             position: sticky;
@@ -95,7 +215,7 @@
             letter-spacing: 1.5px;
             margin-bottom: 10px;
             text-align: center;
-            color: #60a5fa; /* Azul claro igual título do modal de senha */
+            color: #60a5fa;
         }
         
         .header-info {
@@ -114,7 +234,7 @@
             border-radius: 20px;
             flex: 1;
             text-align: center;
-            color: #9ca3af; /* Cinza */
+            color: #9ca3af;
         }
         
         .timer {
@@ -153,11 +273,10 @@
             50% { transform: scale(1.08); opacity: 0.8; }
         }
         
-        /* NOVA LINHA: Rede Externa */
         .header-network {
             text-align: center;
             font-size: 11px;
-            color: #9ca3af; /* Cinza */
+            color: #9ca3af;
             font-style: italic;
             font-weight: 400;
         }
@@ -169,13 +288,12 @@
             -webkit-overflow-scrolling: touch;
         }
         
-        /* =================== TÍTULO DO FORMULÁRIO - BRANCO =================== */
         .form-title {
             font-family: 'Poppins', sans-serif;
             text-align: center;
             margin-bottom: 20px;
             font-size: 16px;
-            color: #ffffff; /* BRANCO */
+            color: #ffffff;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 700;
@@ -209,21 +327,19 @@
             margin-bottom: 0;
         }
         
-        /* =================== ALTURA UNIFORME PARA FORM-GROUP =================== */
         .form-group {
             display: flex;
             flex-direction: column;
-            min-height: 68px; /* Altura mínima para consistência */
+            min-height: 68px;
         }
         
-        /* =================== LABELS DOS CAMPOS - BRANCO =================== */
         .form-group label {
             font-size: 11px;
             font-weight: 600;
-            color: #ffffff; /* BRANCO */
+            color: #ffffff;
             margin-bottom: 4px;
             letter-spacing: 0.5px;
-            flex-shrink: 0; /* Não encolhe */
+            flex-shrink: 0;
         }
         
         .form-group label .required {
@@ -231,29 +347,28 @@
             font-size: 10px;
         }
         
-        /* =================== INPUTS E SELECTS - ALTURA UNIFORME =================== */
         .form-group input,
         .form-group select {
             padding: 10px 8px;
-            background: #0f172a; /* Fundo escuro igual modal de senha */
+            background: #0f172a;
             color: #ffffff;
-            border: 2px solid #334155; /* Borda cinza escura igual modal de senha */
+            border: 2px solid #334155;
             border-radius: 8px;
             font-size: 13px;
             width: 100%;
-            min-height: 42px; /* ALTURA MÍNIMA UNIFORME */
-            height: 42px; /* ALTURA FIXA */
+            min-height: 42px;
+            height: 42px;
             box-sizing: border-box;
             font-weight: 500;
             font-family: 'Poppins', sans-serif;
             transition: all 0.2s;
-            flex-shrink: 0; /* Não encolhe */
+            flex-shrink: 0;
         }
         
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #60a5fa; /* Azul vibrante no focus */
+            border-color: #60a5fa;
             box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
             background: #1e293b;
         }
@@ -277,18 +392,17 @@
             font-size: 10px;
             color: rgba(255,255,255,0.5);
             margin-top: 3px;
-            flex-shrink: 0; /* Não encolhe */
+            flex-shrink: 0;
         }
         
         .form-section {
             margin: 20px 0;
         }
         
-        /* =================== TÍTULOS DAS SEÇÕES - FUNDO AZUL + FONTE BRANCA =================== */
         .section-title {
             font-family: 'Poppins', sans-serif;
-            background: #60a5fa; /* Fundo azul vibrante */
-            color: #ffffff; /* FONTE BRANCA */
+            background: #60a5fa;
+            color: #ffffff;
             padding: 10px 12px;
             border-radius: 8px;
             font-size: 11px;
@@ -299,7 +413,6 @@
             text-align: center;
         }
         
-        /* =================== CAMPO DE BUSCA - LUPA SIMPLES =================== */
         .search-input-container {
             position: relative;
             margin-bottom: 8px;
@@ -385,12 +498,11 @@
             font-size: 12px;
         }
         
-        /* =================== BOTÕES INFERIORES - 3 NA MESMA LINHA =================== */
         .actions {
             padding: 15px;
             background: #111827;
             display: flex;
-            flex-direction: row; /* LINHA HORIZONTAL */
+            flex-direction: row;
             justify-content: center;
             gap: 10px;
             box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
@@ -400,8 +512,8 @@
         
         .btn {
             font-family: 'Poppins', sans-serif;
-            flex: 1; /* MESMO TAMANHO */
-            max-width: 140px; /* LIMITA LARGURA MÁXIMA */
+            flex: 1;
+            max-width: 140px;
             padding: 14px 20px;
             border: none;
             border-radius: 12px;
@@ -419,26 +531,18 @@
             transform: scale(0.97);
         }
         
-        /* ALTA - LARANJA (IGUAL CARDS.JS) */
         .btn-danger {
             background: linear-gradient(135deg, #f59a1d 0%, #d97706 100%);
             color: #ffffff;
         }
         
-        /* SALVAR - AZUL VIBRANTE */
         .btn-primary {
             background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
             color: white;
         }
         
-        /* CANCELAR - CINZA */
         .btn-secondary {
             background: rgba(156, 163, 175, 0.5);
-            color: white;
-        }
-        
-        .btn-qrcode {
-            background: linear-gradient(135deg, #60a5fa 0%, #4a8fd8 100%);
             color: white;
         }
         
@@ -520,10 +624,9 @@
             animation: fadeIn 0.3s ease;
         }
         
-        /* =================== RESPONSIVIDADE MOBILE =================== */
         @media (max-width: 768px) {
             .actions {
-                flex-wrap: wrap; /* Permite quebra de linha em telas muito pequenas */
+                flex-wrap: wrap;
             }
             
             .btn {
@@ -554,36 +657,166 @@
     </style>
 </head>
 <body>
-    <div id="loading" class="loading">
+    <!-- =================== MODAL DE AUTENTICAÇÃO (PRIMEIRO) =================== -->
+    <div id="authModal" class="modal-auth">
+        <div class="auth-container">
+            <h1>Archipelago Dashboard</h1>
+            <p>Digite a senha de acesso:</p>
+            <input type="password" 
+                   id="authPassword" 
+                   placeholder="Senha" 
+                   maxlength="4"
+                   inputmode="numeric"
+                   pattern="[0-9]*"
+                   onkeypress="if(event.key==='Enter') authenticate()">
+            <button onclick="authenticate()">Entrar</button>
+            <div id="authError" class="error-msg hidden">❌ Senha incorreta</div>
+        </div>
+    </div>
+    
+    <!-- =================== LOADING =================== -->
+    <div id="loading" class="loading hidden">
         <div class="spinner"></div>
         <div class="loading-text">Carregando dados...</div>
     </div>
     
+    <!-- =================== CONTAINER PRINCIPAL =================== -->
     <div id="mainContainer" class="container" style="display: none;"></div>
     
+    <!-- =================== MENSAGEM DE ERRO =================== -->
     <div id="errorContainer" class="message-container error" style="display: none;">
         <div class="message-icon">⚠️</div>
         <h2>Atenção</h2>
         <p id="errorMessage">Parâmetros inválidos.</p>
-        <button class="btn btn-qrcode" onclick="openQRScanner()">Ler QR Code</button>
+        <button class="btn btn-danger" onclick="fecharJanela()">Fechar Janela</button>
     </div>
     
+    <!-- =================== MENSAGEM DE SUCESSO =================== -->
     <div id="successContainer" class="message-container success" style="display: none;">
         <div class="message-icon">✅</div>
         <h2>Sucesso!</h2>
         <p id="successMessage">Operação realizada.</p>
-        <p style="margin-top: 15px; font-size: 13px; color: #94a3b8;">Para acessar outro leito, leia o QR Code novamente.</p>
-        <button class="btn btn-qrcode" onclick="openQRScanner()">Ler QR Code</button>
+        <p style="margin-top: 15px; font-size: 13px; color: #94a3b8;">Você pode fechar esta janela agora.</p>
+        <button class="btn btn-danger" onclick="fecharJanela()">Fechar Janela</button>
     </div>
     
     <script src="api.js"></script>
     
     <script>
+// =================== SISTEMA DE AUTENTICAÇÃO =================== 
+const SENHA_ACESSO = '1234';
+
 let hospitalData = {};
 let currentHospital = null;
 let currentLeito = null;
 let timerInterval = null;
 let timeLeft = 120;
+
+/**
+ * Função de autenticação
+ */
+function authenticate() {
+    const senhaInput = document.getElementById('authPassword');
+    const errorMsg = document.getElementById('authError');
+    const senha = senhaInput.value.trim();
+    
+    if (senha === SENHA_ACESSO) {
+        console.log('✅ Senha correta! Autenticando...');
+        
+        // Armazenar autenticação
+        localStorage.setItem('archipelago_qr_auth', 'true');
+        localStorage.setItem('archipelago_qr_auth_time', Date.now());
+        
+        // Esconder modal de senha
+        document.getElementById('authModal').classList.add('hidden');
+        
+        // Mostrar loading
+        document.getElementById('loading').classList.remove('hidden');
+        
+        // Continuar fluxo normal
+        setTimeout(() => {
+            continueAfterAuth();
+        }, 300);
+        
+    } else {
+        // Mostrar erro
+        console.log('❌ Senha incorreta');
+        errorMsg.classList.remove('hidden');
+        senhaInput.value = '';
+        senhaInput.focus();
+        
+        // Esconder erro após 3 segundos
+        setTimeout(() => {
+            errorMsg.classList.add('hidden');
+        }, 3000);
+    }
+}
+
+/**
+ * Continuar após autenticação bem-sucedida
+ */
+async function continueAfterAuth() {
+    console.log('🚀 Continuando após autenticação...');
+    
+    // Validar parâmetros da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const hospitalId = urlParams.get('h');
+    const leitoNumero = urlParams.get('l');
+    
+    if (!hospitalId || !leitoNumero) {
+        showError('Para acessar o leito, leia o QR Code.');
+        return;
+    }
+    
+    if (!HOSPITAIS[hospitalId]) {
+        showError('Hospital não reconhecido.');
+        return;
+    }
+    
+    const leitoNum = parseInt(leitoNumero);
+    if (leitoNum < 1 || leitoNum > HOSPITAIS[hospitalId].leitos) {
+        showError(`Leito ${leitoNumero} inválido para ${HOSPITAIS[hospitalId].nome}.`);
+        return;
+    }
+    
+    currentHospital = hospitalId;
+    currentLeito = leitoNumero;
+    
+    console.log(`📍 ${HOSPITAIS[hospitalId].nome} - Leito ${leitoNumero}`);
+    
+    // Carregar dados
+    await loadHospitalData(hospitalId);
+}
+
+/**
+ * Verificar autenticação ao carregar página
+ */
+function checkAuthentication() {
+    const isAuthenticated = localStorage.getItem('archipelago_qr_auth') === 'true';
+    const authTime = parseInt(localStorage.getItem('archipelago_qr_auth_time') || '0');
+    const now = Date.now();
+    
+    // Autenticação expira após 24 horas
+    const AUTH_EXPIRY = 24 * 60 * 60 * 1000;
+    
+    if (isAuthenticated && (now - authTime) < AUTH_EXPIRY) {
+        console.log('✅ Usuário já autenticado (válido por 24h)');
+        document.getElementById('authModal').classList.add('hidden');
+        return true;
+    } else {
+        console.log('🔒 Autenticação necessária');
+        document.getElementById('authModal').classList.remove('hidden');
+        
+        // Focus no campo de senha
+        setTimeout(() => {
+            document.getElementById('authPassword').focus();
+        }, 100);
+        
+        return false;
+    }
+}
+
+// =================== FUNÇÕES ORIGINAIS DO SISTEMA ===================
 
 function formatarMatriculaExibicao(matricula) {
     if (!matricula || matricula === '—') return '—';
@@ -637,40 +870,25 @@ function configurarBuscaDinamica(containerId, searchId) {
     console.log(`✅ Busca dinâmica configurada: ${searchId}`);
 }
 
+// =================== INICIALIZAÇÃO COM AUTENTICAÇÃO ===================
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 Archipelago QR V4.1 Mobile');
+    console.log('🚀 Archipelago QR V4.1 Mobile COM AUTENTICAÇÃO');
+    console.log('🔐 Senha: 1234');
     console.log('🎨 Cores: #60a5fa + #9ca3af');
     console.log('✍️ Fonte: Poppins Bold');
     console.log('🏥 Total: 7 hospitais | 93 leitos');
     console.log('✅ Concessões: 13 opções (12 + "Não se aplica")');
     console.log('✅ Linhas de Cuidado: 45 opções RESTAURADAS');
     
-    const urlParams = new URLSearchParams(window.location.search);
-    const hospitalId = urlParams.get('h');
-    const leitoNumero = urlParams.get('l');
+    // VERIFICAR AUTENTICAÇÃO PRIMEIRO
+    const isAuthenticated = checkAuthentication();
     
-    if (!hospitalId || !leitoNumero) {
-        showError('Para acessar o leito, leia o QR Code.');
-        return;
+    if (isAuthenticated) {
+        // Continuar fluxo normal (já autenticado)
+        await continueAfterAuth();
     }
-    
-    if (!HOSPITAIS[hospitalId]) {
-        showError('Hospital não reconhecido.');
-        return;
-    }
-    
-    const leitoNum = parseInt(leitoNumero);
-    if (leitoNum < 1 || leitoNum > HOSPITAIS[hospitalId].leitos) {
-        showError(`Leito ${leitoNumero} inválido para ${HOSPITAIS[hospitalId].nome}.`);
-        return;
-    }
-    
-    currentHospital = hospitalId;
-    currentLeito = leitoNumero;
-    
-    console.log(`📍 ${HOSPITAIS[hospitalId].nome} - Leito ${leitoNumero}`);
-    
-    await loadHospitalData(hospitalId);
+    // Se não autenticado, modal de senha já está visível
+    // e aguarda usuário digitar senha
 });
 
 async function loadHospitalData(hospitalId) {
@@ -726,15 +944,11 @@ function renderForm(leito) {
         `<option value="${idade}" ${leito.idade == idade ? 'selected' : ''}>${idade} anos</option>`
     ).join('');
     
-    // Desnormalizar concessões e linhas vindas do backend
     const concessoesExibicao = (leito.concessoes || []).map(c => desnormalizarTexto(c));
     const linhasExibicao = (leito.linhas || []).map(l => desnormalizarTexto(l));
-    
-    // Status formatado
     const statusTexto = isVago ? 'VAGO' : 'OCUPADO';
     
     container.innerHTML = `
-        <!-- =================== HEADER CORRIGIDO =================== -->
         <div class="header">
             <div class="header-title">Archipelago Dashboard</div>
             <div class="header-info">
@@ -863,7 +1077,6 @@ function renderForm(leito) {
                     <select id="prevAlta" required>
                         ${PREVISAO_ALTA.map(p => {
                             const prevAltaAtual = leito.prevAlta === 'SP' ? 'Sem Previsão' : leito.prevAlta;
-                            const defaultValue = !leito.prevAlta || leito.prevAlta === 'SP' ? 'Sem Previsão' : leito.prevAlta;
                             return `<option value="${p}" ${prevAltaAtual === p || (!prevAltaAtual && p === 'Sem Previsão') ? 'selected' : ''}>${p}</option>`;
                         }).join('')}
                     </select>
@@ -991,7 +1204,6 @@ function renderForm(leito) {
             </div>
         </div>
         
-        <!-- =================== BOTÕES CORRIGIDOS - 3 NA MESMA LINHA =================== -->
         <div class="actions">
             ${!isVago ? '<button class="btn btn-danger" onclick="darAlta()">Alta</button>' : ''}
             <button class="btn btn-primary" onclick="saveData()">
@@ -1428,8 +1640,39 @@ function cancelar() {
     }
 }
 
-function openQRScanner() {
-    alert('Abrindo câmera para leitura de QR Code...\n\n(Requer biblioteca de scanner QR integrada)');
+/**
+ * Fecha a janela/aba atual
+ */
+function fecharJanela() {
+    console.log('🔒 Fechando janela...');
+    
+    // Limpar timer se ainda estiver rodando
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    
+    // Tentar fechar a janela
+    window.close();
+    
+    // Fallback: Se window.close() não funcionar (navegador bloqueia)
+    // Aguardar 500ms e verificar se ainda está aberta
+    setTimeout(() => {
+        // Se chegou aqui, significa que window.close() falhou
+        // Mostrar mensagem para o usuário fechar manualmente
+        const successContainer = document.getElementById('successContainer');
+        const errorContainer = document.getElementById('errorContainer');
+        
+        if (successContainer && successContainer.style.display !== 'none') {
+            document.getElementById('successMessage').textContent = 
+                'Por favor, feche esta aba manualmente.';
+        } else if (errorContainer && errorContainer.style.display !== 'none') {
+            document.getElementById('errorMessage').textContent = 
+                'Por favor, feche esta aba manualmente.';
+        }
+        
+        console.log('⚠️ window.close() bloqueado pelo navegador. Usuário deve fechar manualmente.');
+    }, 500);
 }
 
 function hideLoading() {
@@ -1467,20 +1710,12 @@ function showSuccess(message) {
     }
 }
 
-console.log('✅ Archipelago QR V4.1 MOBILE CORRIGIDO');
+console.log('✅ Archipelago QR V4.1 MOBILE - VERSÃO FINAL');
+console.log('🔐 Senha: 1234 (válida por 24h)');
+console.log('🔒 Botão "Fechar Janela" implementado');
 console.log('📱 Otimizado para mobile');
 console.log('⏱️ Timer: 2 minutos com fechamento forçado');
 console.log('🏥 Total Rede: 93 leitos | 7 hospitais');
-console.log('');
-console.log('✅ CORREÇÕES V4.1.2:');
-console.log('🎨 Header: Azul escuro (#1e293b) + Título azul claro (#60a5fa)');
-console.log('✍️ Fonte: Poppins Bold aplicada globalmente');
-console.log('🔷 Campos: Bordas azuis iguais ao modal de senha');
-console.log('⚪ Labels: Todos os títulos em branco');
-console.log('🔍 Lupa: SVG simples + placeholder "Digite para buscar..."');
-console.log('🔘 Botões: 3 na mesma linha (Alta laranja + Salvar azul + Cancelar cinza)');
-console.log('📏 Campos: Altura uniforme (42px) para todos os inputs/selects');
-console.log('🧹 Legendas removidas: "Aceita números e letras" e "Máximo 10 dígitos"');
     </script>
 </body>
 </html>
