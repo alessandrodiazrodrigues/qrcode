@@ -971,7 +971,6 @@ function renderForm(leito) {
                             return `<select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">
                                 <option value="Apartamento" selected>Apartamento</option>
                             </select>
-                            <input type="hidden" id="tipoQuartoValue" value="Apartamento">
                             <div class="help-text">Tipo fixo para este leito</div>`;
                         }
                         
@@ -979,7 +978,6 @@ function renderForm(leito) {
                             return `<select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">
                                 <option value="Enfermaria" selected>Enfermaria</option>
                             </select>
-                            <input type="hidden" id="tipoQuartoValue" value="Enfermaria">
                             <div class="help-text">Tipo fixo para este leito</div>`;
                         }
                         
@@ -1363,7 +1361,7 @@ async function validarBloqueioCruzAzul(dados) {
 }
 
 async function validarLimiteSantaClara(dados) {
-    if (dados.hospital !== 'H4' || dados.tipoQuarto !== 'Enfermaria') {
+    if (dados.hospital !== 'H4' || dados.categoriaEscolhida !== 'Enfermaria') {
         return { valido: true };
     }
     
@@ -1432,11 +1430,6 @@ async function saveData() {
             ...dados
         };
         
-        if (isVago && dados.iniciais) {
-            payload.nome = dados.iniciais;
-            delete payload.iniciais;
-        }
-        
         console.log('📤 Enviando V4.1:', payload);
         
         const params = new URLSearchParams();
@@ -1494,7 +1487,7 @@ function coletarDados() {
     const dados = {};
     
     const iniciais = document.getElementById('iniciais');
-    if (iniciais) dados.iniciais = iniciais.value.trim();
+    if (iniciais) dados.nome = iniciais.value.trim();
     
     const matricula = document.getElementById('matricula');
     if (matricula) {
@@ -1514,16 +1507,10 @@ function coletarDados() {
     dados.diretivas = document.getElementById('diretivas').value;
     
     const tipoQuartoField = document.getElementById('tipoQuarto');
-    const tipoQuartoValue = document.getElementById('tipoQuartoValue');
-    
-    if (tipoQuartoValue) {
-        dados.tipoQuarto = tipoQuartoValue.value;
-        dados.categoria = tipoQuartoValue.value;
-        dados.categoria_escolhida = tipoQuartoValue.value;
-    } else if (tipoQuartoField && tipoQuartoField.value) {
-        dados.tipoQuarto = tipoQuartoField.value;
+    if (tipoQuartoField && tipoQuartoField.value) {
+        dados.categoriaEscolhida = tipoQuartoField.value;
         dados.categoria = tipoQuartoField.value;
-        dados.categoria_escolhida = tipoQuartoField.value;
+        dados.tipoQuarto = tipoQuartoField.value;
     }
     
     dados.concessoes = [];
@@ -1548,7 +1535,7 @@ function coletarDados() {
 function validarDados(dados) {
     const erros = [];
     
-    if (dados.iniciais !== undefined && !dados.iniciais) {
+    if (dados.nome !== undefined && !dados.nome) {
         erros.push('• Iniciais são obrigatórias');
     }
     
