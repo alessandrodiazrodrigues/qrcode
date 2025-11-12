@@ -950,14 +950,24 @@ function renderForm(leito) {
                 <div class="form-group">
                     <label>Identificação <span class="required">*</span></label>
                     ${(() => {
-                        if (currentHospital === 'H2') {
-                            const identificacaoValue = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
-                            return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}" readonly 
+                        const leitoNum = parseInt(currentLeito);
+                        const identificacaoValue = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
+
+                        // CRUZ AZUL - ENFERMARIAS (21-36): READONLY
+                        if (currentHospital === 'H2' && leitoNum >= 21 && leitoNum <= 36) {
+                            return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}" readonly
                                      style="background: #1f2937; color: #9ca3af; cursor: not-allowed;" required>
-                               <div class="help-text">Numeração fixa (Cruz Azul)</div>`;
-                        } else {
-                            const identificacaoValue = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
-                            return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}" 
+                               <div class="help-text">Numeração fixa (Enfermaria Cruz Azul)</div>`;
+                        }
+                        // CRUZ AZUL - APARTAMENTOS (1-20): EDITÁVEL
+                        else if (currentHospital === 'H2' && leitoNum >= 1 && leitoNum <= 20) {
+                            return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}"
+                                     placeholder="Ex: 101, 102, 1A" maxlength="6" required>
+                               <div class="help-text">Digite a identificação do apartamento</div>`;
+                        }
+                        // OUTROS HOSPITAIS: EDITÁVEL
+                        else {
+                            return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}"
                                      placeholder="Ex: 1A, 21, 711.1" maxlength="6" required>`;
                         }
                     })()}
