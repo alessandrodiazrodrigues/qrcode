@@ -139,10 +139,11 @@
             font-size: 14px;
             font-weight: 600;
             animation: shake 0.3s;
+            display: none;
         }
         
-        .error-msg.hidden {
-            display: none !important;
+        .error-msg.show {
+            display: block !important;
         }
         
         @keyframes shake {
@@ -661,7 +662,7 @@
                    pattern="[0-9]*"
                    onkeypress="if(event.key==='Enter') authenticate()">
             <button onclick="authenticate()">Entrar</button>
-            <div id="authError" class="error-msg hidden">❌ Senha incorreta</div>
+            <div id="authError" class="error-msg">❌ Senha incorreta</div>
         </div>
     </div>
     
@@ -718,12 +719,12 @@ function authenticate() {
         
     } else {
         console.log('❌ Senha incorreta');
-        errorMsg.classList.remove('hidden');
+        errorMsg.classList.add('show');
         senhaInput.value = '';
         senhaInput.focus();
         
         setTimeout(() => {
-            errorMsg.classList.add('hidden');
+            errorMsg.classList.remove('show');
         }, 3000);
     }
 }
