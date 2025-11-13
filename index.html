@@ -887,6 +887,33 @@ function renderForm(leito) {
     const hospitalNome = HOSPITAIS[currentHospital].nome;
     const idSequencial = String(currentLeito).padStart(2, '0');
     
+    // ✅ VALIDAÇÃO DE BLOQUEIO POR ISOLAMENTO (CRUZ AZUL) - INÍCIO
+    const leitoNum = parseInt(currentLeito);
+    const isEnfermariaCruzAzul = currentHospital === 'H2' && leitoNum >= 21 && leitoNum <= 36;
+    
+    if (isVago && isEnfermariaCruzAzul) {
+        const leitoIrmao = CRUZ_AZUL_LEITOS_IRMAOS[currentLeito];
+        if (leitoIrmao) {
+            const dadosIrmao = hospitalData['H2']?.leitos.find(l => 
+                String(l.leito) === String(leitoIrmao)
+            );
+            
+            if (dadosIrmao && dadosIrmao.status !== 'Vago' && dadosIrmao.status !== 'vago') {
+                const isolamentoIrmao = dadosIrmao.isolamento || '';
+                if (isolamentoIrmao && isolamentoIrmao !== 'Não Isolamento') {
+                    const identificacaoIrmao = dadosIrmao.identificacaoLeito || 
+                                               dadosIrmao.identificacao_leito || 
+                                               `Leito ${leitoIrmao}`;
+                    
+                    console.log(`🚫 [BLOQUEIO] Leito ${currentLeito} bloqueado - Isolamento no ${identificacaoIrmao}: ${isolamentoIrmao}`);
+                    
+                    showError(`❌ LEITO BLOQUEADO POR ISOLAMENTO!\n\nO leito irmão (${identificacaoIrmao}) está em ${isolamentoIrmao}.\n\nAguarde a alta para admitir neste leito.`);
+                    return;
+                }
+            }
+        }
+    }
+    
     const identificacaoRaw = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao;
     const identificacao = identificacaoRaw ? String(identificacaoRaw).trim() : '';
     const leitoPersonalizado = identificacao 
@@ -900,6 +927,35 @@ function renderForm(leito) {
     const concessoesExibicao = (leito.concessoes || []).map(c => desnormalizarTexto(c));
     const linhasExibicao = (leito.linhas || []).map(l => desnormalizarTexto(l));
     const statusTexto = isVago ? 'VAGO' : 'OCUPADO';
+    
+    // ✅ VALIDAÇÃO DE GÊNERO POR LEITO IRMÃO (CRUZ AZUL)
+    let generoPreDefinido = null;
+    let generoDisabled = false;
+    let mensagemGenero = '';
+    
+    if (currentHospital === 'H2' && parseInt(currentLeito) >= 21 && parseInt(currentLeito) <= 36 && isVago) {
+        const leitoIrmao = CRUZ_AZUL_LEITOS_IRMAOS[currentLeito];
+        if (leitoIrmao) {
+            const dadosIrmao = hospitalData['H2']?.leitos.find(l => 
+                String(l.leito) === String(leitoIrmao)
+            );
+            
+            if (dadosIrmao && dadosIrmao.status !== 'Vago' && dadosIrmao.status !== 'vago') {
+                const isolamentoIrmao = dadosIrmao.isolamento || '';
+                if (!isolamentoIrmao || isolamentoIrmao === 'Não Isolamento') {
+                    if (dadosIrmao.genero) {
+                        generoPreDefinido = dadosIrmao.genero;
+                        generoDisabled = true;
+                        const identificacaoIrmao = dadosIrmao.identificacaoLeito || 
+                                                   dadosIrmao.identificacao_leito || 
+                                                   `Leito ${leitoIrmao}`;
+                        mensagemGenero = `Gênero definido pelo ${identificacaoIrmao}`;
+                        console.log(`🔒 [GENERO] Leito ${currentLeito} bloqueado para gênero ${generoPreDefinido} (irmão ${leitoIrmao})`);
+                    }
+                }
+            }
+        }
+    }
     
     container.innerHTML = `
         <div class="header">
@@ -953,20 +1009,15 @@ function renderForm(leito) {
                         const leitoNum = parseInt(currentLeito);
                         const identificacaoValue = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao || '';
 
-                        // CRUZ AZUL - ENFERMARIAS (21-36): READONLY
                         if (currentHospital === 'H2' && leitoNum >= 21 && leitoNum <= 36) {
                             return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}" readonly
                                      style="background: #1f2937; color: #9ca3af; cursor: not-allowed;" required>
                                <div class="help-text">Numeração fixa (Enfermaria Cruz Azul)</div>`;
-                        }
-                        // CRUZ AZUL - APARTAMENTOS (1-20): EDITÁVEL
-                        else if (currentHospital === 'H2' && leitoNum >= 1 && leitoNum <= 20) {
+                        } else if (currentHospital === 'H2' && leitoNum >= 1 && leitoNum <= 20) {
                             return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}"
                                      placeholder="Ex: 101, 102, 1A" maxlength="6" required>
                                <div class="help-text">Digite a identificação do apartamento</div>`;
-                        }
-                        // OUTROS HOSPITAIS: EDITÁVEL
-                        else {
+                        } else {
                             return `<input type="text" id="identificacaoLeito" value="${identificacaoValue}"
                                      placeholder="Ex: 1A, 21, 711.1" maxlength="6" required>`;
                         }
@@ -1015,13 +1066,17 @@ function renderForm(leito) {
             <div class="form-row-3">
                 <div class="form-group">
                     <label>Gênero <span class="required">*</span></label>
-                    <select id="sexo" required>
-                        <option value="">Selecionar...</option>
-                        ${SEXO_OPTIONS.map(sexo => {
-                            const generoAtual = leito.genero || leito.sexo || '';
-                            return `<option value="${sexo}" ${generoAtual === sexo ? 'selected' : ''}>${sexo}</option>`;
-                        }).join('')}
+                    <select id="sexo" required ${generoDisabled ? 'disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;"' : ''}>
+                        ${generoPreDefinido 
+                            ? `<option value="${generoPreDefinido}" selected>${generoPreDefinido}</option>`
+                            : `<option value="">Selecionar...</option>
+                               ${SEXO_OPTIONS.map(sexo => {
+                                   const generoAtual = leito.genero || leito.sexo || '';
+                                   return `<option value="${sexo}" ${generoAtual === sexo ? 'selected' : ''}>${sexo}</option>`;
+                               }).join('')}`
+                        }
                     </select>
+                    ${generoDisabled ? `<div class="help-text">${mensagemGenero}</div>` : ''}
                 </div>
                 <div class="form-group">
                     <label>Região <span class="required">*</span></label>
@@ -1650,10 +1705,11 @@ function showSuccess(message) {
     }
 }
 
-console.log('✅ Archipelago QR V4.1 MOBILE - VERSÃO FINAL COM CORREÇÕES');
+console.log('✅ Archipelago QR V4.1 MOBILE - VERSÃO FINAL COM VALIDAÇÕES CRUZ AZUL');
 console.log('🔐 Senha: 1997 (válida por 24h)');
-console.log('🎨 Correções estéticas aplicadas');
-console.log('🏥 Cruz Azul: Campo identificação readonly');
+console.log('🏥 Validações Cruz Azul implementadas:');
+console.log('   ✅ Bloqueio por isolamento do leito irmão');
+console.log('   ✅ Gênero pré-definido pelo leito irmão ocupado');
 console.log('📱 Otimizado para mobile');
     </script>
 </body>
