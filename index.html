@@ -961,6 +961,33 @@ function renderForm(leito) {
         }
     }
     
+    // ✅ VALIDAÇÃO DE ISOLAMENTO POR LEITO IRMÃO (CRUZ AZUL)
+    let isolamentoPreDefinido = null;
+    let isolamentoDisabled = false;
+    let mensagemIsolamento = '';
+    
+    if (currentHospital === 'H2' && parseInt(currentLeito) >= 21 && parseInt(currentLeito) <= 36) {
+        const leitoIrmao = CRUZ_AZUL_LEITOS_IRMAOS[currentLeito];
+        if (leitoIrmao) {
+            const dadosIrmao = hospitalData['H2']?.leitos.find(l => 
+                String(l.leito) === String(leitoIrmao)
+            );
+            
+            if (dadosIrmao && dadosIrmao.status !== 'Vago' && dadosIrmao.status !== 'vago') {
+                const isolamentoIrmao = dadosIrmao.isolamento || 'Não Isolamento';
+                isolamentoPreDefinido = isolamentoIrmao;
+                isolamentoDisabled = true;
+                
+                const identificacaoIrmao = dadosIrmao.identificacaoLeito || 
+                                           dadosIrmao.identificacao_leito || 
+                                           `Leito ${leitoIrmao}`;
+                
+                mensagemIsolamento = `Isolamento definido pelo ${identificacaoIrmao}`;
+                console.log(`🔒 [ISOLAMENTO] Leito ${currentLeito} bloqueado para isolamento "${isolamentoPreDefinido}" (irmão ${leitoIrmao})`);
+            }
+        }
+    }
+    
     container.innerHTML = `
         <div class="header">
             <div class="header-title">
@@ -1059,11 +1086,15 @@ function renderForm(leito) {
                 </div>
                 <div class="form-group">
                     <label>Isolamento <span class="required">*</span></label>
-                    <select id="isolamento" required>
-                        ${ISOLAMENTO_OPTIONS.map((opt, index) => 
-                            `<option value="${opt}" ${(leito.isolamento === opt || (index === 0 && !leito.isolamento)) ? 'selected' : ''}>${opt}</option>`
-                        ).join('')}
+                    <select id="isolamento" required ${isolamentoDisabled ? 'disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;"' : ''}>
+                        ${isolamentoPreDefinido 
+                            ? `<option value="${isolamentoPreDefinido}" selected>${isolamentoPreDefinido}</option>`
+                            : ISOLAMENTO_OPTIONS.map((opt, index) => 
+                                `<option value="${opt}" ${(leito.isolamento === opt || (index === 0 && !leito.isolamento)) ? 'selected' : ''}>${opt}</option>`
+                              ).join('')
+                        }
                     </select>
+                    ${isolamentoDisabled ? `<div class="help-text">${mensagemIsolamento}</div>` : ''}
                 </div>
             </div>
             
@@ -1709,11 +1740,12 @@ function showSuccess(message) {
     }
 }
 
-console.log('✅ Archipelago QR V4.1 MOBILE - VERSÃO FINAL COM VALIDAÇÕES CRUZ AZUL');
+console.log('✅ Archipelago QR V4.1 MOBILE - VERSÃO FINAL');
 console.log('🔐 Senha: 1997 (válida por 24h)');
 console.log('🏥 Validações Cruz Azul implementadas:');
 console.log('   ✅ Bloqueio por isolamento do leito irmão');
 console.log('   ✅ Gênero pré-definido pelo leito irmão ocupado');
+console.log('   ✅ Isolamento pré-definido pelo leito irmão ocupado');
 console.log('📱 Otimizado para mobile');
     </script>
 </body>
