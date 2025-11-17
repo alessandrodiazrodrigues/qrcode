@@ -5,11 +5,11 @@
 // Versão: V6.0 (Alinhado com Dashboard Principal)
 // 9 hospitais ativos | 341 leitos | 13 concessões | 45 Linhas de Cuidado
 // Sistema de leitos irmãos: H2 (13 pares) + H4 (9 pares)
-// ⚠️ URLs PRODUÇÃOS - Alterar em produção
+// ⚠️ URLs DE PRODUÇÃO - Em uso
 // ==================================================================================
 
 // *** URL DA API V6.0 - PRODUÇÃO ***
-const API_URL = 'https://script.google.com/macros/s/AKfycbwetTtVcZcpKl4eTT-lbMnG2wAlUJki7Oz4NmpC3vE8tO9KVV_gpzVVNDeBMy73fiR54w/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzUfGJXoX6sEfdMjvz7XUBDIYzpoxxclefTnm7BnIwwOWvre2MJc-7PlE16DjqHugMpdA/exec';
 
 // =================== CONFIGURAÇÃO DE HOSPITAIS V6.0 (9 ATIVOS - 341 LEITOS) ===================
 const HOSPITAIS = {
@@ -256,7 +256,7 @@ function desnormalizarTexto(texto) {
 // =================== LOGS ===================
 console.log('✅ API.js V6.0 QR Code Mobile carregado');
 console.log(`🔗 URL: ${API_URL}`);
-console.log(`⚠️ URL PRODUÇÃO - Alterar em produção`);
+console.log(`⚠️ URL DE PRODUÇÃO - Em uso`);
 console.log(`🏥 Hospitais: ${Object.keys(HOSPITAIS).length} ativos (341 leitos)`);
 console.log(`🎨 Cores: #60a5fa (azul vibrante) + #9ca3af (cinza)`);
 console.log(`✏️ Fonte: Poppins Bold`);
