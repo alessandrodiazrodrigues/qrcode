@@ -1,36 +1,35 @@
-// =================== API V4.1 - QR CODE MOBILE ===================
+// =================== API V6.0 - QR CODE MOBILE ===================
 // Cliente: Guilherme Santoro
 // Desenvolvedor: Alessandro Rodrigues
 // Data: Novembro/2025
-// Versão: V4.1 (Alinhado com Dashboard Principal)
-// ✅ 7 hospitais | 93 leitos | 13 concessões (12 + "Não se aplica")
-// ✅ 45 Linhas de Cuidado RESTAURADAS
-// ✅ Sistema de normalização implementado
-// ✅ Numeração Cruz Azul lida diretamente da planilha (coluna AQ)
+// Versão: V6.0 (Alinhado com Dashboard Principal)
+// 9 hospitais ativos | 341 leitos | 13 concessões | 45 Linhas de Cuidado
+// Sistema de leitos irmãos: H2 (13 pares) + H4 (9 pares)
+// ⚠️ URLs PRODUÇÃOS - Alterar em produção
 // ==================================================================================
 
-// *** URL DA API V4.1 ***
-const API_URL = 'https://script.google.com/macros/s/AKfycbwhbDv23VayY2c4l_xhKMBafwo7w86Qu15RqFFkHkE-quasZuIeT6lWO7LlkU3uwMax/exec';
+// *** URL DA API V6.0 - PRODUÇÃO ***
+const API_URL = 'https://script.google.com/macros/s/AKfycbwetTtVcZcpKl4eTT-lbMnG2wAlUJki7Oz4NmpC3vE8tO9KVV_gpzVVNDeBMy73fiR54w/exec';
 
-// =================== CONFIGURAÇÃO DE HOSPITAIS V4.1 (7 HOSPITAIS - 93 LEITOS) ===================
+// =================== CONFIGURAÇÃO DE HOSPITAIS V6.0 (9 ATIVOS - 341 LEITOS) ===================
 const HOSPITAIS = {
-    H1: { nome: 'Neomater', leitos: 10 },
-    H2: { nome: 'Cruz Azul', leitos: 36 },
-    H3: { nome: 'Santa Marcelina', leitos: 7 },
-    H4: { nome: 'Santa Clara', leitos: 13 },
-    H5: { nome: 'Adventista', leitos: 13 },
-    H6: { nome: 'Santa Cruz', leitos: 7 },
-    H7: { nome: 'Santa Virgínia', leitos: 7 }
+    H1: { nome: 'Neomater', leitos: 25 },
+    H2: { nome: 'Cruz Azul', leitos: 67 },
+    H3: { nome: 'Santa Marcelina', leitos: 28 },
+    H4: { nome: 'Santa Clara', leitos: 57 },
+    H5: { nome: 'Adventista', leitos: 28 },
+    H6: { nome: 'Santa Cruz', leitos: 22 },
+    H7: { nome: 'Santa Virgínia', leitos: 22 },
+    H8: { nome: 'São Camilo Ipiranga', leitos: 22 },
+    H9: { nome: 'São Camilo Pompéia', leitos: 22 }
 };
 
-// =================== HOSPITAIS HÍBRIDOS V4.1 ===================
-const HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5', 'H6', 'H7'];
+// =================== HOSPITAIS HÍBRIDOS V6.0 ===================
+const HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5', 'H6', 'H7', 'H8', 'H9'];
 
-// =================== SANTA CLARA (LIMITE 4 ENFERMARIAS) ===================
-const SANTA_CLARA_MAX_ENFERMARIAS = 4;
-
-// =================== CRUZ AZUL - LEITOS IRMÃOS ===================
+// =================== CRUZ AZUL - LEITOS IRMÃOS (13 PARES) ===================
 const CRUZ_AZUL_LEITOS_IRMAOS = {
+    // Contratuais (8 pares: 21-36)
     '21': '22', '22': '21',
     '23': '24', '24': '23',
     '25': '26', '26': '25',
@@ -38,7 +37,28 @@ const CRUZ_AZUL_LEITOS_IRMAOS = {
     '29': '30', '30': '29',
     '31': '32', '32': '31',
     '33': '34', '34': '33',
-    '35': '36', '36': '35'
+    '35': '36', '36': '35',
+    // Extras (5 pares: 37-46)
+    '37': '38', '38': '37',
+    '39': '40', '40': '39',
+    '41': '42', '42': '41',
+    '43': '44', '44': '43',
+    '45': '46', '46': '45'
+};
+
+// =================== SANTA CLARA - LEITOS IRMÃOS (9 PARES) ===================
+const SANTA_CLARA_LEITOS_IRMAOS = {
+    // Contratuais (4 pares: 10-17)
+    '10': '11', '11': '10',
+    '12': '13', '13': '12',
+    '14': '15', '15': '14',
+    '16': '17', '17': '16',
+    // Extras (5 pares: 18-27)
+    '18': '19', '19': '18',
+    '20': '21', '21': '20',
+    '22': '23', '23': '22',
+    '24': '25', '25': '24',
+    '26': '27', '27': '26'
 };
 
 // =================== OPÇÕES DE FORMULÁRIO ===================
@@ -97,7 +117,7 @@ const CONCESSOES = [
     "Fisioterapia Respiratória Domiciliar"
 ];
 
-// =================== LINHAS DE CUIDADO (45 OPÇÕES - RESTAURADAS V4.1) ===================
+// =================== LINHAS DE CUIDADO (45 OPÇÕES) ===================
 const LINHAS_CUIDADO = [
     "Assiste",
     "APS SP",
@@ -156,7 +176,6 @@ function normalizarTexto(texto) {
         .replace(/Ç/g, 'C');
 }
 
-// Mapas de exibição (SEM acentos → COM acentos)
 const CONCESSOES_DISPLAY_MAP = {
     "Transicao Domiciliar": "Transição Domiciliar",
     "Aplicacao domiciliar de medicamentos": "Aplicação domiciliar de medicamentos",
@@ -235,12 +254,17 @@ function desnormalizarTexto(texto) {
 }
 
 // =================== LOGS ===================
-console.log('✅ API.js V4.1 QR Code Mobile carregado');
+console.log('✅ API.js V6.0 QR Code Mobile carregado');
 console.log(`🔗 URL: ${API_URL}`);
-console.log(`🏥 Hospitais: ${Object.keys(HOSPITAIS).length} (93 leitos)`);
+console.log(`⚠️ URL PRODUÇÃO - Alterar em produção`);
+console.log(`🏥 Hospitais: ${Object.keys(HOSPITAIS).length} ativos (341 leitos)`);
 console.log(`🎨 Cores: #60a5fa (azul vibrante) + #9ca3af (cinza)`);
-console.log(`✍️ Fonte: Poppins Bold`);
+console.log(`✏️ Fonte: Poppins Bold`);
 console.log(`✅ Concessões: ${CONCESSOES.length} opções (12 + "Não se aplica")`);
-console.log(`✅ Linhas de Cuidado: ${LINHAS_CUIDADO.length} opções RESTAURADAS`);
+console.log(`✅ Linhas de Cuidado: ${LINHAS_CUIDADO.length} opções`);
 console.log(`✅ Sistema de normalização implementado`);
-console.log(`✅ Numeração Cruz Azul lida da planilha (coluna AQ)`);
+console.log(`👥 Leitos Irmãos H2: 13 pares (21-46)`);
+console.log(`👥 Leitos Irmãos H4: 9 pares (10-27)`);
+console.log(`📝 Campo anotações: 800 caracteres`);
+console.log(`🔧 H2: 67 leitos (1-20 apto, 21-46 enf, 47-67 apto)`);
+console.log(`🔧 H4: 57 leitos (1-9 apto, 10-27 enf, 28-57 apto)`);
