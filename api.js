@@ -9,7 +9,7 @@
 // ==================================================================================
 
 // *** URL DA API V6.0 - PRODUÇÃO ***
-const API_URL = 'https://script.google.com/macros/s/AKfycbzwtQCszjWzJI-gPltE_qh5XoYYQauc-1f57qPTTJaks5is2WNz6kq9esdBc7zX5Sdt0A/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycby_Lxl6QUXhxuhDXINA5I2VVUnsWd-ewKliu04WPuOosoFLfOcxRCwBGSa-1zATNcJSAQ/exec';
 
 // =================== CONFIGURAÇÃO DE HOSPITAIS V6.0 (9 ATIVOS - 341 LEITOS) ===================
 const HOSPITAIS = {
