@@ -5,12 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Archipelago QR V6.0 - Acesso Médico</title>
+    <title>Archipelago QR V7.6 - Acesso Médico</title>
     
-    <!--⚠️ URL DE PRODUÇÃO - ALTERAR EM PRODUÇÃO:
+    <!--V7.6 - 13/Dezembro/2025
+         - formatarMatriculaExibicao: sempre mostra zeros a esquerda (0000000056-8)
+         - UTI: Modalidade Contratada bloqueada apos admissao (sem mensagem)
+         - UTI: Genero bloqueado apos admissao (sem mensagem)
+         - Enfermaria: Genero bloqueado apos admissao (sem mensagem)
+         - Enfermaria hibridos: Tipo de Quarto bloqueado apos admissao (sem mensagem)
+         - H2/H4: Removido texto "Tipo fixo para este leito" e "Digite o número + sufixo"
+         - CORRIGIDO: Comparacao de "Nao Isolamento" vs "Não Isolamento" nos leitos irmaos
+         - CORRIGIDO: Comparacao de matricula nas reservas (normaliza zeros e verificador)
+         
+         V7.5 - 12/Dezembro/2025
+         V7.5:
+         - Sao Camilo (H8/H9): Sufixos enfermaria corrigidos para 1 e 2
+         - UTI: Campo SPICT-BR reativado
+         
+         V7.4 - 08/Dezembro/2025
+         - UTI: "Tipo Convênio" renomeado para "Modalidade Contratada"
+         - UTI: Identificação com limite 2 dígitos (Ex: 22)
+         - Auto-completar zeros na matrícula (Ex: 455-6 → 0000000455-6)
+         - Placeholder matrícula: Ex: 0000000123-4
+         
+         URL DE TESTE:
          1. API_URL (em api.js)
          2. Vercel: qr-code-systelos.vercel.app
-         3. Planilha: 1ZeaFX9ivNl8kqmBMDACAchgIotSElLYhjCgaDGcCaxA
+         3. Planilha: 1-YlI23lBN_i_-5_Mn_ducIIvQtEvmPRYGFfK4oxJcaI
     -->
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -320,6 +341,7 @@
         }
         
         .form-row-3 {
+            align-items: start;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
@@ -333,6 +355,7 @@
         }
         
         .form-row-2 {
+            align-items: start;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
@@ -346,7 +369,7 @@
         .form-group {
             display: flex;
             flex-direction: column;
-            min-height: 68px;
+            min-height: 72px;
         }
         
         .form-group label {
@@ -356,6 +379,10 @@
             margin-bottom: 4px;
             letter-spacing: 0.5px;
             flex-shrink: 0;
+            min-height: 34px;
+            display: flex;
+            align-items: flex-end;
+            line-height: 1.3;
         }
         
         .form-group label .required {
@@ -601,6 +628,58 @@
             transform: none !important;
         }
         
+        /* V7.2: Loading state discreto */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            right: 10px;
+            top: 50%;
+            margin-top: -7px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: btn-spin 0.6s linear infinite;
+        }
+        @keyframes btn-spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* V7.2: Overlay que bloqueia tela toda */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease;
+        }
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .loading-spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: btn-spin 0.7s linear infinite;
+        }
+        
         .message-container {
             width: 100%;
             min-height: 100vh;
@@ -706,6 +785,11 @@
     </style>
 </head>
 <body>
+    <!-- V7.2: Overlay de loading -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+    
     <div id="authModal" class="modal-auth">
         <div class="auth-container">
             <h1>Archipelago Dashboard</h1>
@@ -751,10 +835,44 @@ const SENHA_ACESSO = '1997';
 
 // const API_URL = 'https://script.google.com/macros/s/AKfycbzUfGJXoX6sEfdMjvz7XUBDIYzpoxxclefTnm7BnIwwOWvre2MJc-7PlE16DjqHugMpdA/exec';
 let hospitalData = {};
+let utiData = {}; // V7.0: Dados UTI separados
 let currentHospital = null;
 let currentLeito = null;
+let isUTI = false; // V7.0: Flag para identificar leito UTI
+let currentLeitoUTIVago = true; // V7.1: Estado do leito UTI (true=vago, false=ocupado)
 let timerInterval = null;
 let timeLeft = 120;
+
+// V7.4: Configuração de sufixos por hospital
+const SUFIXOS_ENFERMARIA = {
+    H1: ['A', 'B'],
+    H2: ['1', '3'],
+    H3: ['1', '2'],
+    H4: ['A', 'C'],
+    H5: ['1', '2'],
+    H6: ['1', '2'],
+    H7: ['1', '2'],
+    H8: ['1', '2'],
+    H9: ['1', '2']
+};
+
+const SUFIXOS_APARTAMENTO = {
+    H3: ['1'],  // Sufixo fixo "-1"
+    H7: ['1']   // Sufixo fixo "-1"
+};
+
+// V7.5: Quantidade de digitos do numero base por hospital
+const MAXLENGTH_IDENTIFICACAO = {
+    H1: 3,
+    H2: 3,
+    H3: 4,  // Santa Marcelina: 4 digitos
+    H4: 3,
+    H5: 3,
+    H6: 3,
+    H7: 3,
+    H8: 3,
+    H9: 3
+};
 
 function authenticate() {
     const senhaInput = document.getElementById('authPassword');
@@ -787,11 +905,12 @@ function authenticate() {
 }
 
 async function continueAfterAuth() {
-    console.log('🚀 Continuando após autenticação...');
+    console.log('Continuando apos autenticacao...');
     
     const urlParams = new URLSearchParams(window.location.search);
     const hospitalId = urlParams.get('h');
     const leitoNumero = urlParams.get('l');
+    const tipoLeito = urlParams.get('t'); // V7.0: Detectar UTI
     
     if (!hospitalId || !leitoNumero) {
         showError('Para acessar o leito, leia o QR Code.');
@@ -804,15 +923,35 @@ async function continueAfterAuth() {
     }
     
     const leitoNum = parseInt(leitoNumero);
-    if (leitoNum < 1 || leitoNum > HOSPITAIS[hospitalId].leitos) {
-        showError(`Leito ${leitoNumero} inválido para ${HOSPITAIS[hospitalId].nome}.`);
-        return;
+    
+    // V7.0: Verificar se e leito UTI
+    isUTI = (tipoLeito === 'UTI');
+    
+    if (isUTI) {
+        // Validar UTI
+        if (!UTI_CAPACIDADE[hospitalId] || UTI_CAPACIDADE[hospitalId].total === 0) {
+            showError('Este hospital não possui leitos UTI.');
+            return;
+        }
+        
+        if (leitoNum < 1 || leitoNum > UTI_CAPACIDADE[hospitalId].total) {
+            showError('Leito UTI ' + leitoNumero + ' inválido para ' + UTI_CAPACIDADE[hospitalId].nome + '.');
+            return;
+        }
+        
+        console.log('UTI: ' + UTI_CAPACIDADE[hospitalId].nome + ' - Leito UTI ' + leitoNumero);
+    } else {
+        // Validar Enfermaria
+        if (leitoNum < 1 || leitoNum > HOSPITAIS[hospitalId].leitos) {
+            showError('Leito ' + leitoNumero + ' inválido para ' + HOSPITAIS[hospitalId].nome + '.');
+            return;
+        }
+        
+        console.log('Enfermaria: ' + HOSPITAIS[hospitalId].nome + ' - Leito ' + leitoNumero);
     }
     
     currentHospital = hospitalId;
     currentLeito = leitoNumero;
-    
-    console.log(`📍 ${HOSPITAIS[hospitalId].nome} - Leito ${leitoNumero}`);
     
     await loadHospitalData(hospitalId);
 }
@@ -846,14 +985,17 @@ function formatarMatriculaExibicao(matricula) {
     const mat = String(matricula).replace(/\D/g, '');
     if (mat.length === 0) return '—';
     if (mat.length === 1) return mat;
-    return mat.slice(0, -1) + '-' + mat.slice(-1);
+    // V7.6: Sempre mostrar com zeros a esquerda (10 digitos + 1 verificador = 11 total)
+    const digitoVerificador = mat.slice(-1);
+    const numero = mat.slice(0, -1).padStart(10, '0');
+    return numero + '-' + digitoVerificador;
 }
 
 function formatarMatricula(input) {
     let valor = input.value.replace(/\D/g, '');
     
-    if (valor.length > 10) {
-        valor = valor.slice(0, 10);
+    if (valor.length > 11) {
+        valor = valor.slice(0, 11);
     }
     
     if (valor.length > 1) {
@@ -861,6 +1003,28 @@ function formatarMatricula(input) {
     }
     
     input.value = valor;
+}
+
+// V7.4: Auto-completar zeros à esquerda na matrícula (10 dígitos + 1 dígito verificador)
+function autoCompletarMatricula(input) {
+    let valor = input.value.replace(/\D/g, ''); // Remove tudo que não é número
+    if (valor.length === 0) return;
+    if (valor.length < 2) return; // Precisa ter pelo menos 2 dígitos para ter número + dígito
+    
+    // Separar número e dígito verificador
+    let digito = valor.slice(-1);
+    let numero = valor.slice(0, -1);
+    
+    // Completar com zeros à esquerda até ter 10 dígitos
+    while (numero.length < 10) {
+        numero = '0' + numero;
+    }
+    
+    // Limitar a 10 dígitos (caso tenha mais)
+    numero = numero.slice(-10);
+    
+    // Formatar com hífen
+    input.value = numero + '-' + digito;
 }
 
 function formatarIniciais(input) {
@@ -944,7 +1108,7 @@ function atualizarContadorAnotacoes() {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 Archipelago QR V6.0 Mobile COM AUTENTICAÇÃO');
+    console.log('Archipelago QR V7.2 Mobile COM AUTENTICACAO');
     console.log('🔐 Senha: 1997');
     console.log('🎨 Cores: #60a5fa + #9ca3af');
     console.log('✍️ Fonte: Poppins Bold');
@@ -967,27 +1131,56 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 async function loadHospitalData(hospitalId) {
     try {
-        console.log('📡 Carregando dados V6.0...');
+        console.log('V7.1 - Carregando dados...');
         
-        const response = await fetch(`${API_URL}?action=all`);
+        const response = await fetch(API_URL + '?action=all');
         if (!response.ok) throw new Error('Erro na API');
         
         const data = await response.json();
         if (!data.ok) throw new Error(data.error || 'Erro desconhecido');
         
         if (!data.data || !data.data[hospitalId]) {
-            throw new Error(`Hospital ${hospitalId} não encontrado`);
+            throw new Error('Hospital ' + hospitalId + ' não encontrado');
         }
         
         hospitalData = data.data;
         
-        const leito = hospitalData[hospitalId].leitos.find(l => 
-            String(l.leito || l.numero) === String(currentLeito)
-        );
+        // V7.1: Dados UTI estao em data.data junto com enfermarias
+        // Não existe data.uti separado
         
-        if (!leito) {
-            showError(`Leito ${currentLeito} não encontrado.`);
-            return;
+        let leito = null;
+        
+        if (isUTI) {
+            // V7.1: Buscar leito UTI na lista de leitos do hospital
+            // Os leitos UTI tem tipo === 'UTI'
+            if (hospitalData[hospitalId] && hospitalData[hospitalId].leitos) {
+                leito = hospitalData[hospitalId].leitos.find(function(l) {
+                    return String(l.leito || l.numero) === String(currentLeito) && l.tipo === 'UTI';
+                });
+                
+                console.log('V7.1 - Busca UTI no hospital ' + hospitalId + ', leito ' + currentLeito);
+                console.log('V7.1 - Leito encontrado:', leito ? JSON.stringify(leito) : 'NÃO ENCONTRADO');
+            }
+            
+            if (!leito) {
+                // Se não encontrou, criar leito vago (UTI não cadastrado ainda)
+                console.log('V7.1 - Leito UTI não encontrado, criando vago...');
+                leito = {
+                    leito: parseInt(currentLeito),
+                    status: 'Vago',
+                    tipo: 'UTI'
+                };
+            }
+        } else {
+            // Enfermaria normal
+            leito = hospitalData[hospitalId].leitos.find(function(l) {
+                return String(l.leito || l.numero) === String(currentLeito);
+            });
+            
+            if (!leito) {
+                showError('Leito ' + currentLeito + ' não encontrado.');
+                return;
+            }
         }
         
         renderForm(leito);
@@ -995,7 +1188,7 @@ async function loadHospitalData(hospitalId) {
         hideLoading();
         
     } catch (error) {
-        console.error('❌ Erro:', error);
+        console.error('Erro:', error);
         showError('Erro ao carregar dados. Tente novamente.');
     }
 }
@@ -1018,8 +1211,458 @@ function verificarLeitoIrmao(hospital, leito) {
     return null;
 }
 
+// =================== V7.1: FORMULARIO UTI SIMPLIFICADO ===================
+function renderFormUTI(leito) {
+    console.log('Renderizando formulário UTI V7.1');
+    
+    var container = document.getElementById('mainContainer');
+    var isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
+    
+    // V7.1: Armazenar estado em variavel global para uso em saveDataUTI
+    currentLeitoUTIVago = isVago;
+    console.log('V7.1 - Estado do leito UTI: isVago =', isVago, '| status original:', leito.status);
+    
+    var hospitalNome = UTI_CAPACIDADE[currentHospital].nome;
+    var idSequencial = String(currentLeito).padStart(2, '0');
+    
+    var identificacaoRaw = leito.identificacaoLeito || leito.identificacao_leito || leito.identificacao;
+    var identificacao = identificacaoRaw ? String(identificacaoRaw).trim() : '';
+    var leitoPersonalizado = identificacao ? identificacao.toUpperCase() : 'UTI ' + currentLeito;
+    
+    var statusTexto = isVago ? 'VAGO' : 'OCUPADO';
+    
+    // Opções de idade
+    var idadeOptions = IDADE_OPTIONS.map(function(idade) {
+        return '<option value="' + idade + '" ' + (leito.idade == idade ? 'selected' : '') + '>' + idade + ' anos</option>';
+    }).join('');
+    
+    // Tipo de Convênio atual
+    var tipoConvenio = leito.categoria_escolhida || leito.categoriaEscolhida || leito.categoria || '';
+    
+    // Previsão de Alta UTI (sem turnos)
+    var prevAltaAtual = leito.prevAlta;
+    if (prevAltaAtual === 'SP') prevAltaAtual = 'Sem Previsão';
+    
+    var prevAltaOptions = PREVISAO_ALTA_UTI.map(function(p) {
+        var selected = (prevAltaAtual === p || (!prevAltaAtual && p === 'Sem Previsão')) ? 'selected' : '';
+        return '<option value="' + p + '" ' + selected + '>' + p + '</option>';
+    }).join('');
+    
+    // Isolamento atual
+    var isolamentoAtual = leito.isolamento || 'Não Isolamento';
+    var isolamentoOptions = ISOLAMENTO_OPTIONS.map(function(opt, index) {
+        var selected = (isolamentoAtual === opt || (index === 0 && !leito.isolamento)) ? 'selected' : '';
+        return '<option value="' + opt + '" ' + selected + '>' + opt + '</option>';
+    }).join('');
+    
+    // Genero atual
+    var generoAtual = leito.genero || leito.sexo || '';
+    var generoOptions = '<option value="">Selecionar...</option>' + SEXO_OPTIONS.map(function(sexo) {
+        return '<option value="' + sexo + '" ' + (generoAtual === sexo ? 'selected' : '') + '>' + sexo + '</option>';
+    }).join('');
+    
+    // HTML do formulario UTI
+    var html = '';
+    html += '<div class="header">';
+    html += '    <div class="header-title">';
+    html += '        <div>Archipelago</div>';
+    html += '        <div>Dashboard</div>';
+    html += '    </div>';
+    html += '    <div class="header-info">';
+    html += '        <div class="hospital-badge" style="background: rgba(239,68,68,0.2); border-color: #ef4444;">';
+    html += '            UTI - ' + hospitalNome + ' - ID ' + idSequencial + ' - ' + leitoPersonalizado + ' - ' + statusTexto;
+    html += '        </div>';
+    html += '        <div class="timer" id="timer">2:00</div>';
+    html += '    </div>';
+    html += '</div>';
+    
+    html += '<div class="form-body">';
+    html += '    <h2 class="form-title" style="color: #ef4444;">' + (isVago ? 'Admissão UTI' : 'Atualização UTI') + '</h2>';
+    
+    // Info de admissao se ocupado
+    if (!isVago && leito.dataAdmissao) {
+        var admissao = new Date(leito.dataAdmissao);
+        var hoje = new Date();
+        var diffDays = Math.ceil(Math.abs(hoje - admissao) / (1000 * 60 * 60 * 24));
+        var tempoInternado = diffDays === 1 ? '1 dia' : diffDays + ' dias';
+        
+        html += '<div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ef4444;">';
+        html += '    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">';
+        html += '        <div style="flex: 1;">';
+        html += '            <div style="color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">Data de Admissão</div>';
+        html += '            <div style="color: #e2e8f0; font-size: 14px; font-weight: 600;">' + admissao.toLocaleDateString('pt-BR') + '</div>';
+        html += '        </div>';
+        html += '        <div style="flex: 1; text-align: right;">';
+        html += '            <div style="color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">Tempo Internado</div>';
+        html += '            <div style="color: #ef4444; font-size: 14px; font-weight: 700;">' + tempoInternado + '</div>';
+        html += '        </div>';
+        html += '    </div>';
+        html += '</div>';
+    }
+    
+    // LINHA 1: Identificação, Modalidade Contratada, Isolamento
+    // V7.6: Modalidade Contratada bloqueada apos admissao (nao pode mudar Apartamento/Enfermaria)
+    var modalidadeDisabled = !isVago ? 'disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;"' : '';
+    
+    html += '<div class="form-row-3">';
+    html += '    <div class="form-group">';
+    html += '        <label>Identificação <span class="required">*</span></label>';
+    html += '        <input type="text" id="identificacaoLeito" value="' + identificacao + '" placeholder="Ex: 22" maxlength="2" required oninput="this.value = this.value.replace(/[^0-9]/g, \'\')">';
+    html += '    </div>';
+    html += '    <div class="form-group">';
+    html += '        <label>Modalidade Contratada <span class="required">*</span></label>';
+    html += '        <select id="tipoQuarto" required ' + modalidadeDisabled + '>';
+    html += '            <option value="">Selecionar...</option>';
+    html += '            <option value="Apartamento" ' + (tipoConvenio === 'Apartamento' ? 'selected' : '') + '>Apartamento</option>';
+    html += '            <option value="Enfermaria" ' + (tipoConvenio === 'Enfermaria' ? 'selected' : '') + '>Enfermaria</option>';
+    html += '        </select>';
+    html += '    </div>';
+    html += '    <div class="form-group">';
+    html += '        <label>Isolamento <span class="required">*</span></label>';
+    html += '        <select id="isolamento" required>' + isolamentoOptions + '</select>';
+    html += '    </div>';
+    html += '</div>';
+    
+    // LINHA 2: Genero, Previsao Alta, SPICT-BR
+    // V7.5: SPICT-BR ativo na UTI
+    // V7.6: Genero bloqueado apos admissao (nao pode mudar genero)
+    var spictAtual = leito.spict || 'nao_elegivel';
+    var generoDisabledUTI = !isVago ? 'disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;"' : '';
+    
+    html += '<div class="form-row-3">';
+    html += '    <div class="form-group">';
+    html += '        <label>Genero <span class="required">*</span></label>';
+    html += '        <select id="sexo" required ' + generoDisabledUTI + '>' + generoOptions + '</select>';
+    html += '    </div>';
+    html += '    <div class="form-group">';
+    html += '        <label>Previsao Alta <span class="required">*</span></label>';
+    html += '        <select id="prevAlta" required>' + prevAltaOptions + '</select>';
+    html += '    </div>';
+    html += '    <div class="form-group">';
+    html += '        <label>SPICT-BR <span class="required">*</span></label>';
+    html += '        <select id="spict" required>';
+    html += '            <option value="nao_elegivel" ' + (spictAtual === 'nao_elegivel' ? 'selected' : '') + '>Nao elegivel</option>';
+    html += '            <option value="elegivel" ' + (spictAtual === 'elegivel' ? 'selected' : '') + '>Elegivel</option>';
+    html += '        </select>';
+    html += '    </div>';
+    html += '</div>';
+
+    
+    // LINHA 3: Iniciais, Matricula, Idade
+    if (isVago) {
+        html += '<div class="form-row-3">';
+        html += '    <div class="form-group">';
+        html += '        <label>Iniciais <span class="required">*</span></label>';
+        html += '        <input type="text" id="iniciais" placeholder="Ex: J S M" maxlength="20" required oninput="formatarIniciais(this)">';
+        html += '    </div>';
+        html += '    <div class="form-group">';
+        html += '        <label>Matricula <span class="required">*</span></label>';
+        html += '        <input type="text" id="matricula" placeholder="Ex: 0000000123-4" maxlength="12" required oninput="formatarMatricula(this)" onblur="autoCompletarMatricula(this)">';
+        html += '    </div>';
+        html += '    <div class="form-group">';
+        html += '        <label>Idade <span class="required">*</span></label>';
+        html += '        <select id="idade" required>';
+        html += '            <option value="">Selecionar...</option>';
+        html += '            ' + idadeOptions;
+        html += '        </select>';
+        html += '    </div>';
+        html += '</div>';
+    } else {
+        var iniciaisDisplay = leito.nome ? leito.nome.split(' ').map(function(n) { return n[0]; }).join(' ') : '';
+        var matriculaDisplay = formatarMatriculaExibicao(leito.matricula);
+        
+        html += '<div class="form-row-3">';
+        html += '    <div class="form-group">';
+        html += '        <label>Iniciais</label>';
+        html += '        <input type="text" value="' + iniciaisDisplay + '" readonly>';
+        html += '    </div>';
+        html += '    <div class="form-group">';
+        html += '        <label>Matrícula</label>';
+        html += '        <input type="text" value="' + matriculaDisplay + '" readonly>';
+        html += '    </div>';
+        html += '    <div class="form-group">';
+        html += '        <label>Idade <span class="required">*</span></label>';
+        html += '        <select id="idade" required>';
+        html += '            <option value="">Selecionar...</option>';
+        html += '            ' + idadeOptions;
+        html += '        </select>';
+        html += '    </div>';
+        html += '</div>';
+    }
+    
+    // ANOTAÇÕES
+    html += '<div class="form-section">';
+    html += '    <div class="section-title">Anotações</div>';
+    html += '    <div class="form-row-1">';
+    html += '        <div class="form-group">';
+    html += '            <textarea id="anotacoes" maxlength="800" rows="4" placeholder="Campo livre para observações (máximo 800 caracteres)" oninput="atualizarContadorAnotacoes()">' + (leito.anotacoes || '') + '</textarea>';
+    html += '            <span id="contadorAnotacoes" class="char-counter">' + (leito.anotacoes || '').length + '/800</span>';
+    html += '        </div>';
+    html += '    </div>';
+    html += '</div>';
+    
+    html += '</div>'; // form-body
+    
+    // BOTOES
+    html += '<div class="actions">';
+    if (!isVago) {
+        html += '<button class="btn btn-danger" onclick="darAltaUTI()">Alta</button>';
+    }
+    html += '    <button class="btn btn-primary" onclick="saveDataUTI()">' + (isVago ? 'Admitir' : 'Salvar') + '</button>';
+    html += '    <button class="btn btn-secondary" onclick="cancelar()">Cancelar</button>';
+    html += '</div>';
+    
+    // FOOTER
+    html += '<div class="footer">';
+    html += '    Archipelago Dashboard V7.6 - Sistema Médico QR<br>';
+    html += '    Total Rede: 356 leitos (293 enf + 63 UTI) | 9 hospitais ativos<br>';
+    html += '</div>';
+    
+    container.innerHTML = html;
+    container.style.display = 'flex';
+    
+    setTimeout(function() {
+        atualizarContadorAnotacoes();
+    }, 100);
+}
+
+// =================== V7.1: SALVAR DADOS UTI (CORRIGIDO) ===================
+async function saveDataUTI() {
+    console.log('V7.1 - Salvando dados UTI...');
+    
+    // V7.1: Usar variavel global definida na renderizacao (MAIS CONFIAVEL)
+    var isVago = currentLeitoUTIVago;
+    console.log('V7.1 - isVago (variavel global):', isVago);
+    
+    // Coletar dados
+    var dados = {
+        hospital: currentHospital,
+        leito: currentLeito,
+        tipo: 'UTI',
+        identificacaoLeito: document.getElementById('identificacaoLeito').value.trim(),
+        tipoQuarto: document.getElementById('tipoQuarto').value,
+        isolamento: document.getElementById('isolamento').value,
+        genero: document.getElementById('sexo').value,
+        prevAlta: document.getElementById('prevAlta').value,
+        idade: document.getElementById('idade').value,
+        spict: document.getElementById('spict').value,
+        anotacoes: document.getElementById('anotacoes').value.trim()
+    };
+    
+    // Se for admissao, pegar iniciais e matricula
+    if (isVago) {
+        var iniciaisEl = document.getElementById('iniciais');
+        var matriculaEl = document.getElementById('matricula');
+        
+        if (iniciaisEl) {
+            dados.iniciais = iniciaisEl.value.trim();
+        }
+        if (matriculaEl) {
+            dados.matricula = matriculaEl.value.replace(/-/g, '').trim();
+        }
+        
+        console.log('Admissão UTI - iniciais:', dados.iniciais, '| matricula:', dados.matricula);
+    }
+    
+    // Validações
+    var erros = [];
+    if (!dados.identificacaoLeito) erros.push('Identificação do Leito é obrigatória');
+    if (!dados.tipoQuarto) erros.push('Tipo de Convênio é obrigatório');
+    if (!dados.isolamento) erros.push('Isolamento é obrigatório');
+    if (!dados.genero) erros.push('Gênero é obrigatório');
+    if (!dados.prevAlta) erros.push('Previsão de Alta é obrigatória');
+    if (!dados.idade) erros.push('Idade é obrigatória');
+    if (!dados.spict) erros.push('SPICT-BR e obrigatorio');
+    
+    if (isVago) {
+        if (!dados.iniciais) erros.push('Iniciais são obrigatórias');
+        if (!dados.matricula || dados.matricula.length !== 11) erros.push('Matrícula: deve ter 10 dígitos + verificador');
+    }
+    
+    if (erros.length > 0) {
+        showError('Campos obrigatórios:\n\n' + erros.join('\n'));
+        return;
+    }
+    
+    // V7.2: Verificar conflitos antes de admitir
+    if (isVago) {
+        console.log('V7.2 - Iniciando verificacao de conflitos UTI');
+        console.log('V7.2 - Dados para verificacao:', JSON.stringify({
+            hospital: dados.hospital,
+            matricula: dados.matricula,
+            identificacaoLeito: dados.identificacaoLeito
+        }));
+        
+        showLoadingOverlay();
+        
+        try {
+            var conflito = await verificarConflitosAdmissao(dados.hospital, dados.matricula, dados.identificacaoLeito);
+            
+            if (conflito.temConflito) {
+                hideLoadingOverlay();
+                
+                if (conflito.bloquear) {
+                    // Matrícula já ocupada - bloquear
+                    showError(conflito.mensagem);
+                    return;
+                } else {
+                    // Reserva encontrada - perguntar se quer continuar
+                    var confirma = confirm(conflito.mensagem);
+                    
+                    if (!confirma) {
+                        return;
+                    }
+                    
+                    // Cancelar reserva automaticamente
+                    showLoadingOverlay();
+                    await cancelarReservaAutomatica(conflito.reserva);
+                }
+            }
+        } catch (error) {
+            console.error('V7.2 - Erro na verificacao de conflitos:', error);
+            hideLoadingOverlay();
+            // Continua mesmo com erro na verificacao
+        }
+        
+        hideLoadingOverlay();
+    }
+    
+    // Determinar action
+    var action = isVago ? 'admitirUTI' : 'atualizarUTI';
+    console.log('Action determinada:', action);
+    
+    // Enviar
+    enviarDadosUTI(action, dados);
+}
+
+function enviarDadosUTI(action, dados) {
+    console.log('V7.1 - Enviando para API UTI: ' + action);
+    console.log('Dados UTI:', JSON.stringify(dados));
+    
+    // V7.2: Mostrar overlay e desabilitar botoes
+    showLoadingOverlay();
+    var btns = document.querySelectorAll('.actions .btn');
+    btns.forEach(function(btn) {
+        btn.disabled = true;
+        if (btn.classList.contains('btn-primary')) {
+            btn.classList.add('btn-loading');
+        }
+    });
+    
+    // V7.1: Backend espera 'categoriaEscolhida' (tipoQuarto do frontend)
+    var url = API_URL + '?action=' + action +
+        '&hospital=' + encodeURIComponent(dados.hospital) +
+        '&leito=' + encodeURIComponent(dados.leito) +
+        '&tipo=' + encodeURIComponent(dados.tipo) +
+        '&identificacaoLeito=' + encodeURIComponent(dados.identificacaoLeito) +
+        '&categoriaEscolhida=' + encodeURIComponent(dados.tipoQuarto) +
+        '&isolamento=' + encodeURIComponent(dados.isolamento) +
+        '&genero=' + encodeURIComponent(dados.genero) +
+        '&prevAlta=' + encodeURIComponent(dados.prevAlta) +
+        '&idade=' + encodeURIComponent(dados.idade) +
+        '&spict=' + encodeURIComponent(dados.spict || 'nao_elegivel') +
+        '&anotacoes=' + encodeURIComponent(dados.anotacoes || '');
+    
+    if (dados.iniciais) {
+        url += '&nome=' + encodeURIComponent(dados.iniciais);
+    }
+    if (dados.matricula) {
+        url += '&matricula=' + encodeURIComponent(dados.matricula);
+    }
+    
+    fetch(url)
+        .then(function(response) { return response.json(); })
+        .then(function(result) {
+            if (result.ok || result.success) {
+                showSuccess(action === 'admitirUTI' ? 'Paciente admitido com sucesso!' : 'Dados atualizados com sucesso!');
+                setTimeout(function() {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                // V7.2: Remover loading em caso de erro
+                btns.forEach(function(btn) {
+                    btn.disabled = false;
+                    btn.classList.remove('btn-loading');
+                });
+                showError('Erro: ' + (result.error || 'Erro desconhecido'));
+            }
+        })
+        .catch(function(error) {
+            console.error('Erro:', error);
+            // V7.2: Remover loading em caso de erro
+            btns.forEach(function(btn) {
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+            });
+            showError('Erro de conexão. Tente novamente.');
+        });
+}
+
+// =================== V7.1: DAR ALTA UTI ===================
+function darAltaUTI() {
+    if (!confirm('Confirma a alta do paciente UTI?')) return;
+    
+    console.log('V7.1 - Processando alta UTI...');
+    console.log('Hospital:', currentHospital, '| Leito:', currentLeito);
+    
+    // V7.2: Mostrar overlay e desabilitar botoes
+    showLoadingOverlay();
+    var btns = document.querySelectorAll('.actions .btn');
+    btns.forEach(function(btn) {
+        btn.disabled = true;
+        if (btn.classList.contains('btn-danger')) {
+            btn.classList.add('btn-loading');
+        }
+    });
+    
+    // V7.1: Tentar pegar identificacaoLeito se disponivel
+    var identificacaoEl = document.getElementById('identificacaoLeito');
+    var identificacaoLeito = identificacaoEl ? identificacaoEl.value.trim() : '';
+    
+    var url = API_URL + '?action=daraltaUTI' +
+        '&hospital=' + encodeURIComponent(currentHospital) +
+        '&leito=' + encodeURIComponent(currentLeito);
+    
+    if (identificacaoLeito) {
+        url += '&identificacaoLeito=' + encodeURIComponent(identificacaoLeito);
+    }
+    
+    fetch(url)
+        .then(function(response) { return response.json(); })
+        .then(function(result) {
+            if (result.ok || result.success) {
+                showSuccess('Alta realizada com sucesso!');
+                setTimeout(function() {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                // V7.2: Remover loading em caso de erro
+                btns.forEach(function(btn) {
+                    btn.disabled = false;
+                    btn.classList.remove('btn-loading');
+                });
+                showError('Erro: ' + (result.error || 'Erro desconhecido'));
+            }
+        })
+        .catch(function(error) {
+            console.error('Erro:', error);
+            // V7.2: Remover loading em caso de erro
+            btns.forEach(function(btn) {
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+            });
+            showError('Erro de conexão. Tente novamente.');
+        });
+}
+
 function renderForm(leito) {
-    console.log('📋 Renderizando formulário V6.0');
+    console.log('Renderizando formulário V7.1');
+    
+    // V7.1: Se for UTI, usar formulario simplificado
+    if (isUTI) {
+        renderFormUTI(leito);
+        return;
+    }
     
     const container = document.getElementById('mainContainer');
     const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
@@ -1039,7 +1682,14 @@ function renderForm(leito) {
             
             if (dadosIrmao && dadosIrmao.status !== 'Vago' && dadosIrmao.status !== 'vago') {
                 const isolamentoIrmao = dadosIrmao.isolamento || '';
-                if (isolamentoIrmao && isolamentoIrmao !== 'Não Isolamento') {
+                // V7.6: Corrigido - comparar com e sem acento
+                const ehNaoIsolamento = !isolamentoIrmao || 
+                                        isolamentoIrmao === 'Não Isolamento' || 
+                                        isolamentoIrmao === 'Nao Isolamento' ||
+                                        isolamentoIrmao.toLowerCase().includes('nao isol') ||
+                                        isolamentoIrmao.toLowerCase().includes('não isol');
+                
+                if (!ehNaoIsolamento) {
                     const identificacaoIrmao = dadosIrmao.identificacaoLeito || 
                                                dadosIrmao.identificacao_leito || 
                                                `Leito ${leitoIrmao}`;
@@ -1072,7 +1722,12 @@ function renderForm(leito) {
     let generoDisabled = false;
     let mensagemGenero = '';
     
-    if (isVago) {
+    // V7.6: Genero bloqueado quando leito ocupado (nao pode mudar genero apos admissao)
+    if (!isVago) {
+        generoDisabled = true;
+        // V7.6: Sem mensagem - apenas bloqueia o campo
+        console.log(`🔒 [GENERO] Leito ${currentLeito} bloqueado - paciente ocupado`);
+    } else if (isVago) {
         const leitoIrmao = verificarLeitoIrmao(currentHospital, currentLeito);
         
         if (leitoIrmao) {
@@ -1082,7 +1737,14 @@ function renderForm(leito) {
             
             if (dadosIrmao && dadosIrmao.status !== 'Vago' && dadosIrmao.status !== 'vago') {
                 const isolamentoIrmao = dadosIrmao.isolamento || '';
-                if (!isolamentoIrmao || isolamentoIrmao === 'Não Isolamento') {
+                // V7.6: Corrigido - comparar com e sem acento
+                const ehNaoIsolamento = !isolamentoIrmao || 
+                                        isolamentoIrmao === 'Não Isolamento' || 
+                                        isolamentoIrmao === 'Nao Isolamento' ||
+                                        isolamentoIrmao.toLowerCase().includes('nao isol') ||
+                                        isolamentoIrmao.toLowerCase().includes('não isol');
+                
+                if (ehNaoIsolamento) {
                     if (dadosIrmao.genero) {
                         generoPreDefinido = dadosIrmao.genero;
                         generoDisabled = true;
@@ -1130,7 +1792,7 @@ function renderForm(leito) {
         // H2: Apartamentos (1-20) e (47-67) - Input livre
         if (currentHospital === 'H2' && ((leitoNum >= 1 && leitoNum <= 20) || (leitoNum >= 47 && leitoNum <= 67))) {
             return `<input type="text" id="identificacaoLeito" value="${identificacao}"
-                         placeholder="Ex: 101, 102" maxlength="6" required>`;
+                         placeholder="Ex: 101" maxlength="3" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">`;
         }
         
         // H2: Enfermarias (21-46) - Input + Dropdown
@@ -1159,20 +1821,19 @@ function renderForm(leito) {
             return `
                 <div class="identificacao-composta">
                     <input type="text" id="idNumero" value="${numeroBase}" 
-                           placeholder="Ex: 101" maxlength="4" ${readonly} required>
+                           placeholder="Ex: 101" maxlength="3" ${readonly} required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     <select id="idSufixo" ${irmaoOcupado ? 'disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;"' : ''}>
                         <option value="1" ${sufixo === '1' ? 'selected' : ''}>1</option>
                         <option value="3" ${sufixo === '3' ? 'selected' : ''}>3</option>
                     </select>
                 </div>
-                <div class="help-text">${irmaoOcupado ? 'Número definido pelo leito irmão' : 'Digite o número + sufixo'}</div>
             `;
         }
         
         // H4: Apartamentos (1-9) e (28-57) - Input livre
         if (currentHospital === 'H4' && ((leitoNum >= 1 && leitoNum <= 9) || (leitoNum >= 28 && leitoNum <= 57))) {
             return `<input type="text" id="identificacaoLeito" value="${identificacao}"
-                         placeholder="Ex: 201, 202" maxlength="6" required>`;
+                         placeholder="Ex: 201" maxlength="3" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">`;
         }
         
         // H4: Enfermarias (10-27) - Input + Dropdown
@@ -1201,19 +1862,67 @@ function renderForm(leito) {
             return `
                 <div class="identificacao-composta">
                     <input type="text" id="idNumero" value="${numeroBase}" 
-                           placeholder="Ex: 201" maxlength="4" ${readonly} required>
+                           placeholder="Ex: 201" maxlength="3" ${readonly} required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     <select id="idSufixo" ${irmaoOcupado ? 'disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;"' : ''}>
                         <option value="A" ${sufixo === 'A' ? 'selected' : ''}>A</option>
                         <option value="C" ${sufixo === 'C' ? 'selected' : ''}>C</option>
                     </select>
                 </div>
-                <div class="help-text">${irmaoOcupado ? 'Número definido pelo leito irmão' : 'Digite o número + sufixo'}</div>
             `;
         }
         
-        // Outros hospitais: input livre
-        return `<input type="text" id="identificacaoLeito" value="${identificacao}"
-                     placeholder="Ex: 1A, 21, 711.1" maxlength="6" required>`;
+        // V7.4: Outros hospitais híbridos - campo bloqueado até selecionar tipo de quarto
+        // Se já tem tipo selecionado (atualização), mostrar campo apropriado
+        const tipoAtual = leito.categoria_escolhida || leito.categoriaEscolhida || leito.categoria || '';
+        
+        if (tipoAtual === 'Enfermaria') {
+            // Mostrar campo número + dropdown de sufixo
+            const sufixos = SUFIXOS_ENFERMARIA[currentHospital] || ['A', 'B'];
+            let numeroBase = '';
+            let sufixoAtual = sufixos[0];
+            
+            if (identificacao && identificacao.includes('-')) {
+                const partes = identificacao.split('-');
+                numeroBase = partes[0];
+                sufixoAtual = partes[1];
+            }
+            
+            const maxLen = MAXLENGTH_IDENTIFICACAO[currentHospital] || 3;
+            return `
+                <div class="identificacao-composta" id="identificacaoContainer">
+                    <input type="text" id="idNumero" value="${numeroBase}" 
+                           placeholder="Numero" maxlength="${maxLen}" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    <select id="idSufixo">
+                        ${sufixos.map(s => `<option value="${s}" ${sufixoAtual === s ? 'selected' : ''}>${s}</option>`).join('')}
+                    </select>
+                </div>
+            `;
+        } else if (tipoAtual === 'Apartamento') {
+            // Verificar se tem sufixo fixo (H3/H7)
+            const sufixosApto = SUFIXOS_APARTAMENTO[currentHospital];
+            const maxLen = MAXLENGTH_IDENTIFICACAO[currentHospital] || 3;
+            if (sufixosApto && sufixosApto.length > 0) {
+                let numeroBase = identificacao || '';
+                if (identificacao && identificacao.includes('-')) {
+                    numeroBase = identificacao.split('-')[0];
+                }
+                return `
+                    <div class="identificacao-composta" id="identificacaoContainer">
+                        <input type="text" id="idNumero" value="${numeroBase}" 
+                               placeholder="Numero" maxlength="${maxLen}" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        <input type="text" id="idSufixoFixo" value="${sufixosApto[0]}" readonly 
+                               style="background: #1f2937; color: #9ca3af; width: 50px; text-align: center;">
+                    </div>
+                `;
+            }
+            return `<div id="identificacaoContainer"><input type="text" id="identificacaoLeito" value="${identificacao}"
+                     placeholder="Numero do quarto" maxlength="${maxLen}" required oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>`;
+        }
+        
+        // Campo bloqueado até selecionar tipo de quarto
+        return `<div id="identificacaoContainer"><input type="text" id="identificacaoLeito" 
+                     placeholder="Selecione o Tipo de Quarto" disabled 
+                     style="background: #1f2937; color: #9ca3af; cursor: not-allowed;"></div>`;
     }
     
     // Gerar campo de tipo de quarto
@@ -1224,7 +1933,6 @@ function renderForm(leito) {
                 <select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">
                     <option value="Apartamento" selected>Apartamento</option>
                 </select>
-                <div class="help-text">Tipo fixo para este leito</div>
             `;
         }
         
@@ -1234,7 +1942,6 @@ function renderForm(leito) {
                 <select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">
                     <option value="Enfermaria" selected>Enfermaria</option>
                 </select>
-                <div class="help-text">Tipo fixo para este leito</div>
             `;
         }
         
@@ -1244,7 +1951,6 @@ function renderForm(leito) {
                 <select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">
                     <option value="Apartamento" selected>Apartamento</option>
                 </select>
-                <div class="help-text">Tipo fixo para este leito</div>
             `;
         }
         
@@ -1254,12 +1960,21 @@ function renderForm(leito) {
                 <select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">
                     <option value="Enfermaria" selected>Enfermaria</option>
                 </select>
-                <div class="help-text">Tipo fixo para este leito</div>
             `;
         }
         
-        // Outros hospitais: selecionável
+        // Outros hospitais: selecionável (mas bloqueado após admissão)
         const tipoAtual = leito.categoria_escolhida || leito.categoriaEscolhida || leito.categoria || leito.tipo || '';
+        
+        // V7.6: Bloquear tipo de quarto quando leito ocupado (não pode mudar Apartamento/Enfermaria após admissão)
+        if (!isVago && tipoAtual) {
+            return `
+                <select id="tipoQuarto" disabled style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">
+                    <option value="${tipoAtual}" selected>${tipoAtual}</option>
+                </select>
+            `;
+        }
+        
         return `
             <select id="tipoQuarto" required>
                 <option value="">Selecionar...</option>
@@ -1350,7 +2065,7 @@ function renderForm(leito) {
                                }).join('')}`
                         }
                     </select>
-                    ${generoDisabled ? `<div class="help-text">${mensagemGenero}</div>` : ''}
+                    ${generoDisabled && mensagemGenero ? `<div class="help-text">${mensagemGenero}</div>` : ''}
                 </div>
                 <div class="form-group">
                     <label>Região <span class="required">*</span></label>
@@ -1381,8 +2096,8 @@ function renderForm(leito) {
                     </div>
                     <div class="form-group">
                         <label>Matrícula <span class="required">*</span></label>
-                        <input type="text" id="matricula" placeholder="Ex: 123456789-0" maxlength="11" required 
-                               oninput="formatarMatricula(this)">
+                        <input type="text" id="matricula" placeholder="Ex: 0000000123-4" maxlength="12" required 
+                               oninput="formatarMatricula(this)" onblur="autoCompletarMatricula(this)">
                     </div>
                     <div class="form-group">
                         <label>Idade <span class="required">*</span></label>
@@ -1518,8 +2233,8 @@ function renderForm(leito) {
         </div>
         
         <div class="footer">
-            Archipelago Dashboard V6.0 - Sistema Médico QR<br>
-            Total Rede: 341 leitos | 9 hospitais ativos<br>
+            Archipelago Dashboard V7.6 - Sistema Médico QR<br>
+            Total Rede: 356 leitos (293 enf + 63 UTI) | 9 hospitais ativos<br>
          </div>
     `;
     
@@ -1530,6 +2245,50 @@ function renderForm(leito) {
         configurarBuscaDinamica('qrcodeConcessoes', 'searchConcessoes');
         configurarBuscaDinamica('qrcodeLinhas', 'searchLinhas');
         atualizarContadorAnotacoes();
+        
+        // V7.4: Event listener para tipoQuarto atualizar campo de identificação
+        const tipoQuartoSelect = document.getElementById('tipoQuarto');
+        const identificacaoContainer = document.getElementById('identificacaoContainer');
+        
+        if (tipoQuartoSelect && identificacaoContainer && !tipoQuartoSelect.disabled) {
+            tipoQuartoSelect.addEventListener('change', function() {
+                const tipoSelecionado = this.value;
+                const sufixosEnf = SUFIXOS_ENFERMARIA[currentHospital] || ['A', 'B'];
+                const sufixosApto = SUFIXOS_APARTAMENTO[currentHospital] || null;
+                const maxLen = MAXLENGTH_IDENTIFICACAO[currentHospital] || 3;
+                
+                if (!tipoSelecionado) {
+                    identificacaoContainer.innerHTML = `<input type="text" id="identificacaoLeito" 
+                        placeholder="Selecione o Tipo de Quarto" disabled 
+                        style="background: #1f2937; color: #9ca3af; cursor: not-allowed;">`;
+                } else if (tipoSelecionado === 'Enfermaria') {
+                    const sufixoOptions = sufixosEnf.map(s => `<option value="${s}">${s}</option>`).join('');
+                    identificacaoContainer.innerHTML = `
+                        <div class="identificacao-composta">
+                            <input type="text" id="idNumero" placeholder="Numero" maxlength="${maxLen}" required 
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            <select id="idSufixo">
+                                ${sufixoOptions}
+                            </select>
+                        </div>`;
+                } else {
+                    // Apartamento
+                    if (sufixosApto && sufixosApto.length > 0) {
+                        identificacaoContainer.innerHTML = `
+                            <div class="identificacao-composta">
+                                <input type="text" id="idNumero" placeholder="Numero" maxlength="${maxLen}" required 
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                <input type="text" id="idSufixoFixo" value="${sufixosApto[0]}" readonly 
+                                       style="background: #1f2937; color: #9ca3af; width: 50px; text-align: center;">
+                            </div>`;
+                    } else {
+                        identificacaoContainer.innerHTML = `<input type="text" id="identificacaoLeito" 
+                            placeholder="Numero do quarto" maxlength="${maxLen}" required 
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')">`;
+                    }
+                }
+            });
+        }
     }, 100);
 }
 
@@ -1597,6 +2356,186 @@ function startTimer() {
     }, 1000);
 }
 
+// =================== V7.2: VERIFICACAO DE CONFLITOS NA ADMISSAO ===================
+// Verifica: 1) Matrícula já ocupada em outro leito 2) Reserva existente
+async function verificarConflitosAdmissao(hospital, matricula, identificacaoLeito) {
+    console.log('V7.2 - Verificando conflitos de admissao...');
+    console.log('Hospital:', hospital, '| Matricula:', matricula, '| Leito:', identificacaoLeito);
+    
+    // V7.6: Funcao para normalizar matricula (remover zeros a esquerda e digito verificador)
+    function normalizarMatricula(mat) {
+        if (!mat) return '';
+        // Remove hifen e espacos
+        var limpa = String(mat).replace(/-/g, '').replace(/\s/g, '').trim();
+        // Remove zeros a esquerda PRIMEIRO
+        limpa = limpa.replace(/^0+/, '');
+        // Se ainda tiver mais de 8 digitos e o ultimo for verificador, remove
+        // Matriculas base tem 8 digitos, com verificador tem 9
+        if (limpa.length > 8) {
+            limpa = limpa.substring(0, 8);
+        }
+        return limpa;
+    }
+    
+    // 1. Verificar se matrícula já está ocupada em outro leito do hospital
+    if (hospitalData[hospital] && hospitalData[hospital].leitos) {
+        var leitoOcupado = hospitalData[hospital].leitos.find(function(l) {
+            var matriculaLeito = normalizarMatricula(l.matricula);
+            var matriculaBusca = normalizarMatricula(matricula);
+            var statusOcupado = l.status && l.status.toLowerCase() === 'ocupado';
+            var leitoAtual = String(l.leito) === String(currentLeito);
+            
+            console.log('V7.6 - Verificando leito ' + l.leito + ': matricula="' + matriculaLeito + '" vs "' + matriculaBusca + '"');
+            return statusOcupado && matriculaLeito === matriculaBusca && !leitoAtual;
+        });
+        
+        if (leitoOcupado) {
+            var idLeito = leitoOcupado.identificacaoLeito || leitoOcupado.identificacao_leito || 'Leito ' + leitoOcupado.leito;
+            return {
+                temConflito: true,
+                tipoConflito: 'matriculaOcupada',
+                bloquear: true,
+                mensagem: 'MATRÍCULA JÁ EM USO!\n\nA matrícula ' + matricula + ' já está ocupando o leito ' + idLeito + ' neste hospital.\n\nNão é permitido admitir a mesma matrícula em dois leitos.'
+            };
+        }
+    }
+    
+    // 2. Verificar se existe reserva para esta matricula ou leito
+    try {
+        var response = await fetch(API_URL + '?action=listarReservas&hospital=' + hospital);
+        var result = await response.json();
+        
+        console.log('V7.2 - Resposta listarReservas:', JSON.stringify(result));
+        
+        // V7.2: Backend retorna reservas em result.data.reservas
+        var reservas = [];
+        if (result.ok && result.data && result.data.reservas) {
+            reservas = result.data.reservas;
+        } else if (result.ok && result.reservas) {
+            // Fallback caso mude
+            reservas = result.reservas;
+        }
+        
+        console.log('V7.2 - Reservas encontradas:', reservas.length);
+        
+        if (reservas.length > 0) {
+            console.log('V7.2 - Reservas detalhadas:');
+            reservas.forEach(function(r, idx) {
+                console.log('  [' + idx + '] hospital=' + r.hospital + ', identificacaoLeito=' + r.identificacaoLeito + ', matricula=' + r.matricula);
+            });
+            
+            // Verificar reserva por matricula (usa normalizarMatricula definida acima)
+            var reservaMatricula = reservas.find(function(r) {
+                var matriculaReserva = normalizarMatricula(r.matricula);
+                var matriculaBusca = normalizarMatricula(matricula);
+                var hospitalMatch = String(r.hospital).toUpperCase() === String(hospital).toUpperCase();
+                console.log('V7.6 - Comparando matricula: "' + matriculaReserva + '" vs "' + matriculaBusca + '" (match=' + (matriculaReserva === matriculaBusca) + ')');
+                return hospitalMatch && matriculaReserva === matriculaBusca;
+            });
+            
+            if (reservaMatricula) {
+                var leitoReservado = reservaMatricula.identificacaoLeito || reservaMatricula.identificacao_leito || 'N/A';
+                return {
+                    temConflito: true,
+                    tipoConflito: 'reservaMatricula',
+                    bloquear: false,
+                    reserva: reservaMatricula,
+                    mensagem: 'RESERVA ENCONTRADA!\n\nA matrícula ' + matricula + ' possui uma reserva para o leito ' + leitoReservado + '.\n\nDeseja continuar com a admissão neste leito?\n(A reserva será cancelada automaticamente)'
+                };
+            }
+            
+            // Verificar reserva por identificacao do leito
+            var reservaLeito = reservas.find(function(r) {
+                var idReserva = String(r.identificacaoLeito || r.identificacao_leito || '').toLowerCase().trim();
+                var idBusca = String(identificacaoLeito || '').toLowerCase().trim();
+                var hospitalMatch = String(r.hospital).toUpperCase() === String(hospital).toUpperCase();
+                console.log('V7.2 - Comparando: hospital=' + r.hospital + ' vs ' + hospital + ' (' + hospitalMatch + '), leito="' + idReserva + '" vs "' + idBusca + '" (' + (idReserva === idBusca) + ')');
+                return hospitalMatch && idReserva === idBusca;
+            });
+            
+            if (reservaLeito) {
+                console.log('V7.2 - Reserva encontrada para leito:', JSON.stringify(reservaLeito));
+                
+                var matriculaReservada = reservaLeito.matricula || '';
+                var iniciaisReservadas = reservaLeito.iniciais || reservaLeito.nome || '';
+                var generoReservado = reservaLeito.genero || '';
+                var isolamentoReservado = reservaLeito.isolamento || '';
+                
+                // V7.2: Verificar se é RESERVA REAL ou apenas RESTRIÇÃO DE GÊNERO
+                var temMatriculaOuIniciais = (matriculaReservada && String(matriculaReservada).trim() !== '') || 
+                                              (iniciaisReservadas && String(iniciaisReservadas).trim() !== '');
+                
+                console.log('V7.2 - temMatriculaOuIniciais:', temMatriculaOuIniciais, '| matricula:', matriculaReservada, '| iniciais:', iniciaisReservadas);
+                
+                if (!temMatriculaOuIniciais) {
+                    // É apenas RESTRIÇÃO DE GÊNERO (leito irmão reservado)
+                    console.log('V7.2 - Linha é apenas restrição de gênero, não é reserva real');
+                    console.log('V7.2 - Gênero da restrição:', generoReservado, '| Isolamento:', isolamentoReservado);
+                    
+                    // Verificar isolamento - se tiver isolamento, bloquear
+                    if (isolamentoReservado && 
+                        isolamentoReservado !== 'Não Isolamento' && 
+                        isolamentoReservado !== 'Nao Isolamento') {
+                        return {
+                            temConflito: true,
+                            tipoConflito: 'isolamentoIrmao',
+                            bloquear: true,
+                            mensagem: 'LEITO BLOQUEADO POR ISOLAMENTO!\n\nO leito irmão está reservado com isolamento (' + isolamentoReservado + ').\n\nAguarde a liberação para admitir neste leito.'
+                        };
+                    }
+                    
+                    // Não bloquear - a validação de gênero será feita pelo sistema de leitos irmãos
+                    // que já existe no formulário (campos desabilitados/pré-definidos)
+                    return { temConflito: false };
+                }
+                
+                // É RESERVA REAL - perguntar se quer continuar
+                return {
+                    temConflito: true,
+                    tipoConflito: 'reservaLeito',
+                    bloquear: false,
+                    reserva: reservaLeito,
+                    mensagem: 'LEITO RESERVADO!\n\nO leito ' + identificacaoLeito + ' está reservado para:\n- Paciente: ' + (iniciaisReservadas || 'N/A') + '\n- Matrícula: ' + (matriculaReservada || 'N/A') + '\n\nDeseja continuar com a admissão?\n(A reserva será cancelada automaticamente)'
+                };
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao verificar reservas:', error);
+        // Continua sem bloquear se der erro na verificacao
+    }
+    
+    return { temConflito: false };
+}
+
+// Cancela reserva automaticamente
+async function cancelarReservaAutomatica(reserva) {
+    console.log('V7.2 - Cancelando reserva automaticamente:', reserva);
+    
+    try {
+        var url = API_URL + '?action=cancelarReserva' +
+            '&hospital=' + encodeURIComponent(reserva.hospital) +
+            '&matricula=' + encodeURIComponent(reserva.matricula);
+        
+        if (reserva.identificacaoLeito) {
+            url += '&identificacaoLeito=' + encodeURIComponent(reserva.identificacaoLeito);
+        }
+        
+        var response = await fetch(url);
+        var result = await response.json();
+        
+        if (result.ok || result.success) {
+            console.log('V7.2 - Reserva cancelada com sucesso');
+            return true;
+        } else {
+            console.error('V7.2 - Erro ao cancelar reserva:', result.error);
+            return false;
+        }
+    } catch (error) {
+        console.error('V7.2 - Erro ao cancelar reserva:', error);
+        return false;
+    }
+}
+
 async function validarBloqueioCruzAzul(dados) {
     const leitoNum = parseInt(currentLeito);
     
@@ -1617,7 +2556,13 @@ async function validarBloqueioCruzAzul(dados) {
     
     const isolamentoIrmao = dadosIrmao.isolamento || 'Não Isolamento';
     
-    if (isolamentoIrmao !== 'Não Isolamento') {
+    // V7.6: Corrigido - comparar com e sem acento
+    const ehNaoIsolamento = isolamentoIrmao === 'Não Isolamento' || 
+                            isolamentoIrmao === 'Nao Isolamento' ||
+                            isolamentoIrmao.toLowerCase().includes('nao isol') ||
+                            isolamentoIrmao.toLowerCase().includes('não isol');
+    
+    if (!ehNaoIsolamento) {
         const identificacaoIrmao = dadosIrmao.identificacaoLeito || 
                                    dadosIrmao.identificacao_leito || 
                                    `Leito ${leitoIrmao}`;
@@ -1636,42 +2581,47 @@ async function validarLimiteSantaClara(dados) {
 }
 
 async function saveData() {
-    const btnSalvar = document.querySelector('.btn-primary');
-    const textoOriginal = btnSalvar.textContent;
+    // V7.2: Mostrar overlay e desabilitar botoes
+    showLoadingOverlay();
+    var btns = document.querySelectorAll('.actions .btn');
+    btns.forEach(function(btn) {
+        btn.disabled = true;
+        if (btn.classList.contains('btn-primary')) {
+            btn.classList.add('btn-loading');
+        }
+    });
     
     try {
-        btnSalvar.disabled = true;
-        btnSalvar.style.opacity = '0.6';
-        btnSalvar.style.cursor = 'not-allowed';
-        btnSalvar.innerHTML = '<span class="spinner-btn"></span>Processando...';
-        
         const dados = coletarDados();
         
         const validacaoCA = await validarBloqueioCruzAzul(dados);
         if (!validacaoCA.valido) {
             alert(validacaoCA.mensagem);
-            btnSalvar.disabled = false;
-            btnSalvar.style.opacity = '1';
-            btnSalvar.style.cursor = 'pointer';
-            btnSalvar.textContent = textoOriginal;
+            hideLoadingOverlay();
+            btns.forEach(function(btn) {
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+            });
             return;
         }
         
         const validacaoSC = await validarLimiteSantaClara(dados);
         if (!validacaoSC.valido) {
             alert(validacaoSC.mensagem);
-            btnSalvar.disabled = false;
-            btnSalvar.style.opacity = '1';
-            btnSalvar.style.cursor = 'pointer';
-            btnSalvar.textContent = textoOriginal;
+            hideLoadingOverlay();
+            btns.forEach(function(btn) {
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+            });
             return;
         }
         
         if (!validarDados(dados)) {
-            btnSalvar.disabled = false;
-            btnSalvar.style.opacity = '1';
-            btnSalvar.style.cursor = 'pointer';
-            btnSalvar.textContent = textoOriginal;
+            hideLoadingOverlay();
+            btns.forEach(function(btn) {
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+            });
             return;
         }
         
@@ -1680,6 +2630,48 @@ async function saveData() {
         );
         const isVago = !leito.status || leito.status === 'Vago' || leito.status === 'vago';
         
+        // V7.2: Verificar conflitos antes de admitir
+        if (isVago && dados.matricula) {
+            try {
+                var identificacaoLeito = dados.identificacaoLeito || dados.identificacao_leito || '';
+                var conflito = await verificarConflitosAdmissao(currentHospital, dados.matricula, identificacaoLeito);
+                
+                if (conflito.temConflito) {
+                    hideLoadingOverlay();
+                    btns.forEach(function(btn) {
+                        btn.disabled = false;
+                        btn.classList.remove('btn-loading');
+                    });
+                    
+                    if (conflito.bloquear) {
+                        // Matrícula já ocupada - bloquear
+                        alert(conflito.mensagem);
+                        return;
+                    } else {
+                        // Reserva encontrada - perguntar se quer continuar
+                        var confirma = confirm(conflito.mensagem);
+                        
+                        if (!confirma) {
+                            return;
+                        }
+                        
+                        // Cancelar reserva automaticamente e reativar loading
+                        showLoadingOverlay();
+                        btns.forEach(function(btn) {
+                            btn.disabled = true;
+                            if (btn.classList.contains('btn-primary')) {
+                                btn.classList.add('btn-loading');
+                            }
+                        });
+                        await cancelarReservaAutomatica(conflito.reserva);
+                    }
+                }
+            } catch (error) {
+                console.error('V7.2 - Erro na verificacao de conflitos:', error);
+                // Continua mesmo com erro na verificacao
+            }
+        }
+        
         const payload = {
             action: isVago ? 'admitir' : 'atualizar',
             hospital: currentHospital,
@@ -1687,7 +2679,7 @@ async function saveData() {
             ...dados
         };
         
-        console.log('📤 Enviando V6.0:', payload);
+        console.log('Enviando V7.0:', payload);
         
         const params = new URLSearchParams();
         for (const [key, value] of Object.entries(payload)) {
@@ -1711,27 +2703,30 @@ async function saveData() {
         showSuccess(message);
         
     } catch (error) {
-        console.error('❌ Erro:', error);
+        console.error('Erro:', error);
         alert('Erro ao salvar: ' + error.message);
-        btnSalvar.disabled = false;
-        btnSalvar.style.opacity = '1';
-        btnSalvar.style.cursor = 'pointer';
-        btnSalvar.textContent = textoOriginal;
+        hideLoadingOverlay();
+        btns.forEach(function(btn) {
+            btn.disabled = false;
+            btn.classList.remove('btn-loading');
+        });
     }
 }
 
 async function darAlta() {
     if (!confirm('Confirma a ALTA deste paciente?')) return;
     
-    const btnAlta = document.querySelector('.btn-danger');
-    const textoOriginal = btnAlta.textContent;
+    // V7.2: Mostrar overlay e desabilitar botoes
+    showLoadingOverlay();
+    var btns = document.querySelectorAll('.actions .btn');
+    btns.forEach(function(btn) {
+        btn.disabled = true;
+        if (btn.classList.contains('btn-danger')) {
+            btn.classList.add('btn-loading');
+        }
+    });
     
     try {
-        btnAlta.disabled = true;
-        btnAlta.style.opacity = '0.6';
-        btnAlta.style.cursor = 'not-allowed';
-        btnAlta.innerHTML = '<span class="spinner-btn"></span>Processando alta...';
-        
         const params = new URLSearchParams({
             action: 'daralta',
             hospital: currentHospital,
@@ -1747,12 +2742,13 @@ async function darAlta() {
         showSuccess('Alta processada com sucesso!');
         
     } catch (error) {
-        console.error('❌ Erro:', error);
+        console.error('Erro:', error);
         alert('Erro ao processar alta: ' + error.message);
-        btnAlta.disabled = false;
-        btnAlta.style.opacity = '1';
-        btnAlta.style.cursor = 'pointer';
-        btnAlta.textContent = textoOriginal;
+        hideLoadingOverlay();
+        btns.forEach(function(btn) {
+            btn.disabled = false;
+            btn.classList.remove('btn-loading');
+        });
     }
 }
 
@@ -1778,14 +2774,20 @@ function coletarDados() {
     dados.genero = document.getElementById('sexo').value;
     dados.diretivas = document.getElementById('diretivas').value;
     
-    // Identificação do leito (composta ou simples)
+    // V7.4: Identificação do leito (composta ou simples)
     const idNumero = document.getElementById('idNumero');
     const idSufixo = document.getElementById('idSufixo');
+    const idSufixoFixo = document.getElementById('idSufixoFixo');
     const idSimples = document.getElementById('identificacaoLeito');
     
     if (idNumero && idSufixo) {
+        // Campo composto com dropdown de sufixo
         dados.identificacaoLeito = `${idNumero.value.trim()}-${idSufixo.value}`.toUpperCase();
+    } else if (idNumero && idSufixoFixo) {
+        // Campo composto com sufixo fixo (H3/H7 Apartamento)
+        dados.identificacaoLeito = `${idNumero.value.trim()}-${idSufixoFixo.value}`.toUpperCase();
     } else if (idSimples) {
+        // Campo simples
         dados.identificacaoLeito = idSimples.value.trim().toUpperCase();
     }
     
@@ -1796,7 +2798,7 @@ function coletarDados() {
         dados.tipoQuarto = tipoQuartoField.value;
     }
     
-    // Anotações (NOVO V6.0)
+    // Anotacoes
     const anotacoes = document.getElementById('anotacoes');
     if (anotacoes) {
         dados.anotacoes = anotacoes.value.trim();
@@ -1814,7 +2816,7 @@ function coletarDados() {
         if (cb && cb.checked) dados.linhas.push(cb.value);
     });
     
-    console.log(`📋 Dados coletados V6.0`);
+    console.log('Dados coletados V7.0');
     console.log(`📋 Concessões: ${dados.concessoes.length}`);
     console.log(`📋 Linhas: ${dados.linhas.length}`);
     console.log(`📝 Anotações: ${dados.anotacoes ? dados.anotacoes.length : 0} chars`);
@@ -1833,15 +2835,16 @@ function validarDados(dados) {
         erros.push('• Matrícula é obrigatória');
     }
     
-    if (dados.matricula && dados.matricula.length > 10) {
-        erros.push('• Matrícula: máximo 10 dígitos');
+    // V7.5: Matrícula deve ter exatamente 11 dígitos (10 + dígito verificador, sem hífen)
+    if (dados.matricula && dados.matricula.length !== 11) {
+        erros.push('• Matrícula: deve ter 10 dígitos + verificador');
     }
     
     if (!dados.idade) {
         erros.push('• Idade é obrigatória');
     }
     
-    if (!dados.pps) erros.push('• PPS é obrigatório');
+    // V7.5: PPS não é obrigatório
     if (!dados.spict) erros.push('• SPICT-BR é obrigatório');
     if (!dados.prevAlta) erros.push('• Previsão de Alta é obrigatória');
     if (!dados.isolamento) erros.push('• Isolamento é obrigatório');
@@ -1909,8 +2912,20 @@ function hideLoading() {
     if (loading) loading.classList.add('hidden');
 }
 
+// V7.2: Overlay que bloqueia tela toda
+function showLoadingOverlay() {
+    var overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.classList.add('active');
+}
+
+function hideLoadingOverlay() {
+    var overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.classList.remove('active');
+}
+
 function showError(message) {
     hideLoading();
+    hideLoadingOverlay(); // V7.2
     
     document.getElementById('mainContainer').style.display = 'none';
     document.getElementById('successContainer').style.display = 'none';
@@ -1926,6 +2941,7 @@ function showError(message) {
 
 function showSuccess(message) {
     hideLoading();
+    hideLoadingOverlay(); // V7.2
     
     document.getElementById('mainContainer').style.display = 'none';
     document.getElementById('errorContainer').style.display = 'none';
@@ -1939,18 +2955,27 @@ function showSuccess(message) {
     }
 }
 
-console.log('✅ Archipelago QR V6.0 MOBILE - VERSÃO ATUALIZADA');
-console.log('🔐 Senha: 1997 (válida por 24h)');
-console.log('🏥 Validações implementadas:');
-console.log('   ✅ H2: Bloqueio por isolamento (leitos 21-46)');
-console.log('   ✅ H2: Gênero pré-definido pelo leito irmão');
-console.log('   ✅ H2: Isolamento pré-definido pelo leito irmão');
-console.log('   ✅ H2: Identificação com dropdown (21-46: sufixos 1/3)');
-console.log('   ✅ H4: Sistema de leitos irmãos (10-27)');
-console.log('   ✅ H4: Identificação com dropdown (10-27: sufixos A/C)');
-console.log('   ✅ Campo anotações (800 caracteres)');
-console.log('📱 Otimizado para mobile');
-console.log('⚠️ URLs TEMPORÁRIAS - Alterar em produção!');
+console.log('Archipelago QR V7.6 MOBILE - CAMPOS BLOQUEADOS APOS ADMISSAO');
+console.log('Senha: 1997 (válida por 24h)');
+console.log('Validações implementadas:');
+console.log('   V7.6: Matricula exibida com zeros a esquerda');
+console.log('   V7.6: Modalidade Contratada bloqueada apos admissao');
+console.log('   V7.6: Genero bloqueado apos admissao (UTI e Enfermaria)');
+console.log('   V7.6: Tipo de Quarto bloqueado apos admissao (Enfermaria hibridos)');
+console.log('   V7.6: Corrigido comparacao isolamento (Nao/Não Isolamento)');
+console.log('   V7.2: Verifica matricula duplicada antes de admitir');
+console.log('   V7.2: Verifica reservas por matricula e leito');
+console.log('   V7.2: Cancela reserva automaticamente se confirmar');
+console.log('   V7.2: Overlay loading bloqueia tela toda');
+console.log('   H2: Bloqueio por isolamento (leitos 21-46)');
+console.log('   H2: Gênero pré-definido pelo leito irmão');
+console.log('   H2: Isolamento pré-definido pelo leito irmão');
+console.log('   H2: Identificação com dropdown (21-46: sufixos 1/3)');
+console.log('   H4: Sistema de leitos irmãos (10-27)');
+console.log('   H4: Identificação com dropdown (10-27: sufixos A/C)');
+console.log('   Campo anotacoes (800 caracteres)');
+console.log('   UTI: Formulário simplificado (63 leitos)');
+console.log('Otimizado para mobile');
     </script>
 </body>
 </html>
