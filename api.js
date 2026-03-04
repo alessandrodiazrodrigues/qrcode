@@ -18,7 +18,7 @@
 // ==================================================================================
 
 // *** URL DA API V7.3 - PRODUCAO ***
-const API_URL = 'https://script.google.com/macros/s/AKfycbz6Zxh5unqM33O2EgI81qFvrwhe26rC33okm0AyVMieQoN3f9kBFhH22mqCXRP2SZojpw/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbx1c_0j2CNXc7h2ejX3-j2BqSllcYHJDsAzRHzZMX5_xWGSJCwNnyEe_KlnyQBDUG2JxQ/exec';
 
 // =================== CONFIGURACAO DE HOSPITAIS V7.0 (9 ATIVOS - 293 LEITOS ENFERMARIA) ===================
 const HOSPITAIS = {
